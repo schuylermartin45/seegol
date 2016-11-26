@@ -1,2 +1,3 @@
-Shoyler's Extremely Experimental Graphical Open Library - SEEGOL
+Shoyler's Extremely Experimental Graphical Open Library - SeeGOL
+
 (pronounced _sea-gull_)
