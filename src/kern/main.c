@@ -6,15 +6,22 @@
 ** Description: Main execution point of the OS
 */
 
-/** Headers    **/
+/** Prep addressing **/
 #include "gcc16.h"
+__asm__("jmpl $0x0000, $main\n");
+
+/** Headers    **/
 #include "debug.h"
 #include "types.h"
 
 /*
 ** Main execution point of the OS
 */
-int main(void)
+uint16_t main(void)
 {
+    // main runtime loop
+    while(true)
+    {
+    }
 	return(0);
 }
