@@ -8,13 +8,18 @@
 #ifndef _TODO_H_
 #define _TODO_H_
 
-/********** Macros     **********/
+/** Headers    **/
+#include "gcc16.h"
+#include "debug.h"
+#include "types.h"
 
-/********** Globals    **********/
+/** Macros     **/
 
-/********** Structures **********/
+/** Globals    **/
 
-/********** Functions  **********/
+/** Structures **/
+
+/** Functions  **/
 
 /*
 ** TODO description

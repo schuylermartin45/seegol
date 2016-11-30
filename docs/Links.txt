@@ -1,0 +1,13 @@
+This file contains a list of websites I have found helpful as I have worked on
+this project.
+==============================================================================
+
+PCjr
+----
+http://www.oldskool.org/shrines/pcjr_tandy
+http://www.brutman.com/PCjr/
+
+16-bit GCC Compilation
+----------------------
+http://dc0d32.blogspot.com/2010/06/real-mode-in-c-with-gcc-writing.html
+http://www.delorie.com/gnu/docs/binutils/as_270.html

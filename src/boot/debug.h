@@ -3,15 +3,14 @@
 **
 ** Author:  Schuyler Martin <sam8050@rit.edu>
 **
-** Description: Header file that defines basic debug macros
+** Description: Header file that contains debug macros
 */
-
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
 
-#include <stdio.h>
+/** Headers    **/
+#include "gcc16.h"
 
-/********** Macros     **********/
 #define DEBUG_MODE
 
 #ifdef DEBUG_MODE
@@ -57,10 +56,5 @@
     #endif
 #endif
 
-/********** Globals    **********/
-
-/********** Structures **********/
-
-/********** Functions  **********/
 
 #endif
