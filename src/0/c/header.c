@@ -5,7 +5,20 @@
 **
 ** Description: TODO
 */
+
+/** Headers    **/
+#include "gcc16.h"
 #include "TODO_header.h"
+
+/*
+** TODO description
+**
+** @param name expl
+** @return
+*/
+void __asm_func()
+{
+}
 
 /*
 ** TODO expl

@@ -12,6 +12,7 @@ __asm__("jmpl $0x0000, $main\n");
 
 /** Headers    **/
 #include "debug.h"
+#include "kio.h"
 #include "types.h"
 
 /*
@@ -20,6 +21,7 @@ __asm__("jmpl $0x0000, $main\n");
 uint16_t main(void)
 {
     // main runtime loop
+    k_print("Kernel Loaded");
     while(true)
     {
     }

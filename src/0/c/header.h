@@ -27,6 +27,14 @@
 ** @param name expl
 ** @return
 */
+void __asm_func();
+
+/*
+** TODO description
+**
+** @param name expl
+** @return
+*/
 void _intern_func();
 
 /*

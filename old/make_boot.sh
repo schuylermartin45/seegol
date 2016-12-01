@@ -3,7 +3,7 @@
 # compile &&
 # link &&
 # convert ELF to single-section binary format &&
-# dd to floppy image
+# dd to zero-out floppy image && dd to floppy image
 gcc -c -g -Os -m16 -ffreestanding -Wall -Werror -I. -o bin/main.o \
     src/kern/main.c \
 && \

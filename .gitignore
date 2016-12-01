@@ -35,3 +35,4 @@
 # My non-common exceptions
 *.img
 *.b
+*.bak

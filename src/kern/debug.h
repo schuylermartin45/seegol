@@ -10,28 +10,29 @@
 
 /** Headers    **/
 #include "gcc16.h"
+#include "kio.h"
 
 #define DEBUG_MODE
 
 #ifdef DEBUG_MODE
     #ifndef DEBUG_OUT
-        #define DEBUG_OUT(x) printf("%s\n", x)
+        #define DEBUG_OUT(x) k_printf("%s\n", x)
     #endif
 
     #ifndef DEBUG_CHR
-        #define DEBUG_CHR(x) printf("DEBUG: %s = %c\n", #x, x)
+        #define DEBUG_CHR(x) k_printf("DEBUG: %s = %c\n", #x, x)
     #endif
 
     #ifndef DEBUG_STR
-        #define DEBUG_STR(x) printf("DEBUG: %s = %s\n", #x, x)
+        #define DEBUG_STR(x) k_printf("DEBUG: %s = %s\n", #x, x)
     #endif
 
     #ifndef DEBUG_INT
-        #define DEBUG_INT(x) printf("DEBUG: %s = %d\n", #x, x)
+        #define DEBUG_INT(x) k_printf("DEBUG: %s = %d\n", #x, x)
     #endif
 
     #ifndef DEBUG_HEX
-        #define DEBUG_HEX(x) printf("DEBUG: %s = 0x%x\n", #x, x)
+        #define DEBUG_HEX(x) k_printf("DEBUG: %s = 0x%x\n", #x, x)
     #endif
 // replace with nothing if debug mode is off
 #else

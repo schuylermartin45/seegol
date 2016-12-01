@@ -8,4 +8,7 @@
 ##              closesly as possible) and loads SeeGOL via a floppy image
 ##
 
-qemu-system-i386 -std-vga -fda bin/floppy.img -serial stdio
+# -i386 is the closest we can get to a pure 8080 or 8088 emulation
+# -fda  loads a floppy disk image
+# -boot sets the initial boot device
+qemu-system-i386 -fda bin/floppy.img -boot a
