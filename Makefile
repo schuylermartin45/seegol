@@ -84,12 +84,13 @@ $(BIN)%.o: $(USR)%.c
 
 #
 # Compiling, assembling, and linking the project
+# 1) Compile using file pattern rules
+# 2) Link object files using a manual link script
+# 3) Convert from ELF to single binary format
 #
 see_gol: depend $(OBJS)
 	## MAKE: see_gol ##
-	$(CC) $(CFLAGS) -o $(BIN)main.obj $(C_OBJ)
-	$(LD) $(LDFLAGS) -o $(BIN)main.elf $(BIN)main.obj
-	# convert from ELF to single binary format
+	$(LD) $(LDFLAGS) -o $(BIN)main.elf $(BIN)main.o
 	objcopy -O binary $(BIN)main.elf $(BIN)main.b
 
 #
