@@ -12,3 +12,10 @@ http://www.brutman.com/PCjr/
 http://dc0d32.blogspot.com/2010/06/real-mode-in-c-with-gcc-writing.html
 http://www.delorie.com/gnu/docs/binutils/as_270.html
 https://www.codeproject.com/articles/664165/writing-a-boot-loader-in-assembly-and-c-part
+http://zoo.cs.yale.edu/classes/cs422/2010/lec/l3-hw
+http://wiki.osdev.org/Rolling_Your_Own_Bootloader
+http://wiki.osdev.org/Bootloader
+
+Graphics on the PCjr (CGA)
+--------------------------
+https://en.wikipedia.org/wiki/Color_Graphics_Adapter

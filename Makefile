@@ -30,7 +30,7 @@ C_SRC_USR  =
 
 # All source files, with paths
 C_SRC = $(C_SRC_KERN) $(C_SRC_GL) $(C_SRC_USR)
-S_SRC =
+S_SRC = $(KERN)boot.s
 # All source files with no paths
 C_SRC_FILES = $(notdir $(C_SRC))
 S_SRC_FILES = $(notdir $(S_SRC))
@@ -54,33 +54,41 @@ INCLUDES = -I. -I./$(SRC) -I./$(KERN) -I./$(GL) -I./$(USR)
 # Compiler setup
 #
 CC = gcc
-CFLAGS = -g -Os -march=i686 -m32 -ffreestanding -Wall -Werror $(INCLUDES)
+CFLAGS = -g -Os -march=i686 -m32 -ffreestanding -Wall -Werror \
+		 -Wl,--oformat=binary $(INCLUDES)
 
 #
 # Assembler setup
 #
 AS = as
-ASFLAGS = --16
+ASFLAGS = --32
 
 #
 # Linker setup
 #
 LD = ld
-LDFLAGS = -melf_i386 -static -Tboot_linker.ld -nostdlib --nmagic
+LDFLAGS = -melf_i386 -static -Tlinker.ld -nostdlib --nmagic
 
 #
 # Make compiling, assembling, and linking rules
+# Notes:
+#     - *.lst files contain helpful dumps of the assembly code
+#     - TODO: ?? Files are compiled as ELF and copied to flat binaries
+#       TODO: objcopy -O binary $@ $@
 #
 
+$(BIN)%.o: $(KERN)%.s
+	## MAKE: compile kern/ ##
+	$(AS) $(ASFLAGS) -o $@ $< -a=$@.lst
 $(BIN)%.o: $(KERN)%.c
 	## MAKE: compile kern/ ##
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
 $(BIN)%.o: $(GL)%.c
 	## MAKE: compile gl/ ##
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
 $(BIN)%.o: $(USR)%.c
 	## MAKE: compile usr/ ##
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
 
 #
 # Compiling, assembling, and linking the project
@@ -88,10 +96,10 @@ $(BIN)%.o: $(USR)%.c
 # 2) Link object files using a manual link script
 # 3) Convert from ELF to single binary format
 #
-see_gol: depend $(OBJS)
+see_gol: depend linker.ld $(OBJS)
 	## MAKE: see_gol ##
-	$(LD) $(LDFLAGS) -o $(BIN)main.elf $(BIN)main.o
-	objcopy -O binary $(BIN)main.elf $(BIN)main.b
+	$(LD) $(LDFLAGS) -o $(BIN)os.elf $(OBJS)
+	objcopy -O binary $(BIN)os.elf $(BIN)os.b
 
 #
 # Targets for building a floppy image
@@ -99,7 +107,7 @@ see_gol: depend $(OBJS)
 floppy.img: see_gol
 	## MAKE: floppy.img ##
 	dd if=/dev/zero of=$(BIN)floppy.img bs=1024 count=1440
-	dd if=$(BIN)main.b of=$(BIN)floppy.img bs=1 count=512 conv=notrunc
+	dd if=$(BIN)os.b of=$(BIN)floppy.img bs=1 count=512 conv=notrunc
 
 #
 # Targets for copying floppy image onto actual floppy
@@ -131,7 +139,7 @@ clean:
 #
 depend:
 	## MAKE: depend ##
-	makedepend -p$(BIN) $(INCLUDES) $(SRCS)
+	makedepend -p$(BIN) $(INCLUDES) $(C_SRC)
 	sed -i "s#$(BIN)$(SRC)[a-z]\+/#$(BIN)#g" Makefile
 	rm Makefile.bak
 

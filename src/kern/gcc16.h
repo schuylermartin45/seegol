@@ -9,6 +9,8 @@
 #ifndef _GCC16_H_
 #define _GCC16_H_
 
-__asm__(".code16gcc\n");
+__asm__(".code16\n");
+// TODO what's the difference? specific to gcc(?)
+//__asm__(".code16gcc\n");
 
 #endif

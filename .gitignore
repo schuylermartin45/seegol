@@ -32,7 +32,8 @@
 *.dSYM/
 *.su
 
-# My non-common exceptions
+# SEEGOL non-standard exceptions
+*.o.lst
 *.img
 *.b
 *.bak
