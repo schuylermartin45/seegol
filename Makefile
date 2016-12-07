@@ -99,15 +99,17 @@ $(BIN)%.o: $(USR)%.c
 see_gol: depend linker.ld $(OBJS)
 	## MAKE: see_gol ##
 	$(LD) $(LDFLAGS) -o $(BIN)os.elf $(OBJS)
-	objcopy -O binary $(BIN)os.elf $(BIN)os.b
+	objcopy -S -O binary $(BIN)os.elf $(BIN)os.b
 
 #
 # Targets for building a floppy image
+# 1) dd zeros-out the whole floppy image
+# 2) dd actually writes the complete flat binary to the floppy image
 #
 floppy.img: see_gol
 	## MAKE: floppy.img ##
 	dd if=/dev/zero of=$(BIN)floppy.img bs=1024 count=1440
-	dd if=$(BIN)os.b of=$(BIN)floppy.img bs=1 count=512 conv=notrunc
+	dd if=$(BIN)os.b of=$(BIN)floppy.img
 
 #
 # Targets for copying floppy image onto actual floppy

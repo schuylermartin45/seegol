@@ -29,20 +29,17 @@ SECTIONS
         _text = .;
         /* boot loader loads other sections of the OS into memory */
         bin/boot.o (.text);
-        _text_end = .;
-    }
-    /*
-    ** This is where we can work before the 1mb barrier (and where ever video
-    ** memory starts for CGA systems)
-    */
-    .text : AT(0x7E00)
-    {
+        /*
+        ** 0x7C00 + 512 = 0x7E00
+        ** This is where we can work before the 1mb barrier (and where ever
+        ** video memory starts for CGA systems)
+        */
         bin/main.o (.text);
         bin/asm_lib.o (.text);
         bin/kio.o (.text);
-        /* TODO this will link everything...including boot.o ??? */
-        /* *(.text); */
+        _text_end = .;
     }
+    /* Save space. Memory is expensive in 1984. */
     /DISCARD/ :
     {
         *(.note*);

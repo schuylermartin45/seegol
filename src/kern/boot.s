@@ -32,10 +32,39 @@ __boot:
 
     # TODO init graphics mode
 
-    # TODO load the rest of the OS from the floppy disk
+__floppy_boot_load:
+    # Load the rest of the OS from the floppy disk
+    # Most of this floppy code is adapted from my friends' Bobby Jr. Project:
+    # https://github.com/csssuf/bobbyjunior/blob/master/kernel/src/mbr.s
 
-    jmp     $0x0000, $main      # jump to main program section
+    movw    %cs, %ax            # initialize segment registers
+    movw    %ax, %ds
+    movw    %ax, %es
+    movw    $0,  %ax
+    movw    %ax, %ss
+    movw    $0x7C00, %sp        # stack lives at 0x7C00; before bootloader
 
+__floppy_reset:
+    movw    $0,  %ax
+    movb    $0,  %dl            # drive 0
+    int     $0x13
+    jc      __floppy_reset      # if failure (EFLAGS carry bit set), try again
+
+__floppy_read:
+    movw    $0x7E00, %bx        # load the OS after the bootloader
+
+    movb    $2,  %ah            # load to ES:BX
+    movb    $8,  %al            # load 8 sectors
+    movb    $0,  %ch            # cylinder 0
+    movb    $2,  %cl            # sector 2
+    movb    $0,  %dh            # head 0
+    movb    $0,  %dl            # drive 0
+    int     $0x13
+    jc      __floppy_read       # if failure (EFLAGS carry bit set), try again
+
+    jmp     main                # jump to the start of the kernel code
+
+__boot_sig:
     . = __boot + 510            # append boot signature
     .byte 0x55
     .byte 0xAA

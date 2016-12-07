@@ -7,14 +7,27 @@ PCjr
 http://www.oldskool.org/shrines/pcjr_tandy
 http://www.brutman.com/PCjr/
 
+x86 References
+--------------
+https://en.wikibooks.org/wiki/X86_Assembly
+
 16-bit GCC Compilation
 ----------------------
 http://dc0d32.blogspot.com/2010/06/real-mode-in-c-with-gcc-writing.html
 http://www.delorie.com/gnu/docs/binutils/as_270.html
 https://www.codeproject.com/articles/664165/writing-a-boot-loader-in-assembly-and-c-part
 http://zoo.cs.yale.edu/classes/cs422/2010/lec/l3-hw
+https://github.com/davidgiven/ack
+
+Bootloader
+----------
 http://wiki.osdev.org/Rolling_Your_Own_Bootloader
 http://wiki.osdev.org/Bootloader
+http://wiki.osdev.org/ATA_in_x86_RealMode_(BIOS)
+http://wiki.osdev.org/Floppy_Disk_Controller#Accessing_Floppies_in_Real_Mode
+http://core.ecu.edu/csci/wirthj/Assembly8088/upg8088.html
+http://mikeos.sourceforge.net/write-your-own-os.html
+https://github.com/csssuf/bobbyjunior/blob/master/kernel/src/mbr.s
 
 Graphics on the PCjr (CGA)
 --------------------------
