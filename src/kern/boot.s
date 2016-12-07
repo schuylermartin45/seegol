@@ -23,19 +23,19 @@
 
 __boot:
 
-    movb    $'B',  %al          # print chars via interrupt to test bootloader
-    movb    $0x0E, %al
+    movb    $'B',  %al          # print via interrupt to test bootloader
+    movb    $0x0E, %ah          # (BL for "BootLoader")
     int     $0x10
     movb    $'L',  %al
-    movb    $0x0E, %al
+    movb    $0x0E, %ah
     int     $0x10
-
-    # TODO load the rest of the OS from the floppy disk
-
-    jmpl    $0x0000, $main      # jump to main program section
 
     # TODO init graphics mode
 
-    . = __boot + 510             # append boot signature
+    # TODO load the rest of the OS from the floppy disk
+
+    jmp     $0x0000, $main      # jump to main program section
+
+    . = __boot + 510            # append boot signature
     .byte 0x55
     .byte 0xAA
