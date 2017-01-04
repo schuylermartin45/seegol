@@ -94,11 +94,11 @@ This a higher-level discussion of the project status while in development.
   completed but enough people have seemed interested in seeing what I had done
   that I figured I would publicly show my progress.
 - I have booted SeeGOL on three platforms so far:
-..-Modern x86 System (1st generation Core Series): Main function is reached but
-   some functions defined outside of the main C file do not execute.
-..-QEMU: Same behavior as with the physical x86 machine.
-..-PCjr: Everything written in x86 assembly works. Nothing happens when the
-   code written in C executes (more on that below).
+  - Modern x86 System (1st generation Core Series): Main function is reached
+    but some functions defined outside of the main C file do not execute.
+  - QEMU: Same behavior as with the physical x86 machine.
+  - PCjr: Everything written in x86 assembly works. Nothing happens when the
+    code written in C executes (more on that below).
 - gcc does not compile to true 16-bit x86. Modern x86 systems will accept and
   run many 32-bit instructions in real mode despite not being in protected
   mode. To get around this, I think I may switch to using the "Amsterdam
