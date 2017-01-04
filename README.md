@@ -1,8 +1,106 @@
-# Shoyler's Extremely Experimental Graphical Open Library - SeeGOL
+# HSC: Shoyler's Extremely Experimental Graphical Open Library - SeeGOL
 #### Author:  Schuyler Martin <sam8050@rit.edu>
 
+![alt tag](/media/hsc.png)
+
+
 ## About
-(pronounced _sea-gull_)
+SeeGOL (pronounced _sea-gull_) is my final graduate project. The end goal is to
+bring a graphics library/windowing system to the 16-bit IBM PCjr from 1984.
+
+The PCjr model I have has 128kb of RAM and a 3.5in floppy drive that can only
+read the older "1mb" IBM floppy format (as opposed to the much more common
+2.44mb format most people are probably familiar with).
+
+
+## Setup
+
+### Dependencies
+These programs are necessary to build and install 
+- dd
+- make
+- makedepend
+TODO [more here]
+An emulator (such as QEMU) may also be helpful in running the OS.
+
+### Compiling from Source
+To compile all of the x86 and C files and put them into a single flat binary:
+```shell
+make see_gol
+```
+To build the complete OS image, targetted to boot from a floppy:
+```shell
+make floppy.img
+```
+To remove all binaries and OS images:
+```shell
+make clean
+```
+
+### Running with QEMU
+There is a provided bash script so that the OS can be easily run with QEMU
+```shell
+./pcjr_qemu.sh
+```
+
+### Running with Physical Hardware
+Assuming the floppy is mounted at `/dev/fd0` (which is common on Linux systems)
+simply run:
+```shell
+make floppy
+```
+Otherwise dd the image file to the floppy:
+```shell
+dd if=/path/to/floppy.img of=/path/to/floppy 
+```
+After making any necessary changes to the boot order via a machine's BIOS
+settings, SeeGOL should be bootable from this floppy on almost any Intel x86
+computer. Modern machines that do not have a floppy drive can usually boot
+See warning notes below for further information.
+
+### Warnings
+Obviously this project comes without any warranties. The software provided has
+not been extensively tested across all possible hardware configurations.
+Although unlikely, since this OS does interact directly with the hardware, it
+could potentially damage it.
+
+Run at your own risk.
+
+#### Note on running this project on anything that isn't a PCjr
+Although SeeGOL should run on any x86 system created after the PCjr (the x86
+architecture is "backwards compatible to the dawn of time"), SeeGOL is not
+guaranteed to run properly on anything other than the PCjr. The main concern is
+that the PCjr uses the CGA graphics chip, as opposed to the much more common
+VGA chip. Most modern graphics cards, on-processor graphics chips, and
+emulators provide backwards-compatibility support for VGA. Although CGA and VGA
+both come from IBM and work in similar ways, VGA is not a direct descendant of
+CGA. Therefore the OS may not appear like it does on the PCjr across all
+systems or it may not work at all.
+
+
+## User Manual
+TODO
+
 
 ## Design
 TODO
+
+
+## Rolling Status Log
+This a higher-level discussion of the project status while in development.
+
+### January 4th, 2017
+- I decided to make the project public. I was going to wait until more had been
+  completed but enough people have seemed interested in seeing what I had done
+  that I figured I would publicly show my progress.
+- I have booted SeeGOL on three platforms so far:
+..-Modern x86 System (1st generation Core Series): Main function is reached but
+   some functions defined outside of the main C file do not execute.
+..-QEMU: Same behavior as with the physical x86 machine.
+..-PCjr: Everything written in x86 assembly works. Nothing happens when the
+   code written in C executes (more on that below).
+- gcc does not compile to true 16-bit x86. Modern x86 systems will accept and
+  run many 32-bit instructions in real mode despite not being in protected
+  mode. To get around this, I think I may switch to using the "Amsterdam
+  Compiler Kit" which claims it can compile to use only 16-bit instructions. If
+  this does not work, I might be stuck writing some plugins for gcc.

@@ -78,16 +78,24 @@ LDFLAGS = -melf_i386 -static -Tlinker.ld -nostdlib --nmagic
 #
 
 $(BIN)%.o: $(KERN)%.s
-	## MAKE: compile kern/ ##
+	##
+	## MAKE: compile kern/
+	##
 	$(AS) $(ASFLAGS) -o $@ $< -a=$@.lst
 $(BIN)%.o: $(KERN)%.c
-	## MAKE: compile kern/ ##
+	##
+	## MAKE: compile kern/
+	##
 	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
 $(BIN)%.o: $(GL)%.c
-	## MAKE: compile gl/ ##
+	##
+	## MAKE: compile gl/
+	##
 	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
 $(BIN)%.o: $(USR)%.c
-	## MAKE: compile usr/ ##
+	##
+	## MAKE: compile usr/
+	##
 	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
 
 #
@@ -97,7 +105,9 @@ $(BIN)%.o: $(USR)%.c
 # 3) Convert from ELF to single binary format
 #
 see_gol: depend linker.ld $(OBJS)
-	## MAKE: see_gol ##
+	##
+	## MAKE: see_gol
+	##
 	$(LD) $(LDFLAGS) -o $(BIN)os.elf $(OBJS)
 	objcopy -S -O binary $(BIN)os.elf $(BIN)os.b
 
@@ -107,7 +117,9 @@ see_gol: depend linker.ld $(OBJS)
 # 2) dd actually writes the complete flat binary to the floppy image
 #
 floppy.img: see_gol
-	## MAKE: floppy.img ##
+	##
+	## MAKE: floppy.img
+	##
 	dd if=/dev/zero of=$(BIN)floppy.img bs=1024 count=1440
 	dd if=$(BIN)os.b of=$(BIN)floppy.img
 
@@ -115,14 +127,18 @@ floppy.img: see_gol
 # Targets for copying floppy image onto actual floppy
 #
 floppy: floppy.img
-	## MAKE: floppy ##
+	##
+	## MAKE: floppy
+	##
 	dd if=$(BIN)floppy.img of=/dev/fd0
 
 #
 # Clean out bin/ directory
 #
 clean:
-	## MAKE: clean ##
+	##
+	## MAKE: clean
+	##
 	rm -f $(BIN)*
 
 #
@@ -140,7 +156,9 @@ clean:
 # "Brian is not the messiah. He's a very naughty boy!"
 #
 depend:
-	## MAKE: depend ##
+	##
+	## MAKE: depend
+	##
 	makedepend -p$(BIN) $(INCLUDES) $(C_SRC)
 	sed -i "s#$(BIN)$(SRC)[a-z]\+/#$(BIN)#g" Makefile
 	rm Makefile.bak

@@ -19,15 +19,13 @@
 .globl main
 .type main, @function
 
-.globl __boot;
+# extra space in the boot sector, in case I'm strapped for room later
+.globl boot_extra
 
 __boot:
 
     movb    $'B',  %al          # print via interrupt to test bootloader
-    movb    $0x0E, %ah          # (BL for "BootLoader")
-    int     $0x10
-    movb    $'L',  %al
-    movb    $0x0E, %ah
+    movb    $0x0E, %ah          # (BL for "BootLoader"; B for booting)
     int     $0x10
 
     # TODO init graphics mode
@@ -62,9 +60,18 @@ __floppy_read:
     int     $0x13
     jc      __floppy_read       # if failure (EFLAGS carry bit set), try again
 
+    movb    $'L',  %al          # L for loading (floppy loaded)
+    movb    $0x0E, %ah
+    int     $0x10
+
     jmp     main                # jump to the start of the kernel code
 
+boot_extra:
+    # Note to self:
+    # Indicates extra space in the boot sector, in case I'm strapped for room
+    # later on in the project. There will be about 470ish bytes to work with
+
 __boot_sig:
-    . = __boot + 510            # append boot signature
-    .byte 0x55
+    . = __boot + 510            # append boot signature at the end of the 512
+    .byte 0x55                  # boot sector
     .byte 0xAA
