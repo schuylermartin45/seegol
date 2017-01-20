@@ -33,7 +33,9 @@
 *.su
 
 # SEEGOL non-standard exceptions
-*.o.lst
+*.lst
 *.img
 *.b
 *.bak
+bin/x86/*.s
+testing/
