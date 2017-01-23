@@ -34,8 +34,9 @@
 
 # SEEGOL non-standard exceptions
 *.lst
+*.swp
 *.img
 *.b
 *.bak
-bin/x86/*.s
+bin_x86/*.s
 testing/

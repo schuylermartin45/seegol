@@ -10,6 +10,8 @@
 # Source and bin paths
 #
 BIN      = bin/
+BIN_X86  = bin_x86/
+BIN_DBG  = dbg_bin/
 SRC	     = src/
 KERN     = $(SRC)kern/
 GL       = $(SRC)gl/
@@ -34,6 +36,9 @@ S_SRC = $(KERN)boot.s
 # All source files with no paths
 C_SRC_FILES = $(notdir $(C_SRC))
 S_SRC_FILES = $(notdir $(S_SRC))
+# Intermediate assembly files
+C_ASM = $(patsubst %.c,$(BIN_X86)%.s,$(C_SRC_FILES))
+.SECONDARY: $(C_ASM)
 # Object files stored in bin/
 C_OBJ = $(patsubst %.c,$(BIN)%.o,$(C_SRC_FILES))
 S_OBJ = $(patsubst %.s,$(BIN)%.o,$(S_SRC_FILES))
@@ -72,7 +77,6 @@ LDFLAGS = -melf_i386 -static -Tlinker.ld -nostdlib --nmagic
 #
 # Make compiling, assembling, and linking rules
 # Notes:
-#     - *.lst files contain helpful dumps of the assembly code
 #     - TODO: ?? Files are compiled as ELF and copied to flat binaries
 #       TODO: objcopy -O binary $@ $@
 #
@@ -81,22 +85,28 @@ $(BIN)%.o: $(KERN)%.s
 	##
 	## MAKE: compile kern/
 	##
-	$(AS) $(ASFLAGS) -o $@ $< -a=$@.lst
-$(BIN)%.o: $(KERN)%.c
+	$(AS) $(ASFLAGS) -o $@ $< -a=dbg_$@
+$(BIN_X86)%.s: $(KERN)%.c
 	##
 	## MAKE: compile kern/
 	##
-	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
-$(BIN)%.o: $(GL)%.c
+	$(CC) $(CFLAGS) -o $@ -S $< -Wa,-aln=dbg_$@
+$(BIN_X86)%.s: $(GL)%.c
 	##
 	## MAKE: compile gl/
 	##
-	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
-$(BIN)%.o: $(USR)%.c
+	$(CC) $(CFLAGS) -o $@ -S $< -Wa,-aln=dbg_$@
+$(BIN_X86)%.s: $(USR)%.c
 	##
 	## MAKE: compile usr/
 	##
-	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
+	$(CC) $(CFLAGS) -o $@ -S $< -Wa,-aln=dbg_$@
+$(BIN)%.o: $(BIN_X86)%.s
+	##
+	## MAKE: Assemble bin_x86/ (as 8086 code)
+	##
+	tools/i386_8086.py $< $<
+	$(AS) $(ASFLAGS) -o $@ -c $<
 
 #
 # Compiling, assembling, and linking the project
@@ -140,6 +150,8 @@ clean:
 	## MAKE: clean
 	##
 	rm -f $(BIN)*
+	rm -f $(BIN_X86)*
+	rm -f $(BIN_DBG)*
 
 #
 # makedepend is a program which creates dependency lists by
