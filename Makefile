@@ -73,8 +73,7 @@ LDFLAGS = -melf_i386 -static -Tlinker.ld -nostdlib --nmagic
 # Make compiling, assembling, and linking rules
 # Notes:
 #     - *.lst files contain helpful dumps of the assembly code
-#     - TODO: ?? Files are compiled as ELF and copied to flat binaries
-#       TODO: objcopy -O binary $@ $@
+#     - Files are compiled as an ELF and copied to flat binaries using objcopy
 #
 
 $(BIN)%.o: $(KERN)%.s
@@ -86,17 +85,17 @@ $(BIN)%.o: $(KERN)%.c
 	##
 	## MAKE: compile kern/
 	##
-	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
+	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
 $(BIN)%.o: $(GL)%.c
 	##
 	## MAKE: compile gl/
 	##
-	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
+	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
 $(BIN)%.o: $(USR)%.c
 	##
 	## MAKE: compile usr/
 	##
-	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=$@.lst
+	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
 
 #
 # Compiling, assembling, and linking the project
