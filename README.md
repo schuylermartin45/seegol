@@ -6,8 +6,16 @@
 
 ## About
 SeeGOL (pronounced _sea-gull_) is my final graduate project. The end goal is to
-bring a graphics library/windowing system to the 16-bit IBM PCjr from 1984.
+develop a graphics library/windowing system to 16-bit x86 processors (i386 and
+above).
 
+### Original Plan
+I originally wanted to develop a library for the IBM PCjr. That has proven to
+be too difficult using modern tools. There is a branch, `pcjr_8086_compat`,
+which includes my attempt at converting gcc's i386 assembly to only valid
+instructions on the 8086.
+
+#### Notes on the PCjr
 The PCjr model I have has 128kb of RAM and a 3.5in floppy drive that can only
 read the older "1mb" IBM floppy format (as opposed to the much more common
 2.44mb format most people are probably familiar with).
@@ -40,7 +48,7 @@ make clean
 ### Running with QEMU
 There is a provided bash script so that the OS can be easily run with QEMU
 ```shell
-./pcjr_qemu.sh
+./tools/i386_qemu.sh
 ```
 
 ### Running with Physical Hardware
@@ -104,3 +112,9 @@ This a higher-level discussion of the project status while in development.
   mode. To get around this, I think I may switch to using the "Amsterdam
   Compiler Kit" which claims it can compile to use only 16-bit instructions. If
   this does not work, I might be stuck writing some plugins for gcc.
+
+### January 17, 2017
+- I am (for now) giving up on targeting the PCjr as the primary platform for
+  this project. I can not find or implement a reliable tool set that will
+  compile C to 8086 assembly. I will now be targeting i386 processors instead.
+  SeeGOL should be able run on almost any modern x86 machine in Real Mode.

@@ -11,6 +11,8 @@
 #include "debug.h"
 #include "kio.h"
 #include "types.h"
+// TODO rm
+#include "asm_lib.h"
 
 /*
 ** Main execution point of the OS
@@ -22,9 +24,10 @@ void main(void)
     {
         __asm__ __volatile__ ("int $0x10" : : "a"(0x0E00 | 'X'), "b"(7));
     }
+    __put_chr('A');
     // main runtime loop
     // TODO fix
-    k_print("Kernel Loaded");
+    k_print("\nKernel Loaded\n");
     while(true)
     {
     }

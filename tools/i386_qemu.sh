@@ -1,6 +1,6 @@
 #/bin/bash
 ##
-## File:    pcjr_qemu.sh
+## File:    i386_qemu.sh
 ##
 ## Author:  Schuyler Martin <sam8050@rit.edu>
 ##
