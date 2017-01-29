@@ -11,6 +11,5 @@
 
 # -b binary specifies a flat binary format
 # -m i386 is the closest we can get to a pure 8080 or 8088 emulation
-# --adjust-vma TODO is a flag that was suggested w/o explination online
 # -D for dissassembly
-objdump -b binary -m i386 --adjust-vma=0xabcd1000 -D bin/os.b
+objdump -b binary -m i386 -D bin/os.b

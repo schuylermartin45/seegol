@@ -100,15 +100,13 @@ $(BIN)%.o: $(USR)%.c
 #
 # Compiling, assembling, and linking the project
 # 1) Compile using file pattern rules
-# 2) Link object files using a manual link script
-# 3) Convert from ELF to single binary format
+# 2) Link object files using a manual link script to a flat binary
 #
 see_gol: depend linker.ld $(OBJS)
 	##
 	## MAKE: see_gol
 	##
-	$(LD) $(LDFLAGS) -o $(BIN)os.elf $(OBJS)
-	objcopy -S -O binary $(BIN)os.elf $(BIN)os.b
+	$(LD) $(LDFLAGS) -o $(BIN)os.b $(OBJS)
 
 #
 # Targets for building a floppy image
@@ -166,5 +164,6 @@ depend:
 
 bin/main.o: src/kern/gcc16.h src/kern/debug.h src/kern/kio.h
 bin/main.o: src/kern/asm_lib.h src/kern/types.h
-bin/asm_lib.o: src/kern/gcc16.h src/kern/asm_lib.h
+bin/asm_lib.o: src/kern/gcc16.h src/kern/asm_lib.h src/kern/types.h
 bin/kio.o: src/kern/gcc16.h src/kern/kio.h src/kern/asm_lib.h
+bin/kio.o: src/kern/types.h

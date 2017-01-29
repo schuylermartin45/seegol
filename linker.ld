@@ -10,7 +10,9 @@
 **              the compiled ELF files
 */
 
-ENTRY(main);
+ENTRY(main)
+/* Link to a flat binary format */
+OUTPUT_FORMAT(binary)
 
 SECTIONS
 {
@@ -26,7 +28,7 @@ SECTIONS
     . = 0x7C00;
     .text : AT(0x7C00)
     {
-        _text = .;
+        _TEXT_BEGIN = .;
         /* boot loader loads other sections of the OS into memory */
         bin/boot.o (.text);
         /*
@@ -35,9 +37,22 @@ SECTIONS
         ** video memory starts for CGA systems)
         */
         bin/main.o (.text);
+        /* TODO needed? */
         bin/asm_lib.o (.text);
         bin/kio.o (.text);
-        _text_end = .;
+        _TEXT_END = .;
+    }
+    .data : ALIGN(0x1000) {
+        _DATA_BEGIN = .;
+        *(.data);
+        *(.rodata);
+        _DATA_END = .;
+    }
+    .bss : ALIGN(0x1000) {
+        _BSS_BEGIN = .;
+        *(.COMMON);
+        *(.bss);
+        _BSS_END = .;
     }
     /* Save space. Memory is expensive in 1984. */
     /DISCARD/ :
