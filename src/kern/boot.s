@@ -64,6 +64,11 @@ __floppy_read:
     movb    $0x0E, %ah
     int     $0x10
 
+__boot_video_init:
+    movb    $0x03, %al
+    movb    $0x00, %ah
+    int     $0x10
+
     jmp     main                # jump to the start of the kernel code
 
 boot_extra:
