@@ -6,8 +6,8 @@
 ** Description: Main execution point of the OS
 */
 
-#define MSG_KERN_LOAD   "Kernel Loaded..."
-#define MSG_WELCOME     "Welcome to SeeGOL!"
+#define MSG_KERN_LOAD   "Kernel Loaded...\n"
+#define MSG_WELCOME     "Welcome to SeeGOL!\n"
 
 /** Headers    **/
 #include "gcc16.h"

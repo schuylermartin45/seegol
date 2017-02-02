@@ -15,11 +15,13 @@
 /** Macros     **/
 
 // Video text memory boundaries
-#define TEXT_WIDTH     80
-#define TEXT_HEIGHT    25
-#define TEXT_MEM_SIZE  (TEXT_WIDTH * TEXT_HEIGHT * 2) // 2 bytes per char
-#define TEXT_MEM_BEGIN 0xB8000
-#define TEXT_MEM_END   (TEXT_MEM_BEGIN + TEXT_MEM_END)
+#define TEXT_WIDTH          80
+#define TEXT_HEIGHT         25
+#define TEXT_MEM_WIDTH      (TEXT_WIDTH * 2) // 2 bytes per char
+#define TEXT_MEM_HEIGHT     TEXT_HEIGHT
+#define TEXT_MEM_SIZE       (TEXT_WIDTH * TEXT_HEIGHT * 2) // 2 bytes per char
+#define TEXT_MEM_BEGIN      0xB8000
+#define TEXT_MEM_END        (TEXT_MEM_BEGIN + TEXT_MEM_END)
 
 /** Various text color modes **/
 #define KIO_WHITE_ON_BLACK      0x0F
