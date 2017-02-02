@@ -10,6 +10,7 @@
 
 /** Headers    **/
 #include "gcc16.h"
+#include "types.h"
 
 /** Macros     **/
 
@@ -20,9 +21,12 @@
 #define TEXT_MEM_BEGIN 0xB8000
 #define TEXT_MEM_END   (TEXT_MEM_BEGIN + TEXT_MEM_END)
 
-// various text color modes
-#define KIO_WHITE_ON_BLACK  0x07
-#define KIO_DEFAULT_COLOR   KIO_WHITE_ON_BLACK
+/** Various text color modes **/
+#define KIO_WHITE_ON_BLACK      0x0F
+#define KIO_WHITE_ON_WHITE      0xFF
+// blink codes
+// default
+#define KIO_DEFAULT_COLOR       KIO_WHITE_ON_BLACK
 
 /** Globals    **/
 
@@ -31,18 +35,30 @@
 /** Functions  **/
 
 /*
-** Kernel print: prints chars to the screen
+** Prints chars to the screen, with specific color code
 **
 ** @param str String to print
+** @param color_code Set the color code of text to draw
 */
-void k_print(const char* str);
+void kio_print_color(const char* str, uint8_t color_code);
 
 /*
-** Kernel printf: k_print with some functionality of the STDIO printf
+** Prints chars to the screen
 **
 ** @param str String to print
-** @param TODO
 */
-void k_printf(const char* str);
+void kio_print(const char* str);
+
+/*
+** Clears screen
+*/
+void kio_clr();
+
+/*
+** Changes color of text memory
+**
+** @param color_code Text foreground/background color code
+*/
+void kio_set_color(uint8_t color_code);
 
 #endif

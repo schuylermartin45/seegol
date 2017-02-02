@@ -14,31 +14,66 @@
 volatile char* txt_ptr = (volatile char*)TEXT_MEM_BEGIN;
 
 /*
-** Kernel print: prints chars to the screen
+** Prints chars to the screen, with specific color code
 **
 ** @param str String to print
+** @param color_code Set the color code of text to draw
 */
-void k_print(const char* str)
+void kio_print_color(const char* str, uint8_t color_code)
 {
-    //char* str = "five";
+    // loop until null byte
     while(*str != 0)
     {
         // first byte: ASCII char
-        *txt_ptr = *str++;
-        txt_ptr++;
+        *txt_ptr++ = *str++;
         // second byte: color code
-        *txt_ptr = KIO_DEFAULT_COLOR;
-        txt_ptr++;
+        *txt_ptr++ = color_code;
     }
 }
 
 /*
-** Kernel printf: k_print with some functionality of the STDIO printf
+** Prints chars to the screen
 **
 ** @param str String to print
-** @param TODO
 */
-void k_printf(const char* str)
+void kio_print(const char* str)
 {
-    k_print(str);
+    kio_print_color(str, KIO_DEFAULT_COLOR);
 }
+
+/*
+** Clears screen
+*/
+void kio_clr()
+{
+    // reset text to 1st position
+    txt_ptr = (volatile char*)TEXT_MEM_BEGIN;
+    //char* str = "five";
+    for(uint16_t i=0; i<TEXT_MEM_SIZE; ++i)
+    {
+        txt_ptr[i] = 0;
+    }
+    // reset cursor again
+    txt_ptr = (volatile char*)TEXT_MEM_BEGIN;
+}
+
+/*
+** Changes color of text memory
+**
+** @param color_code Text foreground/background color code
+*/
+void kio_set_color(uint8_t color_code)
+{
+    volatile char* tmp_ptr = txt_ptr;
+    // reset text to 1st position
+    txt_ptr = (volatile char*)TEXT_MEM_BEGIN;
+    // loop until null byte
+    for(uint16_t i=1; i<TEXT_MEM_SIZE; i+=2)
+    {
+        // second byte: color code
+        txt_ptr[i] = color_code;
+    }
+    // reset to last position
+    txt_ptr = tmp_ptr;
+}
+

@@ -21,8 +21,9 @@
 */
 void main(void)
 {
-    k_print(MSG_KERN_LOAD);
-    k_print(MSG_WELCOME);
+    // kernel print messaging
+    kio_print(MSG_KERN_LOAD);
+    kio_print(MSG_WELCOME);
 
     // primary OS control loop
     while(true)

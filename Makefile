@@ -166,4 +166,4 @@ depend:
 bin/main.o: src/kern/gcc16.h src/kern/types.h src/kern/debug.h
 bin/main.o: src/kern/kio.h
 bin/asm_lib.o: src/kern/gcc16.h src/kern/asm_lib.h src/kern/types.h
-bin/kio.o: src/kern/gcc16.h src/kern/kio.h
+bin/kio.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
