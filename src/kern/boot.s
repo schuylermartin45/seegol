@@ -7,7 +7,7 @@
 ##
 
 # force 16-bit assembly
-.code16
+.code16gcc
 
 ###############################################################################
 ##
@@ -35,12 +35,16 @@ __floppy_boot_load:
     # Most of this floppy code is adapted from my friends' Bobby Jr. Project:
     # https://github.com/csssuf/bobbyjunior/blob/master/kernel/src/mbr.s
 
-    movw    %cs, %ax            # initialize segment registers
-    movw    %ax, %ds
-    movw    %ax, %es
-    movw    $0,  %ax
+    # initialize segment registers
+    movw    %cs, %ax            # cs holds the segment where code is exec'ing
+    movw    %ax, %ds            # (if we have segment registers start in the
+    movw    %ax, %es            # same spot, all addresses should be similar)
+
+    # stack memory set-up
+    movw    $0, %ax
     movw    %ax, %ss
-    movw    $0x7C00, %sp        # stack lives at 0x7C00; before bootloader
+    movw    $0x7C00, %sp        # stack starts at bootloader and grows down
+    movw    %sp, %bp            # bp and sp start at the same location
 
 __floppy_reset:
     movw    $0,  %ax
@@ -52,7 +56,7 @@ __floppy_read:
     movw    $0x7E00, %bx        # load the OS after the bootloader
 
     movb    $2,  %ah            # load to ES:BX
-    movb    $8,  %al            # load 8 sectors
+    movb    $20, %al            # load N sectors (512-bytes each)
     movb    $0,  %ch            # cylinder 0
     movb    $2,  %cl            # sector 2
     movb    $0,  %dh            # head 0
@@ -69,7 +73,7 @@ __boot_video_init:
     movb    $0x00, %ah
     int     $0x10
 
-    jmp     main                # jump to the start of the kernel code
+    call    main                # jump to the start of the kernel code
 
 boot_extra:
     # Note to self:

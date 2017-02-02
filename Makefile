@@ -52,6 +52,7 @@ INCLUDES = -I. -I./$(SRC) -I./$(KERN) -I./$(GL) -I./$(USR)
 
 #
 # Compiler setup
+# Note: we prepend all C files with a directive to target Real Mode
 #
 CC = gcc
 CFLAGS = -g -Os -march=i686 -m32 -ffreestanding -Wall -Werror \
@@ -162,8 +163,7 @@ depend:
 
 # DO NOT DELETE
 
-bin/main.o: src/kern/gcc16.h src/kern/debug.h src/kern/kio.h
-bin/main.o: src/kern/asm_lib.h src/kern/types.h
+bin/main.o: src/kern/gcc16.h src/kern/types.h src/kern/debug.h
+bin/main.o: src/kern/kio.h
 bin/asm_lib.o: src/kern/gcc16.h src/kern/asm_lib.h src/kern/types.h
-bin/kio.o: src/kern/gcc16.h src/kern/kio.h src/kern/asm_lib.h
-bin/kio.o: src/kern/types.h
+bin/kio.o: src/kern/gcc16.h src/kern/kio.h

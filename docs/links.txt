@@ -7,6 +7,11 @@ PCjr
 http://www.oldskool.org/shrines/pcjr_tandy
 http://www.brutman.com/PCjr/
 
+OS References
+-------------
+https://www.cs.bham.ac.uk/~exr/lectures/opsys/10_11/lectures/os-dev.pdf
+https://gitlab.com/sortie/meaty-skeleton/tree/master/kernel
+
 x86 References
 --------------
 https://en.wikibooks.org/wiki/X86_Assembly
@@ -28,6 +33,8 @@ http://wiki.osdev.org/Floppy_Disk_Controller#Accessing_Floppies_in_Real_Mode
 http://core.ecu.edu/csci/wirthj/Assembly8088/upg8088.html
 http://mikeos.sourceforge.net/write-your-own-os.html
 https://github.com/csssuf/bobbyjunior/blob/master/kernel/src/mbr.s
+http://duartes.org/gustavo/blog/post/kernel-boot-process/
+https://en.wikipedia.org/wiki/X86_memory_segmentation
 
 Graphics on the PCjr (CGA)
 --------------------------

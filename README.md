@@ -118,3 +118,13 @@ This a higher-level discussion of the project status while in development.
   this project. I can not find or implement a reliable tool set that will
   compile C to 8086 assembly. I will now be targeting i386 processors instead.
   SeeGOL should be able run on almost any modern x86 machine in Real Mode.
+
+### February 1, 2017
+- I just solved a major bug with the kernel. It appears as though there is a
+  difference between the `.code16` and `.code16gcc` assembly directives. The
+  former causes strange stack behavior and my best guess is that gcc is not
+  properly handling segmentation addressing based on the initialization
+  process in the bootloader. I can't find any documentation online that
+  describes the directives but it makes a clear difference. I can now write
+  messages to text video. I plan to improve the I/O tools shortly and then
+  move to starting my work with the graphics modules.

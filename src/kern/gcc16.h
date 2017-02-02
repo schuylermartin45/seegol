@@ -9,8 +9,12 @@
 #ifndef _GCC16_H_
 #define _GCC16_H_
 
-__asm__(".code16\n");
-// TODO what's the difference? specific to gcc(?)
-//__asm__(".code16gcc\n");
+// WARNING:
+// Don't use ".code16". Doing so does not build the project correctly. It
+// appears this directive gives gcc more context about the bootloading process
+// and doesn't screw up the stack. Strange things occur when the other
+// directive is used (stack space is exhausted very easily, parameters are not
+// correctly passed, undeterministic output)
+__asm__(".code16gcc\n");
 
 #endif

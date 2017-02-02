@@ -11,11 +11,23 @@
 #include "asm_lib.h"
 
 /*
-** Puts a char on the screen
+** Port I/O: Input Byte
 **
-** @param chr Char to print
+** @param port Comm port
 */
-void __put_chr(const char chr)
+uint8_t __inb(uint16_t port)
 {
-    __asm__ __volatile__ ("int $0x10" : : "a"(0x0E00 | chr), "b"(7));
+    // TODO impl
+    return 0;
+}
+
+/*
+** Port I/O: Output Byte
+**
+** @param port Comm port
+** @param val Value to emit
+*/
+void __outb(uint8_t port, uint8_t val)
+{
+    // TODO impl
 }

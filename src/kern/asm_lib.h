@@ -10,6 +10,7 @@
 
 /** Headers    **/
 #include "gcc16.h"
+#include "types.h"
 
 /** Macros     **/
 
@@ -20,10 +21,18 @@
 /** Functions  **/
 
 /*
-** Puts a char on the screen
+** Port I/O: Input Byte
 **
-** @param chr Char to print
+** @param port Comm port
 */
-void __put_chr(const char chr);
+uint8_t __inb(uint16_t port);
+
+/*
+** Port I/O: Output Byte
+**
+** @param port Comm port
+** @param val Value to emit
+*/
+void __outb(uint8_t port, uint8_t val);
 
 #endif

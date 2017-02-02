@@ -10,17 +10,25 @@
 #include "gcc16.h"
 #include "kio.h"
 
+// pointer to video memory; character to display
+volatile char* txt_ptr = (volatile char*)TEXT_MEM_BEGIN;
+
 /*
 ** Kernel print: prints chars to the screen
 **
 ** @param str String to print
 */
-void k_print(const char *str)
+void k_print(const char* str)
 {
-    while(*str)
+    //char* str = "five";
+    while(*str != 0)
     {
-        __put_chr(*str);
-        str++;
+        // first byte: ASCII char
+        *txt_ptr = *str++;
+        txt_ptr++;
+        // second byte: color code
+        *txt_ptr = KIO_DEFAULT_COLOR;
+        txt_ptr++;
     }
 }
 
@@ -30,11 +38,7 @@ void k_print(const char *str)
 ** @param str String to print
 ** @param TODO
 */
-void k_printf(const char *str)
+void k_printf(const char* str)
 {
-    while(*str)
-    {
-        __put_chr(*str);
-        str++;
-    }
+    k_print(str);
 }

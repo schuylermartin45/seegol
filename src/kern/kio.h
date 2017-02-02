@@ -10,9 +10,19 @@
 
 /** Headers    **/
 #include "gcc16.h"
-#include "asm_lib.h"
 
 /** Macros     **/
+
+// Video text memory boundaries
+#define TEXT_WIDTH     80
+#define TEXT_HEIGHT    25
+#define TEXT_MEM_SIZE  (TEXT_WIDTH * TEXT_HEIGHT * 2) // 2 bytes per char
+#define TEXT_MEM_BEGIN 0xB8000
+#define TEXT_MEM_END   (TEXT_MEM_BEGIN + TEXT_MEM_END)
+
+// various text color modes
+#define KIO_WHITE_ON_BLACK  0x07
+#define KIO_DEFAULT_COLOR   KIO_WHITE_ON_BLACK
 
 /** Globals    **/
 
@@ -25,7 +35,7 @@
 **
 ** @param str String to print
 */
-void k_print(const char *str);
+void k_print(const char* str);
 
 /*
 ** Kernel printf: k_print with some functionality of the STDIO printf
@@ -33,6 +43,6 @@ void k_print(const char *str);
 ** @param str String to print
 ** @param TODO
 */
-void k_printf(const char *str);
+void k_printf(const char* str);
 
 #endif
