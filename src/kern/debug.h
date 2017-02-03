@@ -15,37 +15,37 @@
 #define DEBUG_MODE
 
 #ifdef DEBUG_MODE
-    #ifndef DEBUG_OUT
-        #define DEBUG_OUT(x) k_printf("%s\n", x)
-    #endif
-
     #ifndef DEBUG_CHR
-        #define DEBUG_CHR(x) k_printf("DEBUG: %s = %c\n", #x, x)
+        #define DEBUG_CHR(x) kio_printf("DEBUG: %s = %c\n", #x, &x)
     #endif
 
     #ifndef DEBUG_STR
-        #define DEBUG_STR(x) k_printf("DEBUG: %s = %s\n", #x, x)
+        #define DEBUG_STR(x) kio_printf("DEBUG: %s = %s\n", #x, x)
+    #endif
+    
+    #ifndef DEBUG_BIN
+        #define DEBUG_BIN(x) kio_printf("DEBUG: %s = %b\n", #x, &x)
     #endif
 
     #ifndef DEBUG_INT
-        #define DEBUG_INT(x) k_printf("DEBUG: %s = %d\n", #x, x)
+        #define DEBUG_INT(x) kio_printf("DEBUG: %s = %d\n", #x, &x)
     #endif
 
     #ifndef DEBUG_HEX
-        #define DEBUG_HEX(x) k_printf("DEBUG: %s = 0x%x\n", #x, x)
+        #define DEBUG_HEX(x) kio_printf("DEBUG: %s = %x\n", #x, &x)
     #endif
 // replace with nothing if debug mode is off
 #else
-    #ifndef DEBUG_OUT
-        #define DEBUG_OUT(x)
-    #endif
-
     #ifndef DEBUG_CHR
         #define DEBUG_CHR(x)
     #endif
 
     #ifndef DEBUG_STR
         #define DEBUG_STR(x)
+    #endif
+
+    #ifndef DEBUG_BIN
+        #define DEBUG_BIN(x)
     #endif
 
     #ifndef DEBUG_INT
@@ -56,6 +56,5 @@
         #define DEBUG_HEX(x)
     #endif
 #endif
-
 
 #endif

@@ -39,3 +39,7 @@ https://en.wikipedia.org/wiki/X86_memory_segmentation
 Graphics on the PCjr (CGA)
 --------------------------
 https://en.wikipedia.org/wiki/Color_Graphics_Adapter
+
+Hacky C Tricks
+--------------
+http://stackoverflow.com/questions/12371450/how-are-variable-arguments-implemented-in-gcc

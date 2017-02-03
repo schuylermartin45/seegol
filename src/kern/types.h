@@ -29,6 +29,10 @@ typedef unsigned short  uint16_t;
 #ifndef true
     #define true 1
 #endif
+// null
+#ifndef NULL
+    #define NULL 0
+#endif
 
 // String macros to allow concatenation of other string macros
 #define STR_HELP(x) #x

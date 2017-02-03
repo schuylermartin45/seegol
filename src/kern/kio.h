@@ -52,6 +52,25 @@ void kio_print_color(const char* str, uint8_t color_code);
 void kio_print(const char* str);
 
 /*
+** Printf-like print function, limited to 2 arguments
+**
+** @param str String to print
+** @param color_code Set the color code of text to draw
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
+*/
+void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1);
+
+/*
+** Printf-like print function, limited to 2 arguments
+**
+** @param str String to print
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
+*/
+void kio_printf(const char* str, void* a0, void* a1);
+
+/*
 ** Clears screen
 */
 void kio_clr();
