@@ -74,12 +74,10 @@ static void __kio_chk_scroll()
     // ran out of space, scroll up
     if (txt_ptr < (txt_mem_begin + TEXT_MEM_SIZE))
         return;
-    // use 16-bit access ptr to clear memory; cuts memory access in half
+    // use 16-bit access ptr to copy memory; cuts memory access in half
     volatile uint16_t* cp_ptr = (volatile uint16_t*)txt_mem_begin;
     for(uint16_t i=0; i<(TEXT_SIZE - TEXT_WIDTH); ++i)
-    {
         cp_ptr[i] = cp_ptr[i + TEXT_WIDTH];
-    }
     // move cursor to the start of the last line
     txt_ptr = txt_mem_begin + (TEXT_MEM_SIZE - TEXT_MEM_WIDTH);
 }
@@ -164,22 +162,16 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1)
             {
                 // binary numbers
                 case 'b': case 'B':
-                {
                     __kio_int_str(buff, val, 2);
                     break;
-                }
                 // decimal numbers
                 case 'd': case 'D':
-                {
                     __kio_int_str(buff, val, 10);
                     break;
-                }
                 // hex numbers
                 case 'x': case 'X':
-                {
                     __kio_int_str(buff, val, 16);
                     break;
-                }
                 // char/string
                 case 'c': case 'C':
                     arg_str = buff;
@@ -187,10 +179,8 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1)
                     buff[1] = '\0';
                     break;
                 case 's': case 'S':
-                {
                     arg_str = (ai == 0) ? (char*)a0 : (char*)a1;
                     break;
-                }
             }
             // print the value of the argument
             while(*arg_str != 0)
@@ -225,7 +215,7 @@ void kio_printf(const char* str, void* a0, void* a1)
 
 
 /*
-** Clears screen
+** Clears current screen
 */
 void kio_clr()
 {
@@ -233,10 +223,8 @@ void kio_clr()
     txt_ptr = txt_mem_begin;
     // use 16-bit access ptr to clear memory; cuts memory access in half
     volatile uint16_t* clr_ptr = (volatile uint16_t*)txt_mem_begin;
-    for(uint16_t i=0; i<(TEXT_SIZE); ++i)
-    {
+    for(uint16_t i=0; i<TEXT_SIZE; ++i)
         clr_ptr[i] = 0;
-    }
 }
 
 /*
@@ -249,12 +237,43 @@ void kio_set_color(uint8_t color_code)
     volatile char* tmp_ptr = txt_ptr;
     // reset text to 1st position
     txt_ptr = txt_mem_begin;
+    // odd addresses; change second byte/color code only
     for(uint16_t i=1; i<TEXT_MEM_SIZE; i+=2)
-    {
-        // second byte: color code
         txt_ptr[i] = color_code;
-    }
     // reset to last position
     txt_ptr = tmp_ptr;
 }
 
+/*
+** Swap currently active text frame buffer
+*/
+void kio_swap_fb()
+{
+    // use 16-bit ptrs to cut memory access in half
+    volatile uint16_t* cp_mem_ptr = (volatile uint16_t*)TEXT_MEM_BEGIN;
+    volatile uint16_t* cp_fb_ptr = (volatile uint16_t*)txt_fb;
+    // frame buffer is currently active
+    if (txt_mem_begin == txt_fb)
+    {
+        // update pointers to relative addresses in the video memory
+        txt_ptr = (volatile char*)TEXT_MEM_BEGIN + (txt_ptr - txt_mem_begin);
+        txt_mem_begin = (volatile char*)TEXT_MEM_BEGIN;
+        // copy current video memory context to the frame buffer
+        for(uint16_t i=0; i<TEXT_SIZE; ++i)
+            cp_mem_ptr[i] = cp_fb_ptr[i];
+    }
+    // video memory is currently active
+    else
+    {
+        // copy current video memory context to the frame buffer
+        for(uint16_t i=0; i<TEXT_SIZE; ++i)
+        {
+            cp_fb_ptr[i] = cp_mem_ptr[i];
+            // clear text memory post-copy; prevents artifacts in graphics mode
+            cp_mem_ptr[i] = 0;
+        }
+        // update pointers to relative addresses in the frame buffer
+        txt_ptr = txt_fb + (txt_ptr - txt_mem_begin);
+        txt_mem_begin = txt_fb;
+    }
+}

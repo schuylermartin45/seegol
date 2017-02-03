@@ -83,4 +83,9 @@ void kio_clr();
 */
 void kio_set_color(uint8_t color_code);
 
+/*
+** Swap currently active text frame buffer
+*/
+void kio_swap_fb();
+
 #endif
