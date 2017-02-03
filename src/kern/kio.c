@@ -67,6 +67,24 @@ static void __kio_int_str(char* buff, uint16_t num, uint8_t base)
 }
 
 /*
+** Check if text memory is used up; scroll all of text memory up one line
+*/
+static void __kio_chk_scroll()
+{
+    // ran out of space, scroll up
+    if (txt_ptr < (txt_mem_begin + TEXT_MEM_SIZE))
+        return;
+    // use 16-bit access ptr to clear memory; cuts memory access in half
+    volatile uint16_t* cp_ptr = (volatile uint16_t*)txt_mem_begin;
+    for(uint16_t i=0; i<(TEXT_SIZE - TEXT_WIDTH); ++i)
+    {
+        cp_ptr[i] = cp_ptr[i + TEXT_WIDTH];
+    }
+    // move cursor to the start of the last line
+    txt_ptr = txt_mem_begin + (TEXT_MEM_SIZE - TEXT_MEM_WIDTH);
+}
+
+/*
 ** Prints chars to the screen, with specific color code
 **
 ** @param str String to print
@@ -88,6 +106,7 @@ void kio_print_color(const char* str, uint8_t color_code)
         }
         else
         {
+             __kio_chk_scroll();
             // first byte: ASCII char
             *txt_ptr++ = *str++;
             // second byte: color code
@@ -176,6 +195,7 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1)
             // print the value of the argument
             while(*arg_str != 0)
             {
+                __kio_chk_scroll();
                 *txt_ptr++ = *arg_str++;
                 *txt_ptr++ = color_code;
             }
@@ -184,9 +204,8 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1)
         }
         else
         {
-            // first byte: ASCII char
+            __kio_chk_scroll();
             *txt_ptr++ = *str++;
-            // second byte: color code
             *txt_ptr++ = color_code;
         }
     }
@@ -214,7 +233,7 @@ void kio_clr()
     txt_ptr = txt_mem_begin;
     // use 16-bit access ptr to clear memory; cuts memory access in half
     volatile uint16_t* clr_ptr = (volatile uint16_t*)txt_mem_begin;
-    for(uint16_t i=0; i<(TEXT_MEM_SIZE / 2); ++i)
+    for(uint16_t i=0; i<(TEXT_SIZE); ++i)
     {
         clr_ptr[i] = 0;
     }

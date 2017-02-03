@@ -17,6 +17,7 @@
 // Video text memory boundaries
 #define TEXT_WIDTH          80
 #define TEXT_HEIGHT         25
+#define TEXT_SIZE           (TEXT_WIDTH * TEXT_HEIGHT)
 #define TEXT_MEM_WIDTH      (TEXT_WIDTH * 2) // 2 bytes per char
 #define TEXT_MEM_HEIGHT     TEXT_HEIGHT
 #define TEXT_MEM_SIZE       (TEXT_WIDTH * TEXT_HEIGHT * 2) // 2 bytes per char
