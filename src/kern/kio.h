@@ -24,6 +24,10 @@
 #define TEXT_MEM_BEGIN      0xB8000
 #define TEXT_MEM_END        (TEXT_MEM_BEGIN + TEXT_MEM_END)
 
+// Some ASCII character definitions
+#define ASCII_BACKSPACE     8
+#define ASCII_DELETE        127
+
 /** Various text color modes **/
 #define KIO_WHITE_ON_BLACK      0x0F
 #define KIO_WHITE_ON_WHITE      0xFF
@@ -36,6 +40,8 @@
 /** Structures **/
 
 /** Functions  **/
+
+/************************** Output Functions **************************/
 
 /*
 ** Prints chars to the screen, with specific color code
@@ -87,5 +93,51 @@ void kio_set_color(uint8_t color_code);
 ** Swap currently active text frame buffer
 */
 void kio_swap_fb();
+
+/************************** Input Functions **************************/
+
+/*
+** Fetches a single char from the user
+**
+** @return Character from the user
+*/
+char kio_getchr();
+
+/*
+** Fetches a null-terminated string (ended with a newline) from the user
+**
+** @param str String buffer to put chars into
+*/
+void kio_getstr(char* str);
+
+/*
+** Fetches a null-terminated string (ended with a newline) from the user
+** with some higher level functionality, drawing to the screen and able to
+** handle backspaces. Similar to Python's `input()` function
+**
+** @param prompt Prompt to show before string input
+** @param color_code Set the color code of text to draw
+** @param str String buffer to put chars into
+*/
+void kio_prompt_color(char* prompt, uint8_t color_code, char* str);
+
+/*
+** Fetches a null-terminated string (ended with a newline) from the user
+** with some higher level functionality, drawing to the screen (similar to
+** Python's `input()` function)
+**
+** @param prompt Prompt to show before string input
+** @param str String buffer to put chars into
+*/
+void kio_prompt(char* prompt, char* str);
+
+/*
+** Compares two strings for equivalency
+**
+** @param str0 First string
+** @param str1 Second string
+** @return Integer value indicating if str0 is >, =, or < str 1
+*/
+uint16_t kio_strcmp(char* str0, char* str1);
 
 #endif

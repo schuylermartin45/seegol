@@ -22,6 +22,8 @@ volatile char txt_fb[TEXT_MEM_SIZE];
 // buffer we are writing to
 volatile char* txt_mem_begin = (volatile char*)TEXT_MEM_BEGIN;
 
+/************************** Output Functions **************************/
+
 /*
 ** Converts a positive integer into a string
 **
@@ -276,4 +278,127 @@ void kio_swap_fb()
         txt_ptr = txt_fb + (txt_ptr - txt_mem_begin);
         txt_mem_begin = txt_fb;
     }
+}
+
+/************************** Input Functions **************************/
+
+/*
+** Fetches a single char from the user
+**
+** @return Character from the user
+*/
+char kio_getchr()
+{
+    // BIOS interrupt to get a character
+    __asm__ __volatile__("movb $0, %ah\n");
+    __asm__ __volatile__("int $0x16\n");
+    // %al has the character
+    char ch;
+    __asm__ __volatile__("movb %%al, %0\n" : "=rm"(ch));
+    return ch;
+}
+
+/*
+** Fetches a null-terminated string (ended with a newline) from the user
+**
+** @param str String buffer to put chars into
+*/
+void kio_getstr(char* str)
+{
+    char ch;
+    while(true)
+    {
+        ch = kio_getchr();
+        // enter key on my keyboard is being interpretted as a carriage return
+        if ((ch == '\r') || (ch == '\n'))
+        {
+            *str++ = '\0';
+            break;
+        }
+        else
+            *str++ = ch;
+    }
+}
+
+/*
+** Fetches a null-terminated string (ended with a newline) from the user
+** with some higher level functionality, drawing to the screen and able to
+** handle backspaces. Similar to Python's `input()` function
+**
+** @param prompt Prompt to show before string input
+** @param color_code Set the color code of text to draw
+** @param str String buffer to put chars into
+*/
+void kio_prompt_color(char* prompt, uint8_t color_code, char* str)
+{
+    // dump prompt to the screen
+    kio_print_color(prompt, color_code);
+    // record the prompt mem location
+    char* prompt_loc = (char*)txt_ptr;
+    // fetch chars until newline
+    char ch;
+    while(true)
+    {
+        ch = kio_getchr();
+        switch (ch)
+        {
+            // if it's a backspace, move back once in video memory and wipe
+            case ASCII_BACKSPACE:
+            case ASCII_DELETE:
+                // prevent deleting the prompt and prior text from video memory
+                if ((txt_ptr - prompt_loc) > 0)
+                {
+                    // go back 2 bytes (char and color code), write a blank
+                    // char, and then go back again so that the next char will
+                    // write on top of the blank character
+                    txt_ptr -= 2;
+                    kio_print_color(" ", color_code);
+                    txt_ptr -= 2;
+                    // also wipe the string storage 1 character
+                    --str;
+                }
+                break;
+            // terminate string on enter key
+            case '\r':
+            case '\n':
+                // terminate string, add newline after prompt, and bail
+                *str++ = '\0';
+                kio_print("\n");
+                return;
+            // otherwise, draw character
+            default:
+                *str++ = ch;
+                kio_printf_color("%c", color_code, &ch, NULL);
+        }
+    }
+}
+
+/*
+** Fetches a null-terminated string (ended with a newline) from the user
+** with some higher level functionality, drawing to the screen (similar to
+** Python's `input()` function)
+**
+** @param prompt Prompt to show before string input
+** @param str String buffer to put chars into
+*/
+void kio_prompt(char* prompt, char* str)
+{
+    kio_prompt_color(prompt, KIO_DEFAULT_COLOR, str);
+}
+
+/*
+** Compares two strings for equivalency
+**
+** @param str0 First string
+** @param str1 Second string
+** @return Integer value indicating if str0 is >, =, or < str 1
+*/
+uint16_t kio_strcmp(char* str0, char* str1)
+{
+    uint16_t diff = 0;
+    do
+    {
+        diff += *str0++ - *str1++;
+    } while((str0 != '\0') && (str1 != '\0'));
+    return diff;
 }
