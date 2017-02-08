@@ -36,10 +36,7 @@ SECTIONS
         ** This is where we can work before the 1mb barrier (and where ever
         ** video memory starts for CGA systems)
         */
-        bin/main.o (.text);
-        /* TODO needed? */
-        bin/asm_lib.o (.text);
-        bin/kio.o (.text);
+        *(.text);
         _TEXT_END = .;
     }
     .data : ALIGN(0x1000) {

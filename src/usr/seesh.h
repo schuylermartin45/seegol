@@ -1,0 +1,38 @@
+/*
+** File:    seesh.h
+**
+** Author:  Schuyler Martin <sam8050@rit.edu>
+**
+** Description: SeeSH shell program for SeeGOL
+*/
+#ifndef _SEESH_H_
+#define _SEESH_H_
+
+/** Headers    **/
+#include "../kern/gcc16.h"
+#include "../kern/types.h"
+#include "../kern/debug.h"
+#include "../kern/kio.h"
+#include "program.h"
+
+/** Macros     **/
+// shell macros
+#define SHELL_PROMPT    "seesh> "   // SeeGOL + shell = seesh
+#define SHELL_BUFF_SIZE 80
+#define MSG_SHELL_START "SeeSH (Shoyler's Extremely Experimental SHell)\n"
+
+// shell failure exit code
+#define SHELL_FAIL_EXIT 42
+
+/** Globals    **/
+
+/** Structures **/
+
+/** Functions  **/
+
+/*
+** Main execution point of the shell
+*/
+uint16_t seesh_main(void);
+
+#endif

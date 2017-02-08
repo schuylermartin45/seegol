@@ -127,6 +127,12 @@ void kio_print(const char* str)
 
 /*
 ** Printf-like print function, limited to 2 arguments
+**   Supported patterns:
+**     %b | %B - Numeric in binary      (uint16_t | uint8_t)
+**     %d | %D - Numeric in decimal     (uint16_t | uint8_t)
+**     %x | %X - Numeric in hexadecimal (uint16_t | uint8_t)
+**     %c | %C - Character
+**     %s | %S - String
 **
 ** @param str String to print
 ** @param color_code Set the color code of text to draw
@@ -163,17 +169,39 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1)
             switch (*str)
             {
                 // binary numbers
-                case 'b': case 'B':
+                case 'b':
                     __kio_int_str(buff, val, 2);
                     break;
+                // upper case variants handle 8-bit numbers
+                case 'B':
+                {
+                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
+                    uint8_t val = *ptr;
+                    __kio_int_str(buff, val, 2);
+                    break;
+                }
                 // decimal numbers
-                case 'd': case 'D':
+                case 'd':
                     __kio_int_str(buff, val, 10);
                     break;
+                case 'D':
+                {
+                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
+                    uint8_t val = *ptr;
+                    __kio_int_str(buff, val, 10);
+                    break;
+                }
                 // hex numbers
-                case 'x': case 'X':
+                case 'x':
                     __kio_int_str(buff, val, 16);
                     break;
+                case 'X':
+                {
+                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
+                    uint8_t val = *ptr;
+                    __kio_int_str(buff, val, 16);
+                    break;
+                }
                 // char/string
                 case 'c': case 'C':
                     arg_str = buff;
@@ -205,6 +233,12 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1)
 
 /*
 ** Printf-like print function, limited to 2 arguments
+**   Supported patterns:
+**     %b | %B - Numeric in binary      (uint16_t | uint8_t)
+**     %d | %D - Numeric in decimal     (uint16_t | uint8_t)
+**     %x | %X - Numeric in hexadecimal (uint16_t | uint8_t)
+**     %c | %C - Character
+**     %s | %S - String
 **
 ** @param str String to print
 ** @param a0 First arugment to print
@@ -391,9 +425,9 @@ void kio_prompt(char* prompt, char* str)
 **
 ** @param str0 First string
 ** @param str1 Second string
-** @return 0 if strings are the same, non-zero otherwise
+** @return True if strings are the same, false otherwise
 */
-uint16_t kio_strcmp(char* str0, char* str1)
+bool kio_strcmp(char* str0, char* str1)
 {
     // check character by character, bailing if there's a mismatch
     while(*str0 == *str1)
@@ -404,7 +438,7 @@ uint16_t kio_strcmp(char* str0, char* str1)
     }
     // report matches
     if ((*str0 == '\0') && (*str1 == '\0'))
-        return 0;
+        return true;
     else
-        return 1;
+        return false;
 }

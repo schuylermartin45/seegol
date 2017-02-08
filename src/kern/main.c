@@ -6,15 +6,16 @@
 ** Description: Main execution point of the OS
 */
 
-#define MSG_KERN_LOAD   "Kernel Loaded...\n"
-#define MSG_WELCOME     "Welcome to SeeGOL!\n"
-
 /** Headers    **/
 #include "gcc16.h"
-#include "types.h"
-#include "debug.h"
 #include "kio.h"
 
+#include "../usr/seesh.h"
+
+// main welcome messages
+#define MSG_KERN_LOAD   "Kernel Loaded...\n"
+#define MSG_WELCOME     "Welcome to SeeGOL!\n"
+#define MSG_KERN_EXIT   "< Kernel Exited >\n"
 
 /*
 ** Main execution point of the OS
@@ -28,5 +29,8 @@ void main(void)
     // primary OS control loop
     while(true)
     {
+        // call the seesh shell to run commands
+        seesh_main();
     }
+    kio_print(MSG_KERN_EXIT);
 }
