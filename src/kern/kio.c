@@ -391,14 +391,20 @@ void kio_prompt(char* prompt, char* str)
 **
 ** @param str0 First string
 ** @param str1 Second string
-** @return Integer value indicating if str0 is >, =, or < str 1
+** @return 0 if strings are the same, non-zero otherwise
 */
 uint16_t kio_strcmp(char* str0, char* str1)
 {
-    uint16_t diff = 0;
-    do
+    // check character by character, bailing if there's a mismatch
+    while(*str0 == *str1)
     {
-        diff += *str0++ - *str1++;
-    } while((str0 != '\0') && (str1 != '\0'));
-    return diff;
+        if ((*str0 == '\0') || (*str1 == '\0'))
+            break;
+        ++str0; ++str1;
+    }
+    // report matches
+    if ((*str0 == '\0') && (*str1 == '\0'))
+        return 0;
+    else
+        return 1;
 }
