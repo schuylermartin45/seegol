@@ -11,24 +11,16 @@
 #include "seesh.h"
 
 /** Macros    **/
-#define PROG_COUNT 3
+#define BUILT_IN_COUNT  3
+#define PROG_COUNT      (BUILT_IN_COUNT + 1)
 
 // structure that holds all program information
 Program prog_lst[PROG_COUNT];
 
 /*
-** Main method for hello world program
-*/
-uint16_t hellow_main(uint16_t argc, char* argv)
-{
-    kio_print("Hello, world!\n");
-    return EXIT_SUCCESS;
-}
-
-/*
 ** Main method for help menu program
 */
-uint16_t help_main(uint16_t argc, char* argv)
+static uint16_t _help_main(uint16_t argc, char* argv)
 {
     kio_print("SeeSH Help Menu - Available Programs:\n");
     kio_print("=====================================\n");
@@ -41,21 +33,34 @@ uint16_t help_main(uint16_t argc, char* argv)
 }
 
 /*
+** Main method for help menu program
+*/
+static uint16_t _clear_main(uint16_t argc, char* argv)
+{
+    kio_clr();
+    return EXIT_SUCCESS;
+}
+
+/*
 ** Initialize the shell with program structure information
 */
 static void __init(Program* prog_lst)
 {
+    // built-in commands
     prog_lst->name = "exit";
     prog_lst->desc = "Bail from SeeSH. Game Over.";
     prog_lst->main = NULL;
     ++prog_lst;
-    prog_lst->name = "help";
-    prog_lst->desc = "Help menu. Describes other programs";
-    prog_lst->main = &help_main;
+    prog_lst->name = "clear";
+    prog_lst->desc = "Clears the screen.";
+    prog_lst->main = &_clear_main;
     ++prog_lst;
-    prog_lst->name = "hello_world";
-    prog_lst->desc = "Basic \"Hello World\" program.";
-    prog_lst->main = &hellow_main;
+    prog_lst->name = "help";
+    prog_lst->desc = "Help menu. Describes other programs.";
+    prog_lst->main = &_help_main;
+    ++prog_lst;
+    // user programs
+    hellow_init(prog_lst);
     ++prog_lst;
 }
 
@@ -73,9 +78,7 @@ uint16_t seesh_main(void)
         kio_prompt(SHELL_PROMPT, prompt_buff);
         // special bail command
         if (kio_strcmp(prog_lst[0].name, prompt_buff))
-        {
             break;
-        }
         // programs have error codes
         uint8_t err_code = ERR_PROG_NOT_FOUND;
         char* err_name = prompt_buff;

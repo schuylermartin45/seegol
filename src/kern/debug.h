@@ -34,6 +34,18 @@
     #ifndef DEBUG_HEX
         #define DEBUG_HEX(x) kio_printf("DEBUG: %s = %x\n", #x, &x)
     #endif
+
+    #ifndef DEBUG_BIN8
+        #define DEBUG_BIN8(x) kio_printf("DEBUG: %s = %B\n", #x, &x)
+    #endif
+
+    #ifndef DEBUG_INT8
+        #define DEBUG_INT8(x) kio_printf("DEBUG: %s = %D\n", #x, &x)
+    #endif
+
+    #ifndef DEBUG_HEX8
+        #define DEBUG_HEX8(x) kio_printf("DEBUG: %s = %X\n", #x, &x)
+    #endif
 // replace with nothing if debug mode is off
 #else
     #ifndef DEBUG_CHR
@@ -54,6 +66,18 @@
 
     #ifndef DEBUG_HEX
         #define DEBUG_HEX(x)
+    #endif
+
+    #ifndef DEBUG_BIN8
+        #define DEBUG_BIN8(x)
+    #endif
+
+    #ifndef DEBUG_INT8
+        #define DEBUG_INT8(x)
+    #endif
+
+    #ifndef DEBUG_HEX8
+        #define DEBUG_HEX8(x)
     #endif
 #endif
 

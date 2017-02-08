@@ -22,7 +22,8 @@ C_SRC_KERN = $(KERN)main.c \
              $(KERN)asm_lib.c \
              $(KERN)kio.c
 C_SRC_GL   =
-C_SRC_USR  = $(USR)seesh.c
+C_SRC_USR  = $(USR)seesh.c \
+			 $(USR)hellow.c
 
 #
 # Source and object files
@@ -166,8 +167,13 @@ depend:
 bin/main.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
 bin/main.o: src/usr/seesh.h src/kern/gcc16.h src/kern/types.h
 bin/main.o: src/kern/debug.h src/kern/kio.h src/usr/program.h
+bin/main.o: src/usr/hellow.h
 bin/asm_lib.o: src/kern/gcc16.h src/kern/asm_lib.h src/kern/types.h
 bin/kio.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
 bin/seesh.o: src/kern/gcc16.h src/usr/seesh.h src/kern/types.h
 bin/seesh.o: src/kern/debug.h src/kern/gcc16.h src/kern/kio.h
 bin/seesh.o: src/kern/types.h src/kern/kio.h src/usr/program.h
+bin/seesh.o: src/usr/hellow.h
+bin/hellow.o: src/kern/gcc16.h src/usr/hellow.h src/kern/types.h
+bin/hellow.o: src/kern/kio.h src/usr/program.h src/kern/gcc16.h
+bin/hellow.o: src/kern/types.h
