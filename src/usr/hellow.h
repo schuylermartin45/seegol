@@ -32,6 +32,6 @@ void hellow_init(Program* prog);
 /*
 ** Main method for hello world program
 */
-uint16_t hellow_main(uint16_t argc, char* argv);
+uint16_t hellow_main(uint16_t argc, char* argv[]);
 
 #endif

@@ -19,6 +19,8 @@
 #define ERR_PROG_USAGE      3
 // and when you get it right
 #define EXIT_SUCCESS        0
+// and when you're too lazy to come up with a better name
+#define EXIT_FAILURE        42
 
 /** Globals    **/
 
@@ -28,8 +30,10 @@ typedef struct Program
     // info on the program
     char* name;
     char* desc;
+    // usage message for the program
+    char* usage;
     // main method of the program
-    uint16_t (*main)(uint16_t argc, char* argv);
+    uint16_t (*main)(uint16_t argc, char* argv[]);
 } Program;
 
 #endif

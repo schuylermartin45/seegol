@@ -22,6 +22,7 @@
 // shell macros
 #define SHELL_PROMPT    "seesh> "   // SeeGOL + shell = seesh
 #define SHELL_BUFF_SIZE 80
+#define SHELL_ARG_SIZE  32
 #define MSG_SHELL_START "SeeSH (Shoyler's Extremely Experimental SHell)\n"
 
 // shell failure exit code
