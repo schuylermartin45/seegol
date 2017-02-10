@@ -15,12 +15,14 @@
 /** Macros     **/
 
 // Video text memory boundaries
+// dimensions in terms of characters
 #define TEXT_WIDTH          80
 #define TEXT_HEIGHT         25
 #define TEXT_SIZE           (TEXT_WIDTH * TEXT_HEIGHT)
-#define TEXT_MEM_WIDTH      (TEXT_WIDTH * 2) // 2 bytes per char
+// MEM indicates we're talking in terms of bytes (2 bytes per char)
+#define TEXT_MEM_WIDTH      (TEXT_WIDTH * 2)
 #define TEXT_MEM_HEIGHT     TEXT_HEIGHT
-#define TEXT_MEM_SIZE       (TEXT_WIDTH * TEXT_HEIGHT * 2) // 2 bytes per char
+#define TEXT_MEM_SIZE       (TEXT_WIDTH * TEXT_HEIGHT * 2)
 #define TEXT_MEM_BEGIN      0xB8000
 #define TEXT_MEM_END        (TEXT_MEM_BEGIN + TEXT_MEM_END)
 

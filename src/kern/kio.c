@@ -73,13 +73,18 @@ static void __kio_int_str(char* buff, uint16_t num, uint8_t base)
 */
 static void __kio_chk_scroll()
 {
-    // ran out of space, scroll up
+    // ran out of space, scroll up; otherwise don't run this method
     if (txt_ptr < (txt_mem_begin + TEXT_MEM_SIZE))
         return;
     // use 16-bit access ptr to copy memory; cuts memory access in half
     volatile uint16_t* cp_ptr = (volatile uint16_t*)txt_mem_begin;
     for(uint16_t i=0; i<(TEXT_SIZE - TEXT_WIDTH); ++i)
         cp_ptr[i] = cp_ptr[i + TEXT_WIDTH];
+    // clear last line
+    cp_ptr = (volatile uint16_t*)txt_mem_begin;
+    cp_ptr += TEXT_SIZE - TEXT_WIDTH;
+    for(uint16_t i=0; i<TEXT_WIDTH; ++i)
+        cp_ptr[i] = 0;
     // move cursor to the start of the last line
     txt_ptr = txt_mem_begin + (TEXT_MEM_SIZE - TEXT_MEM_WIDTH);
 }
