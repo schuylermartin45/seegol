@@ -69,8 +69,13 @@ __floppy_read:
     int     $0x10
 
 __boot_video_init:
-    movb    $0x03, %al
+    movb    $0x03, %al          # resets video mode; clears BIOS messages 
     movb    $0x00, %ah
+    int     $0x10
+
+    movb    $0x00, %al          # hides cursor 
+    movb    $0x01, %ah
+    movw    $0x2607, %cx
     int     $0x10
 
     call    main                # jump to the start of the kernel code
