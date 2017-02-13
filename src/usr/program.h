@@ -17,6 +17,7 @@
 #define ERR_PROG_NOT_FOUND  1
 #define ERR_PROG_GEN_FAIL   2
 #define ERR_PROG_USAGE      3
+#define ERR_PROG_BAD_ARGS   4
 // and when you get it right
 #define EXIT_SUCCESS        0
 // and when you're too lazy to come up with a better name
@@ -33,7 +34,7 @@ typedef struct Program
     // usage message for the program
     char* usage;
     // main method of the program
-    uint16_t (*main)(uint16_t argc, char* argv[]);
+    uint8_t (*main)(uint8_t argc, char* argv[]);
 } Program;
 
 #endif

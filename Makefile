@@ -12,6 +12,7 @@
 BIN      = bin/
 SRC	     = src/
 KERN     = $(SRC)kern/
+VGA      = $(KERN)vga/
 GL       = $(SRC)gl/
 USR      = $(SRC)usr/
 
@@ -46,7 +47,7 @@ OBJS  = $(C_OBJ) $(S_OBJ)
 #
 # Add directories that have header files; for #include's
 #
-INCLUDES = -I. -I./$(SRC) -I./$(KERN) -I./$(GL) -I./$(USR)
+INCLUDES = -I. -I./$(SRC) -I./$(KERN) -I.$(VGA) -I./$(GL) -I./$(USR)
 
 #
 # Compiler setup
@@ -77,12 +78,17 @@ LDFLAGS = -melf_i386 -static -Tlinker.ld -nostdlib --nmagic
 
 $(BIN)%.o: $(KERN)%.s
 	##
-	## MAKE: compile kern/
+	## MAKE: assemble kern/
 	##
 	$(AS) $(ASFLAGS) -o $@ $< -a=$@.lst
 $(BIN)%.o: $(KERN)%.c
 	##
 	## MAKE: compile kern/
+	##
+	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
+$(BIN)%.o: $(VGA)%.c
+	##
+	## MAKE: compile kern/vga/
 	##
 	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
 $(BIN)%.o: $(GL)%.c
@@ -164,13 +170,22 @@ depend:
 bin/main.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
 bin/main.o: src/usr/seesh.h src/kern/gcc16.h src/kern/types.h
 bin/main.o: src/kern/debug.h src/kern/kio.h src/usr/program.h
-bin/main.o: src/usr/hellow.h
+bin/main.o: src/usr/hellow.h src/usr/hsc_tp.h src/gl/gl_lib.h
+bin/main.o: src/kern/vga/vga13.h src/kern/gcc16.h src/kern/types.h
+bin/vga/vga13.o: src/kern/gcc16.h src/kern/vga/vga13.h
+bin/vga/vga13.o: src/kern/types.h
 bin/asm_lib.o: src/kern/gcc16.h src/kern/asm_lib.h src/kern/types.h
 bin/kio.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
+bin/gl_lib.o: src/kern/gcc16.h src/gl/gl_lib.h src/kern/types.h
+bin/gl_lib.o: src/kern/kio.h src/kern/vga/vga13.h src/kern/gcc16.h
+bin/gl_lib.o: src/kern/types.h
 bin/hellow.o: src/kern/gcc16.h src/usr/hellow.h src/kern/types.h
-bin/hellow.o: src/kern/kio.h src/usr/program.h src/kern/gcc16.h
-bin/hellow.o: src/kern/types.h
+bin/hellow.o: src/kern/kio.h src/usr/program.h
 bin/seesh.o: src/kern/gcc16.h src/usr/seesh.h src/kern/types.h
 bin/seesh.o: src/kern/debug.h src/kern/gcc16.h src/kern/kio.h
 bin/seesh.o: src/kern/types.h src/kern/kio.h src/usr/program.h
-bin/seesh.o: src/usr/hellow.h
+bin/seesh.o: src/usr/hellow.h src/usr/hsc_tp.h src/gl/gl_lib.h
+bin/seesh.o: src/kern/vga/vga13.h src/kern/gcc16.h src/kern/types.h
+bin/hsc_tp.o: src/kern/gcc16.h src/usr/hsc_tp.h src/kern/types.h
+bin/hsc_tp.o: src/kern/kio.h src/gl/gl_lib.h src/kern/vga/vga13.h
+bin/hsc_tp.o: src/kern/gcc16.h src/kern/types.h src/usr/program.h

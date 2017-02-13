@@ -13,17 +13,17 @@
 /** Macros    **/
 // number of shell commands. This is kept in the C file out of convenience
 #define BUILT_IN_COUNT  3
-#define PROG_COUNT      (BUILT_IN_COUNT + 1)
+#define PROG_COUNT      (BUILT_IN_COUNT + 2)
 
 // structure that holds all program information
-Program prog_lst[PROG_COUNT];
+static Program prog_lst[PROG_COUNT];
 
 /************************** Built-in Main Functions **************************/
 
 /*
 ** Main method for help menu program
 */
-static uint16_t _help_main(uint16_t argc, char* argv[])
+static uint8_t _help_main(uint8_t argc, char* argv[])
 {
     // help with no arguments well dump a list of commands 
     if (argc == 1)
@@ -56,7 +56,7 @@ static uint16_t _help_main(uint16_t argc, char* argv[])
 /*
 ** Main method for help menu program
 */
-static uint16_t _clear_main(uint16_t argc, char* argv[])
+static uint8_t _clear_main(uint8_t argc, char* argv[])
 {
     kio_clr();
     return EXIT_SUCCESS;
@@ -72,7 +72,7 @@ static uint16_t _clear_main(uint16_t argc, char* argv[])
 ** @param argv Argument array to set (program name at position 0)
 ** @return Arg count
 */
-static uint16_t __parse_args(char* buff, char* argv[])
+static uint8_t __parse_args(char* buff, char* argv[])
 {
     uint16_t argc = 1;
     // first argument is the name of the program
@@ -121,12 +121,14 @@ static void __init(Program* prog_lst)
     // user programs
     hellow_init(prog_lst);
     ++prog_lst;
+    hsc_tp_init(prog_lst);
+    ++prog_lst;
 }
 
 /*
 ** Main execution point of the shell
 */
-uint16_t seesh_main(void)
+uint8_t seesh_main(void)
 {
     kio_print(MSG_SHELL_START);
     __init(prog_lst);
@@ -142,7 +144,7 @@ uint16_t seesh_main(void)
         uint8_t err_code = ERR_PROG_NOT_FOUND;
         // parse the command line arguments
         char* argv[SHELL_ARG_SIZE];
-        uint16_t argc = __parse_args(prompt_buff, argv);
+        uint8_t argc = __parse_args(prompt_buff, argv);
         // cntr defined out here for error messaging later
         uint8_t id;
         // match the command with a program, and call it

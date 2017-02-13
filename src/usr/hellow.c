@@ -7,7 +7,7 @@
 */
 
 /** Headers    **/
-#include "gcc16.h"
+#include "../kern/gcc16.h"
 #include "hellow.h"
 
 /*
@@ -26,7 +26,7 @@ void hellow_init(Program* prog)
 /*
 ** Main method for hello world program
 */
-uint16_t hellow_main(uint16_t argc, char* argv[])
+uint8_t hellow_main(uint8_t argc, char* argv[])
 {
     kio_print("Hello, world!\n");
     return EXIT_SUCCESS;

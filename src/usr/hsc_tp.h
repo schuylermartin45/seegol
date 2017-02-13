@@ -1,17 +1,20 @@
 /*
-** File:    hellow.h
+** File:    hsc_tp.h
 **
 ** Author:  Schuyler Martin <sam8050@rit.edu>
 **
-** Description: Hello World demo program
+** Description: Graphical test program that displays the HSC logo and a test
+**              pattern
 */
-#ifndef _HELLOW_H_
-#define _HELLOW_H_
+
+#ifndef _HSC_TP_H_
+#define _HSC_TP_H_
 
 /** Headers    **/
 #include "../kern/gcc16.h"
 #include "../kern/types.h"
 #include "../kern/kio.h"
+#include "../gl/gl_lib.h"
 #include "program.h"
 
 /** Macros     **/
@@ -27,11 +30,11 @@
 **
 ** @param prog Program pointer to set
 */
-void hellow_init(Program* prog);
+void hsc_tp_init(Program* prog);
 
 /*
-** Main method for hello world program
+** Main method for HSC Test Pattern program
 */
-uint8_t hellow_main(uint8_t argc, char* argv[]);
+uint8_t hsc_tp_main(uint8_t argc, char* argv[]);
 
 #endif

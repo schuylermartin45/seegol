@@ -13,7 +13,6 @@
 #include "types.h"
 
 /** Macros     **/
-
 // Video text memory boundaries
 // dimensions in terms of characters
 #define TEXT_WIDTH          80
@@ -116,6 +115,13 @@ void kio_swap_fb();
 ** @return Character from the user
 */
 char kio_getchr();
+
+/*
+** Blocking wait that waits for a single char from the user
+**
+** @param Character from the user
+*/
+void kio_wait_key(char ch);
 
 /*
 ** Fetches a null-terminated string (ended with a newline) from the user

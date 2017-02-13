@@ -13,14 +13,14 @@
 #include "kio.h"
 
 // pointer to video memory; character to display
-volatile char* txt_ptr = (volatile char*)TEXT_MEM_BEGIN;
+static volatile char* txt_ptr = (volatile char*)TEXT_MEM_BEGIN;
 
 // alternative frame buffer for text output. This will allow us to write to
 // text memory even in graphics mode, analogous to a TTY session on Linux
-volatile char txt_fb[TEXT_MEM_SIZE];
+static volatile char txt_fb[TEXT_MEM_SIZE];
 // reference to the current start of text memory. This will depend on which
 // buffer we are writing to
-volatile char* txt_mem_begin = (volatile char*)TEXT_MEM_BEGIN;
+static volatile char* txt_mem_begin = (volatile char*)TEXT_MEM_BEGIN;
 
 /************************** Output Functions **************************/
 
@@ -335,6 +335,16 @@ char kio_getchr()
     char ch;
     __asm__ __volatile__("movb %%al, %0\n" : "=rm"(ch));
     return ch;
+}
+
+/*
+** Blocking wait that waits for a single char from the user
+**
+** @param Character from the user
+*/
+void kio_wait_key(char ch)
+{
+    while (kio_getchr() != ch) {}
 }
 
 /*

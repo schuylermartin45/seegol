@@ -28,8 +28,6 @@ __boot:
     movb    $0x0E, %ah          # (BL for "BootLoader"; B for booting)
     int     $0x10
 
-    # TODO init graphics mode
-
 __floppy_boot_load:
     # Load the rest of the OS from the floppy disk
     # Most of this floppy code is adapted from my friends' Bobby Jr. Project:

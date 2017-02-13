@@ -17,6 +17,7 @@
 #include "program.h"
 // user program headers
 #include "hellow.h"
+#include "hsc_tp.h"
 
 /** Macros     **/
 // shell macros
@@ -37,6 +38,6 @@
 /*
 ** Main execution point of the shell
 */
-uint16_t seesh_main(void);
+uint8_t seesh_main(void);
 
 #endif
