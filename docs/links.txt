@@ -43,3 +43,8 @@ https://en.wikipedia.org/wiki/Color_Graphics_Adapter
 Hacky C Tricks
 --------------
 http://stackoverflow.com/questions/12371450/how-are-variable-arguments-implemented-in-gcc
+
+VGA
+---
+http://wiki.osdev.org/VGA_Hardware
+http://f.osdev.org/viewtopic.php?p=260739

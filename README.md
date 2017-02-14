@@ -86,6 +86,37 @@ CGA. Therefore the OS may not appear like it does on the PCjr across all
 systems or it may not work at all.
 
 
+## Directories
+Here is a quick description of the top-level directories. Some of these
+directories have their own READMEs.
+
+### bin/
+Stores binary objects (compiled code).
+
+### dgb_bin/
+Stores compile-time debugging information. These are files that list the source
+code and compiled assembly instructions together with memory addresses.
+
+### docs/
+Extensive documentation and presentations on the project.
+
+### img/
+Stores the image files that can be dd'd to storage media and used to boot the
+OS.
+
+### media/
+Contains media content not directly packaged into the OS.
+
+### old/
+Deprecated code that is kept around as reference material.
+
+### src/
+Source code directory for the project.
+
+### tools/
+Includes scripts and other helpful tools used to run and debug the OS.
+
+
 ## User Manual
 TODO
 

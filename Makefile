@@ -10,6 +10,7 @@
 # Source and bin paths
 #
 BIN      = bin/
+IMG      = img/
 SRC	     = src/
 KERN     = $(SRC)kern/
 VGA      = $(KERN)vga/
@@ -115,24 +116,45 @@ see_gol: depend linker.ld $(OBJS)
 
 #
 # Targets for building a floppy image
-# 1) dd zeros-out the whole floppy image
+# 1) dd zeros-out the whole image
 # 2) dd actually writes the complete flat binary to the floppy image
 #
 floppy.img: see_gol
 	##
 	## MAKE: floppy.img
 	##
-	dd if=/dev/zero of=$(BIN)floppy.img bs=1024 count=1440
-	dd if=$(BIN)os.b of=$(BIN)floppy.img
+	dd if=/dev/zero of=$(IMG)floppy.img bs=512 count=2880
+	dd if=$(BIN)os.b of=$(IMG)floppy.img
 
 #
 # Targets for copying floppy image onto actual floppy
 #
 floppy: floppy.img
 	##
-	## MAKE: floppy
+	## MAKE: floppy (targets /dev/fd0)
 	##
-	dd if=$(BIN)floppy.img of=/dev/fd0
+	dd if=$(IMG)floppy.img of=/dev/fd0
+#
+# Targets for building a USB image
+# 1) dd zeros-out the whole image
+# 2) dd actually writes the complete flat binary to the USB image
+#
+usb.img: see_gol
+	##
+	## MAKE: usb.img
+	##
+	dd if=/dev/zero of=$(IMG)usb.img bs=512 count=2880
+	dd if=$(BIN)os.b of=$(IMG)usb.img
+
+#
+# Targets for copying floppy image onto actual floppy
+#
+usb: usb.img
+	##
+	## MAKE: usb (targets /dev/sdj; default for my desktop)
+	## TODO do something safer than assuming a particular mount point
+	##
+	dd if=$(IMG)usb.img of=/dev/sdj
 
 #
 # Clean out bin/ directory
@@ -142,6 +164,7 @@ clean:
 	## MAKE: clean
 	##
 	rm -f $(BIN)*
+	rm -f $(IMG)*
 
 #
 # makedepend is a program which creates dependency lists by

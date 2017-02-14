@@ -12,4 +12,4 @@
 # -s    opens port 1234 for gdb debugging: (gdb) target remote localhost:1234
 # -fda  loads a floppy disk image
 # -boot sets the initial boot device
-qemu-system-i386 -s -fda bin/floppy.img -boot a
+qemu-system-i386 -s -fda img/floppy.img -boot a
