@@ -48,3 +48,4 @@ VGA
 ---
 http://wiki.osdev.org/VGA_Hardware
 http://f.osdev.org/viewtopic.php?p=260739
+http://wiki.osdev.org/Drawing_In_Protected_Mode
