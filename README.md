@@ -128,3 +128,11 @@ This a higher-level discussion of the project status while in development.
   describes the directives but it makes a clear difference. I can now write
   messages to text video. I plan to improve the I/O tools shortly and then
   move to starting my work with the graphics modules.
+
+### February 13, 2017
+- My graphics work from the Systems Programming class has been imported and
+  significantly improved. Right now only Mode13h is supported but I have laid
+  out the groundwork for other graphics modes. User programs (installed via the
+  SeeSH shell interface) must access the graphics hardware through the Graphics
+  Library (GL) package. This is actually enforced by design, unlike my work in
+  Sys Prog.
