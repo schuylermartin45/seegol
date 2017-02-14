@@ -153,7 +153,7 @@ uint8_t seesh_main(void)
             // execute program, if it is found and pass the arguments over
             if (kio_strcmp(prog_lst[id].name, argv[0]))
             {
-                err_code = (prog_lst[id].main)(argc, argv);
+                err_code = prog_lst[id].main(argc, argv);
                 break;
             }
         }

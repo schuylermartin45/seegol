@@ -13,7 +13,7 @@
 /*
 ** Clears the video buffer
 */
-void _vga13_clrscr(void)
+static void __vga13_clrscr(void)
 {
     uint16_t* addr = (uint16_t*)VGA13_MEM_BEGIN;
     while(addr < (uint16_t*)VGA13_MEM_END)
@@ -22,16 +22,6 @@ void _vga13_clrscr(void)
     }
 }
 
-/*
-** Start VGA's Mode13h
-*/
-void _vga13_enter(void)
-{
-    // BIOS interrupt appears to clear memory on reset
-    __asm__ __volatile__("movb $0x13, %al\n");
-    __asm__ __volatile__("movb $0x00, %ah\n");
-    __asm__ __volatile__("int  $0x10\n");
-}
 
 /*
 ** Write a byte out to the frame buffer. This represents a single pixel
@@ -39,7 +29,7 @@ void _vga13_enter(void)
 ** @param addr Address of the pixel in the frame buffer to write to
 ** @param pxb Pixel byte to write. This is an index into the color palette
 */
-void _vga13_fbwb(uint8_t* addr, uint8_t pxb)
+static void __vga13_fbwb(uint8_t* addr, uint8_t pxb)
 {
     *addr = pxb;
 }
@@ -50,7 +40,7 @@ void _vga13_fbwb(uint8_t* addr, uint8_t pxb)
 ** @param addr Address of the pixel in the frame buffer to write to
 ** @return Pixel's color value
 */
-uint8_t _vga13_fbrb(uint8_t* addr)
+static uint8_t __vga13_fbrb(uint8_t* addr)
 {
     return *addr;
 }
@@ -62,7 +52,7 @@ uint8_t _vga13_fbrb(uint8_t* addr)
 ** @param y coordinate on the screen
 ** @param color Pixel color to write. This is an index into the color palette
 */
-void _vga13_put_pixel(uint16_t x, uint16_t y, uint8_t color)
+static void __vga13_put_pixel(uint16_t x, uint16_t y, uint8_t color)
 {
     // calculate the pixel offset and set the pixel accordingly
     *((uint8_t*)(VGA13_MEM_BEGIN + ((y * VGA13_WIDTH) + x))) = color;
@@ -75,7 +65,7 @@ void _vga13_put_pixel(uint16_t x, uint16_t y, uint8_t color)
 ** @param y coordinate on the screen
 ** @return Pixel color at position. This is an index into the color palette
 */
-uint8_t _vga13_get_pixel(uint16_t x, uint16_t y)
+static uint8_t __vga13_get_pixel(uint16_t x, uint16_t y)
 {
     return *((uint8_t*)(VGA13_MEM_BEGIN + ((y * VGA13_WIDTH) + x)));
 }
@@ -91,8 +81,8 @@ uint8_t _vga13_get_pixel(uint16_t x, uint16_t y)
 ** @param lly Lower-left y coordinate on the screen
 ** @param color Pixel color to write. This is an index into the color palette
 */
-void _vga13_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx, uint16_t lly, 
-    uint8_t color)
+static void __vga13_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx,
+    uint16_t lly, uint8_t color)
 {
     // we actually start drawing on the upper left pixel, so calculate the
     // address at that position first
@@ -102,8 +92,8 @@ void _vga13_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx, uint16_t lly,
     // do a little preprocessing: how many times we can do chunk copies per
     // scanline. this reduces the number of memory writes we need to do as
     // these addresses are right next to each other
-    uint8_t div = (urx - llx) / 2;
-    uint8_t rem = (urx - llx) % 2;
+    uint8_t div = (urx - llx) / sizeof(uint16_t);
+    uint8_t rem = (urx - llx) % sizeof(uint16_t);
     uint16_t packed_color = color;
     packed_color <<= 8; packed_color += color;
 
@@ -139,8 +129,40 @@ void _vga13_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx, uint16_t lly,
 ** @param h Height of the rectangle
 ** @param color Pixel color to write. This is an index into the color palette
 */
-void _vga13_draw_rect_wh(uint16_t ulx, uint16_t uly, uint16_t w, uint16_t h,
-    uint8_t color)
+static void __vga13_draw_rect_wh(uint16_t ulx, uint16_t uly, uint16_t w,
+    uint16_t h, uint8_t color)
 {
-    _vga13_draw_rect(ulx + w, uly, ulx, uly + h, color);
+    __vga13_draw_rect(ulx + w, uly, ulx, uly + h, color);
 }
+
+/*
+** Start VGA's Mode13h
+**
+** @param driver Standard driver spec for a driver to setup
+** @param aux Auxiliary input data. This is sets the palette in Mode13h
+*/
+void _vga13_enter(VGA_Driver* driver, uint16_t aux)
+{
+    // configure VGA13 mode
+    driver->screen_w = VGA13_WIDTH;
+    driver->screen_h = VGA13_HEIGHT;
+    // address of start of the frame buffer for each mode
+    driver->frame_buff = (uint16_t*)VGA13_MEM_BEGIN;
+    // remember what graphical mode we are in
+    driver->vga_mode = VGA_MODE_13;
+    // set all the functions here
+    driver->vga_enter = &_vga13_enter;
+    driver->vga_clrscr = &__vga13_clrscr;
+    driver->vga_fbwb = &__vga13_fbwb;
+    driver->vga_fbrb = &__vga13_fbrb;
+    driver->vga_put_pixel = &__vga13_put_pixel;
+    driver->vga_get_pixel = &__vga13_get_pixel;
+    driver->vga_draw_rect = &__vga13_draw_rect;
+    driver->vga_draw_rect_wh = &__vga13_draw_rect_wh;
+
+    // BIOS interrupt appears to clear memory on reset
+    __asm__ __volatile__("movb $0x13, %al\n");
+    __asm__ __volatile__("movb $0x00, %ah\n");
+    __asm__ __volatile__("int  $0x10\n");
+}
+

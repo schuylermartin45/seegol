@@ -18,12 +18,10 @@
 // text controller
 #include "../kern/kio.h"
 // VGA mode drivers
+#include "../kern/vga/vga.h"
 #include "../kern/vga/vga13.h"
 
 /** Macros     **/
-// identifiers for the various graphics modes
-#define GL_MODE_TEXT    0x03
-#define GL_MODE_VGA13   0x13
 
 /** Globals    **/
 
@@ -32,35 +30,41 @@
 /** Functions  **/
 
 /*
+** Initialize the graphics library with default values. User should call this
+** once per program
+*/
+void gl_init(void);
+
+/*
 ** Enter a graphical mode
 **
 ** @param mode Graphics mode to select
 */
-void gl_lib_enter(uint8_t mode);
+void gl_enter(uint8_t mode);
 
 /*
 ** Exit graphical mode and go back to text
 */
-void gl_lib_exit(void);
+void gl_exit(void);
 
 /*
 ** Get the current width of the screen
 **
 ** @param Width of the screen in the current mode
 */
-uint16_t gl_lib_getw(void);
+uint16_t gl_getw(void);
 
 /*
 ** Get the current height of the screen
 **
 ** @param Height of the screen in the current mode
 */
-uint16_t gl_lib_geth(void);
+uint16_t gl_geth(void);
 
 /*
 ** Clears the video buffer
 */
-void gl_lib_clrscr(void);
+void gl_clrscr(void);
 
 /*
 ** Draws a pixel to the screen. Coordinates start in the upper-left corner
@@ -69,7 +73,7 @@ void gl_lib_clrscr(void);
 ** @param y Pixel position in the y direction
 ** @param color Pixel color to write. This is an index into the color palette
 */
-void gl_lib_put_pixel(uint16_t x, uint16_t y, uint8_t color);
+void gl_put_pixel(uint16_t x, uint16_t y, uint8_t color);
 
 /*
 ** Gets a pixel's color value. Coordinates start in the upper-left corner
@@ -78,7 +82,7 @@ void gl_lib_put_pixel(uint16_t x, uint16_t y, uint8_t color);
 ** @param y Pixel position in the y direction
 ** @return Pixel's color value
 */
-uint8_t gl_lib_get_pixel(uint16_t x, uint16_t y);
+uint8_t gl_get_pixel(uint16_t x, uint16_t y);
 
 /*
 ** Draws a simple rectangle
@@ -89,7 +93,7 @@ uint8_t gl_lib_get_pixel(uint16_t x, uint16_t y);
 ** @param lly Lower-left y coordinate on the screen
 ** @param color Pixel color to write. This is an index into the color palette
 */
-void gl_lib_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx, uint16_t lly, 
+void gl_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx, uint16_t lly, 
     uint8_t color);
 
 /*
@@ -101,7 +105,7 @@ void gl_lib_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx, uint16_t lly,
 ** @param h Height of the rectangle
 ** @param color Pixel color to write. This is an index into the color palette
 */
-void gl_lib_draw_rect_wh(uint16_t ulx, uint16_t uly, uint16_t w, uint16_t h,
+void gl_draw_rect_wh(uint16_t ulx, uint16_t uly, uint16_t w, uint16_t h,
     uint8_t color);
 
 #endif

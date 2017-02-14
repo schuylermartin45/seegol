@@ -26,6 +26,8 @@
 /** Globals    **/
 
 /** Structures **/
+
+// Defines a user program
 typedef struct Program
 {
     // info on the program
