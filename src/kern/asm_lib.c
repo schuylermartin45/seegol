@@ -15,10 +15,14 @@
 **
 ** @param port Comm port
 */
-uint8_t __inb(uint16_t port)
+uint8_t _inb(uint16_t port)
 {
-    // TODO impl
-    return 0;
+    uint8_t val;
+    __asm__ __volatile__("inb %1, %0"
+        : "=a"(val)
+        : "Nd"(port)
+    );
+    return val;
 }
 
 /*
@@ -27,7 +31,7 @@ uint8_t __inb(uint16_t port)
 ** @param port Comm port
 ** @param val Value to emit
 */
-void __outb(uint8_t port, uint8_t val)
+void _outb(uint16_t port, uint8_t val)
 {
-    // TODO impl
+    __asm__ __volatile__( "outb %0, %1" : : "a"(val), "Nd"(port));
 }

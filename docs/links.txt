@@ -49,3 +49,5 @@ VGA
 http://wiki.osdev.org/VGA_Hardware
 http://f.osdev.org/viewtopic.php?p=260739
 http://wiki.osdev.org/Drawing_In_Protected_Mode
+http://www.brackeen.com/vga/bitmaps.html
+https://en.wikipedia.org/wiki/INT_10H

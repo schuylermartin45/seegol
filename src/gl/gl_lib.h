@@ -73,7 +73,7 @@ void gl_clrscr(void);
 ** @param y Pixel position in the y direction
 ** @param color Pixel color to write. This is an index into the color palette
 */
-void gl_put_pixel(uint16_t x, uint16_t y, uint8_t color);
+void gl_put_pixel(uint16_t x, uint16_t y, RGB_8* color);
 
 /*
 ** Gets a pixel's color value. Coordinates start in the upper-left corner
@@ -94,7 +94,7 @@ uint8_t gl_get_pixel(uint16_t x, uint16_t y);
 ** @param color Pixel color to write. This is an index into the color palette
 */
 void gl_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx, uint16_t lly, 
-    uint8_t color);
+    RGB_8* color);
 
 /*
 ** Draws a simple rectangle, using alternative parameter listings
@@ -106,6 +106,6 @@ void gl_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx, uint16_t lly,
 ** @param color Pixel color to write. This is an index into the color palette
 */
 void gl_draw_rect_wh(uint16_t ulx, uint16_t uly, uint16_t w, uint16_t h,
-    uint8_t color);
+    RGB_8* color);
 
 #endif

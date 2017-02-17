@@ -25,7 +25,7 @@
 **
 ** @param port Comm port
 */
-uint8_t __inb(uint16_t port);
+uint8_t _inb(uint16_t port);
 
 /*
 ** Port I/O: Output Byte
@@ -33,6 +33,6 @@ uint8_t __inb(uint16_t port);
 ** @param port Comm port
 ** @param val Value to emit
 */
-void __outb(uint8_t port, uint8_t val);
+void _outb(uint16_t port, uint8_t val);
 
 #endif
