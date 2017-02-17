@@ -23,8 +23,10 @@
 void hsc_tp_init(Program* prog)
 {
     prog->name = "hsc_tp";
-    prog->desc = "HSC Graphical Test Pattern Program. 'q' to quit.";
-    prog->usage = "mode";
+    prog->desc =
+        "HSC Graphical Test Pattern Program. 'q' to quit.\n \
+        'mode' picks a VGA driver mode. '-m' just draws the Macbeth chart.";
+    prog->usage = "mode [-m]";
     prog->main = &hsc_tp_main;
 }
 
@@ -107,7 +109,7 @@ static void __hsc_tp_draw_HSC(void)
 uint8_t hsc_tp_main(uint8_t argc, char* argv[])
 {
     // usage check
-    if (argc != 2)
+    if ((argc < 2) && (argc > 3))
         return ERR_PROG_USAGE;
     // enter graphics mode, based on user input
     gl_init();
@@ -118,8 +120,9 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
 
     // background
     __hsc_tp_draw_board();
-    // foreground
-    __hsc_tp_draw_HSC();
+    // foreground (HSC logo); drawn conditionally based on the -m flag
+    if (!kio_strcmp(argv[2], "-m"))
+        __hsc_tp_draw_HSC();
 
     // block for user input
     kio_wait_key('q');
