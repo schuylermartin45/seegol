@@ -35,6 +35,7 @@
 # SEEGOL non-standard exceptions
 *.lst
 *.img
+*.iso
 *.b
 *.bak
 *.swp
