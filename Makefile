@@ -196,6 +196,7 @@ bin/main.o: src/kern/debug.h src/kern/kio.h src/usr/program.h
 bin/main.o: src/usr/hellow.h src/usr/hsc_tp.h src/gl/gl_lib.h
 bin/main.o: src/kern/vga/vga.h src/kern/vga/vga13.h src/kern/gcc16.h
 bin/main.o: src/kern/types.h src/kern/asm_lib.h src/kern/vga/vga.h
+bin/main.o: src/gl/see_font.h
 bin/vga/vga13.o: src/kern/gcc16.h src/kern/vga/vga13.h
 bin/vga/vga13.o: src/kern/types.h src/kern/asm_lib.h
 bin/vga/vga13.o: src/kern/gcc16.h src/kern/types.h
@@ -203,10 +204,12 @@ bin/vga/vga13.o: src/kern/vga/vga.h
 bin/vga/vga.o: src/kern/gcc16.h src/kern/vga/vga.h
 bin/asm_lib.o: src/kern/gcc16.h src/kern/asm_lib.h src/kern/types.h
 bin/kio.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
+bin/see_font.o: src/kern/gcc16.h src/gl/see_font.h src/kern/types.h
 bin/gl_lib.o: src/kern/gcc16.h src/gl/gl_lib.h src/kern/types.h
 bin/gl_lib.o: src/kern/kio.h src/kern/vga/vga.h src/kern/gcc16.h
 bin/gl_lib.o: src/kern/types.h src/kern/vga/vga13.h src/kern/gcc16.h
 bin/gl_lib.o: src/kern/types.h src/kern/asm_lib.h src/kern/vga/vga.h
+bin/gl_lib.o: src/gl/see_font.h
 bin/hellow.o: src/kern/gcc16.h src/usr/hellow.h src/kern/types.h
 bin/hellow.o: src/kern/kio.h src/usr/program.h
 bin/seesh.o: src/kern/gcc16.h src/usr/seesh.h src/kern/types.h
@@ -215,8 +218,9 @@ bin/seesh.o: src/kern/types.h src/kern/kio.h src/usr/program.h
 bin/seesh.o: src/usr/hellow.h src/usr/hsc_tp.h src/gl/gl_lib.h
 bin/seesh.o: src/kern/vga/vga.h src/kern/vga/vga13.h src/kern/gcc16.h
 bin/seesh.o: src/kern/types.h src/kern/asm_lib.h src/kern/vga/vga.h
+bin/seesh.o: src/gl/see_font.h
 bin/hsc_tp.o: src/kern/gcc16.h src/usr/hsc_tp.h src/kern/types.h
 bin/hsc_tp.o: src/kern/kio.h src/gl/gl_lib.h src/kern/vga/vga.h
 bin/hsc_tp.o: src/kern/gcc16.h src/kern/types.h src/kern/vga/vga13.h
 bin/hsc_tp.o: src/kern/gcc16.h src/kern/types.h src/kern/asm_lib.h
-bin/hsc_tp.o: src/kern/vga/vga.h src/usr/program.h
+bin/hsc_tp.o: src/kern/vga/vga.h src/gl/see_font.h src/usr/program.h

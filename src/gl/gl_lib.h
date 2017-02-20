@@ -20,6 +20,8 @@
 // VGA mode drivers
 #include "../kern/vga/vga.h"
 #include "../kern/vga/vga13.h"
+// defines the font used to draw strings
+#include "see_font.h"
 
 /** Macros     **/
 
@@ -107,5 +109,15 @@ void gl_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx, uint16_t lly,
 */
 void gl_draw_rect_wh(uint16_t ulx, uint16_t uly, uint16_t w, uint16_t h,
     RGB_8* color);
+
+/*
+** Draws a string, based on a custom-made bitmap font
+**
+** @param start Starting point to draw the string (upper left pixel)
+** @param b_color Background color of the text
+** @param f_color Foreground color of the text
+** @param str String to draw
+*/
+void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
 
 #endif

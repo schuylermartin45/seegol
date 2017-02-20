@@ -26,6 +26,19 @@ typedef struct RGB_8
     uint8_t b;
 } RGB_8;
 
+// Point systems
+typedef struct Point_2D
+{
+    uint16_t x;
+    uint16_t y;
+} Point_2D;
+typedef struct Point_3D
+{
+    uint16_t x;
+    uint16_t y;
+    uint16_t z;
+} Point_3D;
+
 // defines a standard set of operations for VGA drivers
 typedef struct VGA_Driver VGA_Driver;
 struct VGA_Driver

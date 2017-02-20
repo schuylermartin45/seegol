@@ -160,3 +160,72 @@ void gl_draw_rect_wh(uint16_t ulx, uint16_t uly, uint16_t w, uint16_t h,
 {
     vga_driver.vga_draw_rect_wh(ulx, uly, w, h, color);
 }
+
+/*
+** Draws a string, based on a custom-made bitmap font
+**
+** @param start Starting point to draw the string (upper left pixel)
+** @param b_color Background color of the text
+** @param f_color Foreground color of the text
+** @param str String to draw
+*/
+void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
+{
+    Point_2D cur = start;
+    // pad vertically
+    cur.y += SEE_FONT_PAD_VERT;
+    // loop until null byte
+    while(*str != '\0')
+    {
+        // encounter a newline, jump ahead to the next line
+        if (*str == '\n')
+        {
+            // TODO jump a row of chars down
+            /*
+            // jump to the start of the next line (one line after the current)
+            uint8_t ln_num = ((txt_ptr - txt_mem_begin) / TEXT_MEM_WIDTH) + 1;
+            txt_ptr = txt_mem_begin + (ln_num * TEXT_MEM_WIDTH);
+            // advance to next char
+            str++;
+            */
+        }
+        else
+        {
+            uint8_t ch = *str;
+            // quickly draw the background color using the rectangle draw
+            // function and use this assumption for other optimizations
+            vga_driver.vga_draw_rect_wh(start.x, start.y,
+                SEE_FONT_WIDTH  + (2 * SEE_FONT_PAD_HORZ),
+                SEE_FONT_HEIGHT + (2 * SEE_FONT_PAD_VERT),
+                &b_color
+            );
+            for (uint8_t row=0; row<SEE_FONT_HEIGHT; ++row)
+            {
+                uint8_t row_map = see_font_tbl[ch][row];
+                // skip empty rows
+                if (row_map != 0)
+                {
+                    uint8_t mask = 0b10000000;
+                    for (uint8_t col=0; col<SEE_FONT_WIDTH; ++col)
+                    {
+                        if (row_map & mask)
+                            vga_driver.vga_put_pixel(cur.x, cur.y, &f_color);
+                        mask >>= 1;
+                        ++cur.x;
+                    }
+                }
+                cur.x = start.x;
+                ++cur.y;
+            }
+            ++str;
+        }
+        // mind the gap
+        vga_driver.vga_draw_rect_wh(start.x + SEE_FONT_WIDTH, start.y,
+            SEE_FONT_PAD_HORZ, SEE_FONT_HEIGHT, &b_color
+        );
+        // move right; the character to draw
+        start.x += SEE_FONT_WIDTH + SEE_FONT_PAD_HORZ;
+        cur.x = start.x;
+        cur.y = start.y + SEE_FONT_PAD_VERT;
+    }
+}

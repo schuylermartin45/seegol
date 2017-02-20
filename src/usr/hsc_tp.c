@@ -14,6 +14,7 @@
 // info about the Macbeth color chart
 #define MACBETH_ROWS 4
 #define MACBETH_COLS 6
+#define HSC_NAME     "HENRIETTA SEMICONDUCTOR CORPORATION"
 
 /*
 ** Initializes program structure
@@ -101,6 +102,10 @@ static void __hsc_tp_draw_HSC(void)
     gl_draw_rect_wh(50, 135, 220, 3, &RGB_8_WHITE);
     gl_draw_rect_wh(50, 143, 220, 3, &RGB_8_WHITE);
     gl_draw_rect_wh(50, 150, 220, 3, &RGB_8_WHITE);
+    // draw a string
+    Point_2D ul = {20, 180};
+    RGB_8 off_white = {255, 100, 0};
+    gl_draw_str(ul, off_white, RGB_8_HSC, HSC_NAME);
 }
 
 /*
