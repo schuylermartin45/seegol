@@ -26,19 +26,6 @@ typedef struct RGB_8
     uint8_t b;
 } RGB_8;
 
-// Point systems
-typedef struct Point_2D
-{
-    uint16_t x;
-    uint16_t y;
-} Point_2D;
-typedef struct Point_3D
-{
-    uint16_t x;
-    uint16_t y;
-    uint16_t z;
-} Point_3D;
-
 // defines a standard set of operations for VGA drivers
 typedef struct VGA_Driver VGA_Driver;
 struct VGA_Driver
@@ -70,7 +57,7 @@ struct VGA_Driver
     ** @param y coordinate on the screen
     ** @param color Pixel color to write
     */
-    void (*vga_put_pixel)(uint16_t x, uint16_t y, RGB_8* color);
+    void (*vga_put_pixel)(uint16_t x, uint16_t y, RGB_8 color);
 
     /*
     ** Read a pixel out of the frame buffer. This represents a single pixel
@@ -91,7 +78,7 @@ struct VGA_Driver
     ** @param color Pixel color to write
     */
     void (*vga_draw_rect)(uint16_t urx, uint16_t ury, uint16_t llx,
-        uint16_t lly, RGB_8* color);
+        uint16_t lly, RGB_8 color);
 
     /*
     ** Draws a simple rectangle, using alternative parameter listings
@@ -103,15 +90,11 @@ struct VGA_Driver
     ** @param color Pixel color to write
     */
     void (*vga_draw_rect_wh)(uint16_t ulx, uint16_t uly, uint16_t w,
-        uint16_t h, RGB_8* color);
+        uint16_t h, RGB_8 color);
 
 };
 
 /** Globals    **/
-// common colors
-extern RGB_8 RGB_8_BLACK;
-extern RGB_8 RGB_8_WHITE;
-extern RGB_8 RGB_8_HSC;
 
 /** Functions  **/
 
@@ -122,6 +105,6 @@ extern RGB_8 RGB_8_HSC;
 ** @param c1 Second color
 ** @param Color equivalency
 */
-bool vga_RGB_8_cmp(RGB_8* c0, RGB_8* c1);
+bool vga_RGB_8_cmp(RGB_8 c0, RGB_8 c1);
 
 #endif

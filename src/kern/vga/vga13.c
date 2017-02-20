@@ -16,6 +16,8 @@
 // Reserved:
 //   + Black (and Error code)
 //   + White
+static const RGB_8 RGB_8_BLACK = {  0,   0,   0};
+static const RGB_8 RGB_8_WHITE = {255, 255, 255};
 static RGB_8 color_palette[VGA13_PALETTE_SIZE];
 // current index into the table
 static uint8_t palette_idx;
@@ -29,7 +31,7 @@ static uint8_t palette_idx;
 ** @param idx Index of the value to set (0-255)
 ** @param color RGB color value to set
 */
-static void __vga13_set_port_color(uint8_t idx, RGB_8* color)
+static void __vga13_set_port_color(uint8_t idx, RGB_8 color)
 {
     // look through the table
     // RGB values written to the device table/palette, under an index value
@@ -37,9 +39,9 @@ static void __vga13_set_port_color(uint8_t idx, RGB_8* color)
     // this mode actually only uses 6 bit per channel; 18bit not 24bit color
     // so right shifting by 2 bits will quantize the color space, giving a
     // closer approximation of the desired color
-    _outb(VGA13_PALETTE_PORT_CLR, color->r >> 2);
-    _outb(VGA13_PALETTE_PORT_CLR, color->g >> 2);
-    _outb(VGA13_PALETTE_PORT_CLR, color->b >> 2);
+    _outb(VGA13_PALETTE_PORT_CLR, color.r >> 2);
+    _outb(VGA13_PALETTE_PORT_CLR, color.g >> 2);
+    _outb(VGA13_PALETTE_PORT_CLR, color.b >> 2);
 }
 
 /*
@@ -49,12 +51,12 @@ static void __vga13_set_port_color(uint8_t idx, RGB_8* color)
 ** @param color RGB Color to set
 ** @return Look up value in the color palette table. To write to frame buffer
 */
-static uint8_t __vga13_fetch_color(RGB_8* color)
+static uint8_t __vga13_fetch_color(RGB_8 color)
 {
     // check reserved colors; prevent modification to the palette
-    if (vga_RGB_8_cmp(color, color_palette + VGA13_PALETTE_BLACK))
+    if (vga_RGB_8_cmp(color, color_palette[VGA13_PALETTE_BLACK]))
         return VGA13_PALETTE_BLACK;
-    if (vga_RGB_8_cmp(color, color_palette + VGA13_PALETTE_WHITE))
+    if (vga_RGB_8_cmp(color, color_palette[VGA13_PALETTE_WHITE]))
         return VGA13_PALETTE_WHITE;
     // perform a search to prevent duplicates
     uint8_t color_code = VGA13_PALETTE_NOT_FOUND;
@@ -64,7 +66,7 @@ static uint8_t __vga13_fetch_color(RGB_8* color)
     // Only loops until the last color set; prevents wasted search time
     for (uint8_t i=VGA13_PALETTE_BLACK + 1; i<palette_idx; ++i)
     {
-        if (vga_RGB_8_cmp(color_palette + i, color))
+        if (vga_RGB_8_cmp(color_palette[i], color))
         {
             color_code = i;
             break;
@@ -79,7 +81,7 @@ static uint8_t __vga13_fetch_color(RGB_8* color)
         __vga13_set_port_color(palette_idx, color);
         // add color to the table
         color_code = palette_idx;
-        color_palette[color_code] = *color;
+        color_palette[color_code] = color;
         palette_idx %= (VGA13_PALETTE_SIZE - VGA13_PALETTE_RESERVED);
         ++palette_idx;
     }
@@ -95,8 +97,8 @@ static void __vga13_init_color()
     color_palette[VGA13_PALETTE_BLACK] = RGB_8_BLACK;
     color_palette[VGA13_PALETTE_WHITE] = RGB_8_WHITE;
     // set black and white values
-    __vga13_set_port_color(VGA13_PALETTE_BLACK, &RGB_8_BLACK);
-    __vga13_set_port_color(VGA13_PALETTE_WHITE, &RGB_8_WHITE);
+    __vga13_set_port_color(VGA13_PALETTE_BLACK, RGB_8_BLACK);
+    __vga13_set_port_color(VGA13_PALETTE_WHITE, RGB_8_WHITE);
     // valid range: Black + 1 to White - 1
     palette_idx = VGA13_PALETTE_BLACK + 1;
 }
@@ -122,7 +124,7 @@ static void __vga13_clrscr(void)
 ** @param y coordinate on the screen
 ** @param color Pixel color to write. This is an index into the color palette
 */
-static void __vga13_put_pixel(uint16_t x, uint16_t y, RGB_8* color)
+static void __vga13_put_pixel(uint16_t x, uint16_t y, RGB_8 color)
 {
     uint8_t color_code = __vga13_fetch_color(color);
     // calculate the pixel offset and set the pixel accordingly
@@ -156,7 +158,7 @@ static void __vga13_get_pixel(uint16_t x, uint16_t y, RGB_8* color)
 ** @param color Pixel color to write. This is an index into the color palette
 */
 static void __vga13_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx,
-    uint16_t lly, RGB_8* color)
+    uint16_t lly, RGB_8 color)
 {
     uint8_t color_code = __vga13_fetch_color(color);
     // we actually start drawing on the upper left pixel, so calculate the
@@ -205,7 +207,7 @@ static void __vga13_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx,
 ** @param color Pixel color to write. This is an index into the color palette
 */
 static void __vga13_draw_rect_wh(uint16_t ulx, uint16_t uly, uint16_t w,
-    uint16_t h, RGB_8* color)
+    uint16_t h, RGB_8 color)
 {
     __vga13_draw_rect(ulx + w, uly, ulx, uly + h, color);
 }

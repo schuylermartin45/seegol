@@ -71,7 +71,7 @@ static void __hsc_tp_draw_board(void)
     {
         for (uint8_t col=0; col<MACBETH_COLS; ++col)
         {
-            gl_draw_rect_wh(w*col, h*row, w, h, color++);
+            gl_draw_rect_wh(PT2(w*col, h*row), w, h, *color++);
         }
     }
 }
@@ -82,30 +82,28 @@ static void __hsc_tp_draw_board(void)
 static void __hsc_tp_draw_HSC(void)
 {
     // white border
-    gl_draw_rect_wh(50, 30, 220, 140, &RGB_8_WHITE);
+    gl_draw_rect_wh(PT2(50, 30), 220, 140, RGB_WHITE);
     // H
-    gl_draw_rect_wh( 65, 40, 20, 120, &RGB_8_HSC);
-    gl_draw_rect_wh( 85, 95, 20,  10, &RGB_8_HSC);
-    gl_draw_rect_wh(105, 40, 20, 120, &RGB_8_HSC);
+    gl_draw_rect_wh(PT2( 65, 40), 20, 120, RGB_HSC);
+    gl_draw_rect_wh(PT2( 85, 95), 20,  10, RGB_HSC);
+    gl_draw_rect_wh(PT2(105, 40), 20, 120, RGB_HSC);
     // S
-    gl_draw_rect_wh(135,  43, 20, 60, &RGB_8_HSC);
-    gl_draw_rect_wh(155,  40, 40, 25, &RGB_8_HSC);
-    gl_draw_rect_wh(155,  90, 20, 20, &RGB_8_HSC);
-    gl_draw_rect_wh(175,  95, 20, 63, &RGB_8_HSC);
-    gl_draw_rect_wh(135, 135, 40, 25, &RGB_8_HSC);
+    gl_draw_rect_wh(PT2(135,  43), 20, 60, RGB_HSC);
+    gl_draw_rect_wh(PT2(155,  40), 40, 25, RGB_HSC);
+    gl_draw_rect_wh(PT2(155,  90), 20, 20, RGB_HSC);
+    gl_draw_rect_wh(PT2(175,  95), 20, 63, RGB_HSC);
+    gl_draw_rect_wh(PT2(135, 135), 40, 25, RGB_HSC);
     // C
-    gl_draw_rect_wh(205,  43, 20, 114, &RGB_8_HSC);
-    gl_draw_rect_wh(225,  40, 40,  20, &RGB_8_HSC);
-    gl_draw_rect_wh(225, 140, 40,  20, &RGB_8_HSC);
+    gl_draw_rect_wh(PT2(205,  43), 20, 114, RGB_HSC);
+    gl_draw_rect_wh(PT2(225,  40), 40,  20, RGB_HSC);
+    gl_draw_rect_wh(PT2(225, 140), 40,  20, RGB_HSC);
     // I'm lazy at this point...screw the z axis.
     // white stripes on the logo
-    gl_draw_rect_wh(50, 135, 220, 3, &RGB_8_WHITE);
-    gl_draw_rect_wh(50, 143, 220, 3, &RGB_8_WHITE);
-    gl_draw_rect_wh(50, 150, 220, 3, &RGB_8_WHITE);
+    gl_draw_rect_wh(PT2(50, 135), 220, 3, RGB_WHITE);
+    gl_draw_rect_wh(PT2(50, 143), 220, 3, RGB_WHITE);
+    gl_draw_rect_wh(PT2(50, 150), 220, 3, RGB_WHITE);
     // draw a string
-    Point_2D ul = {20, 180};
-    RGB_8 off_white = {255, 100, 0};
-    gl_draw_str(ul, off_white, RGB_8_HSC, HSC_NAME);
+    gl_draw_str(PT2(20, 180), RGB(255, 100, 0), RGB_HSC, HSC_NAME);
 }
 
 /*

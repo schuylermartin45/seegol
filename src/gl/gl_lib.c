@@ -97,6 +97,8 @@ uint16_t gl_geth(void)
     return vga_driver.screen_h;
 }
 
+/***** "Fast" Draw Functions (implemented in driver) *****/
+
 /*
 ** Clears the video buffer
 */
@@ -110,56 +112,51 @@ void gl_clrscr(void)
 /*
 ** Draws a pixel to the screen. Coordinates start in the upper-left corner
 **
-** @param x Pixel position in the x direction
-** @param y Pixel position in the y direction
+** @param pt Pixel position
 ** @param color Pixel color to write. This is an index into the color palette
 */
-void gl_put_pixel(uint16_t x, uint16_t y, RGB_8* color)
+void gl_put_pixel(Point_2D pt, RGB_8 color)
 {
-    vga_driver.vga_put_pixel(x, y, color);
+    vga_driver.vga_put_pixel(pt.x, pt.y, color);
 }
 
 /*
 ** Gets a pixel's color value. Coordinates start in the upper-left corner
 **
-** @param x Pixel position in the x direction
-** @param y Pixel position in the y direction
+** @param pt Pixel position
 ** @param color Pixel color written to the pixel position
 */
-void gl_get_pixel(uint16_t x, uint16_t y, RGB_8* color)
+void gl_get_pixel(Point_2D pt, RGB_8* color)
 {
-    vga_driver.vga_get_pixel(x, y, color);
+    vga_driver.vga_get_pixel(pt.x, pt.y, color);
 }
 
 /*
 ** Draws a simple rectangle
 **
-** @param urx Upper-right x coordinate on the screen
-** @param ury Upper-right y coordinate on the screen
-** @param llx Lower-left x coordinate on the screen
-** @param lly Lower-left y coordinate on the screen
+** @param ur Upper-right coordinate on the screen
+** @param ll Lower-left coordinate on the screen
 ** @param color Pixel color to write. This is an index into the color palette
 */
-void gl_draw_rect(uint16_t urx, uint16_t ury, uint16_t llx, uint16_t lly, 
-    RGB_8* color)
+void gl_draw_rect(Point_2D ur, Point_2D ll, RGB_8 color)
 {
-    vga_driver.vga_draw_rect(urx, ury, llx, lly, color);
+    vga_driver.vga_draw_rect(ur.x, ur.y, ll.x, ll.y, color);
 }
 
 /*
 ** Draws a simple rectangle, using alternative parameter listings
 **
-** @param ulx Upper-left x coordinate on the screen
-** @param uly Upper-left y coordinate on the screen
+** @param ul Upper-left coordinate on the screen
 ** @param w Width of the rectangle
 ** @param h Height of the rectangle
 ** @param color Pixel color to write. This is an index into the color palette
 */
-void gl_draw_rect_wh(uint16_t ulx, uint16_t uly, uint16_t w, uint16_t h,
-    RGB_8* color)
+void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color)
 {
-    vga_driver.vga_draw_rect_wh(ulx, uly, w, h, color);
+    vga_driver.vga_draw_rect_wh(ul.x, ul.y, w, h, color);
 }
+
+/***** Generic Draw Functions (implemented in GL *****/
 
 /*
 ** Draws a string, based on a custom-made bitmap font
@@ -197,7 +194,7 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
             vga_driver.vga_draw_rect_wh(start.x, start.y,
                 SEE_FONT_WIDTH  + (2 * SEE_FONT_PAD_HORZ),
                 SEE_FONT_HEIGHT + (2 * SEE_FONT_PAD_VERT),
-                &b_color
+                b_color
             );
             for (uint8_t row=0; row<SEE_FONT_HEIGHT; ++row)
             {
@@ -209,7 +206,7 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
                     for (uint8_t col=0; col<SEE_FONT_WIDTH; ++col)
                     {
                         if (row_map & mask)
-                            vga_driver.vga_put_pixel(cur.x, cur.y, &f_color);
+                            vga_driver.vga_put_pixel(cur.x, cur.y, f_color);
                         mask >>= 1;
                         ++cur.x;
                     }
@@ -221,7 +218,7 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
         }
         // mind the gap
         vga_driver.vga_draw_rect_wh(start.x + SEE_FONT_WIDTH, start.y,
-            SEE_FONT_PAD_HORZ, SEE_FONT_HEIGHT, &b_color
+            SEE_FONT_PAD_HORZ, SEE_FONT_HEIGHT, b_color
         );
         // move right; the character to draw
         start.x += SEE_FONT_WIDTH + SEE_FONT_PAD_HORZ;
