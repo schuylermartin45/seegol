@@ -48,8 +48,7 @@
 ** Start VGA's Mode13h
 **
 ** @param driver Standard driver spec for a driver to setup
-** @param aux Auxiliary input data. Unused.
 */
-void _vga13_enter(VGA_Driver* driver, uint16_t aux);
+void _vga13_enter(VGA_Driver* driver);
 
 #endif

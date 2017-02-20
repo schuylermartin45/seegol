@@ -33,8 +33,6 @@ void gl_init(void)
     // NULL for now
     vga_driver.vga_enter = NULL;
     vga_driver.vga_clrscr = NULL;
-    vga_driver.vga_fbwb = NULL;
-    vga_driver.vga_fbrb = NULL;
     vga_driver.vga_put_pixel = NULL;
     vga_driver.vga_get_pixel = NULL;
     vga_driver.vga_draw_rect = NULL;
@@ -53,8 +51,7 @@ void gl_enter(uint8_t mode)
     switch (mode)
     {
         case VGA_MODE_13:
-            // TODO aux
-            _vga13_enter(&vga_driver, 0x0);
+            _vga13_enter(&vga_driver);
             break;
     }
 }
@@ -127,11 +124,11 @@ void gl_put_pixel(uint16_t x, uint16_t y, RGB_8* color)
 **
 ** @param x Pixel position in the x direction
 ** @param y Pixel position in the y direction
-** @return Pixel's color value
+** @param color Pixel color written to the pixel position
 */
-uint8_t gl_get_pixel(uint16_t x, uint16_t y)
+void gl_get_pixel(uint16_t x, uint16_t y, RGB_8* color)
 {
-    return vga_driver.vga_get_pixel(x, y);
+    vga_driver.vga_get_pixel(x, y, color);
 }
 
 /*

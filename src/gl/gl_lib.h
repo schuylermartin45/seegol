@@ -80,9 +80,9 @@ void gl_put_pixel(uint16_t x, uint16_t y, RGB_8* color);
 **
 ** @param x Pixel position in the x direction
 ** @param y Pixel position in the y direction
-** @return Pixel's color value
+** @param color Pixel color written to the pixel position
 */
-uint8_t gl_get_pixel(uint16_t x, uint16_t y);
+void gl_get_pixel(uint16_t x, uint16_t y, RGB_8* color);
 
 /*
 ** Draws a simple rectangle

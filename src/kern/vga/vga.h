@@ -42,31 +42,13 @@ struct VGA_Driver
     ** Start a VGA mode
     **
     ** @param driver Standard driver spec for a driver to setup
-    ** @param aux Auxiliary input data. This is mode specific
     */
-    void (*vga_enter)(VGA_Driver* driver, uint16_t aux);
+    void (*vga_enter)(VGA_Driver* driver);
 
     /*
     ** Clears the video buffer
     */
     void (*vga_clrscr)(void);
-
-
-    /*
-    ** Write a byte out to the frame buffer. This represents a single pixel
-    **
-    ** @param addr Address of the pixel in the frame buffer to write to
-    ** @param pxb Pixel byte to write
-    */
-    void (*vga_fbwb)(uint8_t* addr, uint8_t pxb);
-
-    /*
-    ** Read a byte out of the frame buffer. This represents a single pixel
-    **
-    ** @param addr Address of the pixel in the frame buffer to write to
-    ** @return Pixel's color value
-    */
-    uint8_t (*vga_fbrb)(uint8_t* addr);
 
     /*
     ** Write a pixel out to the frame buffer. This represents a single pixel
@@ -82,9 +64,9 @@ struct VGA_Driver
     **
     ** @param x coordinate on the screen
     ** @param y coordinate on the screen
-    ** @return Pixel color at position
+    ** @param color Pixel color written to the pixel position
     */
-    uint8_t (*vga_get_pixel)(uint16_t x, uint16_t y);
+    void (*vga_get_pixel)(uint16_t x, uint16_t y, RGB_8* color);
 
     /*
     ** Draws a simple rectangle

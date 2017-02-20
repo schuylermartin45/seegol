@@ -116,28 +116,6 @@ static void __vga13_clrscr(void)
 }
 
 /*
-** Write a byte out to the frame buffer. This represents a single pixel
-**
-** @param addr Address of the pixel in the frame buffer to write to
-** @param pxb Pixel byte to write. This is an index into the color palette
-*/
-static void __vga13_fbwb(uint8_t* addr, uint8_t pxb)
-{
-    *addr = pxb;
-}
-
-/*
-** Read a byte out of the frame buffer. This represents a single pixel
-**
-** @param addr Address of the pixel in the frame buffer to write to
-** @return Pixel's color value
-*/
-static uint8_t __vga13_fbrb(uint8_t* addr)
-{
-    return *addr;
-}
-
-/*
 ** Write a pixel out to the frame buffer. This represents a single pixel
 **
 ** @param x coordinate on the screen
@@ -156,11 +134,14 @@ static void __vga13_put_pixel(uint16_t x, uint16_t y, RGB_8* color)
 **
 ** @param x coordinate on the screen
 ** @param y coordinate on the screen
-** @return Pixel color at position. This is an index into the color palette
+** @param color Pixel color written to the pixel position
 */
-static uint8_t __vga13_get_pixel(uint16_t x, uint16_t y)
+static void __vga13_get_pixel(uint16_t x, uint16_t y, RGB_8* color)
 {
-    return *((uint8_t*)(VGA13_MEM_BEGIN + ((y * VGA13_WIDTH) + x)));
+    uint8_t color_code =
+        *((uint8_t*)(VGA13_MEM_BEGIN + ((y * VGA13_WIDTH) + x)));
+    // look up color in the table and set it
+    *color = color_palette[color_code];
 }
 
 /* "Fast" (i.e. lazy) drawing methods */
@@ -235,9 +216,8 @@ static void __vga13_draw_rect_wh(uint16_t ulx, uint16_t uly, uint16_t w,
 ** Start VGA's Mode13h
 **
 ** @param driver Standard driver spec for a driver to setup
-** @param aux Auxiliary input data. Unused.
 */
-void _vga13_enter(VGA_Driver* driver, uint16_t aux)
+void _vga13_enter(VGA_Driver* driver)
 {
     // configure VGA13 mode
     driver->screen_w = VGA13_WIDTH;
@@ -249,8 +229,6 @@ void _vga13_enter(VGA_Driver* driver, uint16_t aux)
     // set all the functions here
     driver->vga_enter = &_vga13_enter;
     driver->vga_clrscr = &__vga13_clrscr;
-    driver->vga_fbwb = &__vga13_fbwb;
-    driver->vga_fbrb = &__vga13_fbrb;
     driver->vga_put_pixel = &__vga13_put_pixel;
     driver->vga_get_pixel = &__vga13_get_pixel;
     driver->vga_draw_rect = &__vga13_draw_rect;
