@@ -25,9 +25,8 @@ void hsc_tp_init(Program* prog)
 {
     prog->name = "hsc_tp";
     prog->desc =
-        "HSC Graphical Test Pattern Program. 'q' to quit.\n \
-        'mode' picks a VGA driver mode. '-m' just draws the Macbeth chart.";
-    prog->usage = "mode [-m]";
+        "HSC Graphical Test Pattern Program. 'q' to quit. 'mode' picks a VGA driver mode. '-m' just draws the Macbeth chart. '-t' tests string drawing.";
+    prog->usage = "mode [-m | -t]";
     prog->main = &hsc_tp_main;
 }
 
@@ -107,6 +106,15 @@ static void __hsc_tp_draw_HSC(void)
 }
 
 /*
+** Draw test function for string printing
+*/
+static void __hsc_tp_draw_str(void)
+{
+    char* str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 .$%";
+    gl_draw_str(PT2(0, 0), RGB_WHITE, RGB_HSC, str);
+}
+
+/*
 ** Main method for HSC Test Pattern program
 */
 uint8_t hsc_tp_main(uint8_t argc, char* argv[])
@@ -121,11 +129,17 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
     else
         return ERR_PROG_BAD_ARGS;
 
-    // background
-    __hsc_tp_draw_board();
-    // foreground (HSC logo); drawn conditionally based on the -m flag
-    if (!kio_strcmp(argv[2], "-m"))
-        __hsc_tp_draw_HSC();
+    // draw string test
+    if ((argc == 3) && (kio_strcmp(argv[2], "-t")))
+        __hsc_tp_draw_str();
+    else
+    {
+        // background
+        __hsc_tp_draw_board();
+        // foreground (HSC logo); drawn conditionally based on the -m flag
+        if ((argc < 3) && (!kio_strcmp(argv[2], "-m")))
+            __hsc_tp_draw_HSC();
+    }
 
     // block for user input
     kio_wait_key('q');

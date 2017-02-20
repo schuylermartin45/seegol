@@ -170,6 +170,7 @@ uint8_t seesh_main(void)
                 kio_printf("ERROR: program '%s' not found\n", argv[0], NULL);
                 break;
             case ERR_PROG_USAGE:
+            case ERR_PROG_BAD_ARGS:
                 kio_printf("Usage: %s %s\n", argv[0], prog_lst[id].usage);
                 break;
             default:
