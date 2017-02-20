@@ -414,6 +414,13 @@ void kio_prompt_color(char* prompt, uint8_t color_code, char* str)
                 *str++ = '\0';
                 kio_print("\n");
                 return;
+            // Some keys don't have 8-bit ASCII codes, but rather 16 bit key
+            // codes, the lower 8-bits being the null byte. These include the
+            // arrow keys. For now, instead of adding history to the prompt, we
+            // will just dump a dummy character. This at least allows the user
+            // to correct the mistake; before no command could be entered
+            case '\0':
+                ch = '^';
             // otherwise, draw character
             default:
                 *str++ = ch;
