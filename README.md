@@ -1,4 +1,4 @@
-# HSC: Shoyler's Extremely Experimental Graphical Open Library - SeeGOL
+# HSC: Shoyler's Extremely Experimental Graphical Operating Library - SeeGOL
 #### Author:  Schuyler Martin <sam8050@rit.edu>
 
 ![alt tag](/media/hsc.png)
