@@ -42,6 +42,7 @@ void hsc_tp_init(Program* prog)
 static void __hsc_tp_draw_board(void)
 {
     // calculate the size of each piece based on the screen dimensions
+    // round off may occur in some dimensions, leaving a some unused space
     uint16_t w = gl_getw() / MACBETH_COLS;
     uint16_t h = gl_geth() / MACBETH_ROWS;
     // set up the chart
@@ -116,20 +117,20 @@ static void __hsc_tp_draw_str(void)
     char* str0 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 .";
     gl_draw_str(PT2(0, 0), RGB_WHITE, RGB_HSC, str0);
     // TEST 1: new line
-    char* str1 = "NEWLINE TEST\nNEWLINE TEST";
+    char* str1 = "NEWLINE TEST\nNEWLINE TEST\nNEWLINE TEST";
     gl_draw_str(PT2(20, 20), RGB_HSC, RGB_WHITE, str1);
     // TEST 2: word wrap
     char* str2 = "WORD WRAP WORD WORD WRAP WORD WRAP WORD WRAP WORD WRAP "
                  "WORD WRAP WORD WORD WRAP WORD WRAP WORD WRAP WORD WRAP ";
     gl_draw_str(PT2(0, 100), RGB_WHITE, RGB_BLACK, str2);
-    // TEST 3: sprintf
-    char* str3 = "BIN %b  HEX %x WORDS WORDS\nWORDS WORDS";
+    // TEST 3: sprintf and transparent backgrounds
+    char* str3 = "BIN %b  HEX %x WORDS WORDS WORDS NEWLINE\nWORDS WORDS";
     uint16_t num[1];
     num[0] = 42;
     uint16_t str3_len = kio_sprintf_len(str3, num, num);
     char buff_3[str3_len];
     kio_sprintf(str3, buff_3, num, num);
-    gl_draw_str(PT2(50, 160), RGB_WHITE, RGB_BLACK, buff_3);
+    gl_draw_str(PT2(50, 160), RGB_WHITE, RGB_WHITE, buff_3);
 }
 
 /*

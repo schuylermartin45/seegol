@@ -18,7 +18,7 @@
 #define SEE_FONT_WIDTH      8
 #define SEE_FONT_HEIGHT     8
 // pixel padding, one side
-#define SEE_FONT_PAD_VERT   1
+#define SEE_FONT_PAD_VERT   2
 #define SEE_FONT_PAD_HORZ   0
 // font will hopefully suport 7-bit ASCII
 #define SEE_FONT_NUM_CH     128

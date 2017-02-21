@@ -131,7 +131,9 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color);
 /***** Generic Draw Functions (implemented in GL *****/
 
 /*
-** Draws a string, based on a custom-made bitmap font
+** Draws a string, based on a custom-made bitmap font.
+** "Transparent" backgrounds are achieved by setting the background and
+** foreground colors to the same value.
 **
 ** @param start Starting point to draw the string (upper left pixel)
 ** @param b_color Background color of the text
