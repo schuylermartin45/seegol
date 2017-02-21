@@ -136,7 +136,8 @@ uint8_t seesh_main(void)
     while(true)
     {
         char prompt_buff[SHELL_BUFF_SIZE];
-        // clear the buffer, otherwise wrong commands might execute
+        // TODO check this; shouldn't be necessary(?)
+        // flush the buffer, otherwise wrong commands might execute
         for(uint8_t i=0; i<SHELL_BUFF_SIZE; ++i)
             prompt_buff[i] = '\0';
         kio_prompt(SHELL_PROMPT, prompt_buff);

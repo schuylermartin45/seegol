@@ -308,6 +308,8 @@ void kio_sprintf(const char* str, char* buff, void* a0, void* a1)
             *buff++ = *str++;
         }
     }
+    // null pad
+    *buff = '\0';
 }
 
 /************************** Output Functions **************************/
@@ -388,8 +390,6 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1)
     // Go me! WOOT!
     uint16_t size = kio_sprintf_len(str, a0, a1);
     char buff[size];
-    for (uint16_t i=0; i<size; ++i)
-        buff[i] = 0;
     // call sprintf, then dump to the screen
     kio_sprintf(str, buff, a0, a1);
     kio_print_color(buff, color_code);
@@ -563,7 +563,7 @@ void kio_prompt_color(char* prompt, uint8_t color_code, char* str)
             case '\r':
             case '\n':
                 // terminate string, add newline after prompt, and bail
-                *str++ = '\0';
+                *str = '\0';
                 kio_print("\n");
                 return;
             // Some keys don't have 8-bit ASCII codes, but rather 16 bit key
