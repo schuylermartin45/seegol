@@ -112,8 +112,24 @@ static void __hsc_tp_draw_HSC(void)
 */
 static void __hsc_tp_draw_str(void)
 {
-    char* str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 .$%";
-    gl_draw_str(PT2(0, 0), RGB_WHITE, RGB_HSC, str);
+    // TEST 0: basic character draw
+    char* str0 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 .";
+    gl_draw_str(PT2(0, 0), RGB_WHITE, RGB_HSC, str0);
+    // TEST 1: new line
+    char* str1 = "NEWLINE TEST\nNEWLINE TEST";
+    gl_draw_str(PT2(20, 20), RGB_HSC, RGB_WHITE, str1);
+    // TEST 2: word wrap
+    char* str2 = "WORD WRAP WORD WORD WRAP WORD WRAP WORD WRAP WORD WRAP "
+                 "WORD WRAP WORD WORD WRAP WORD WRAP WORD WRAP WORD WRAP ";
+    gl_draw_str(PT2(0, 100), RGB_WHITE, RGB_BLACK, str2);
+    // TEST 3: sprintf
+    char* str3 = "BIN %b  HEX %x WORDS WORDS\nWORDS WORDS";
+    uint16_t num[1];
+    num[0] = 42;
+    uint16_t str3_len = kio_sprintf_len(str3, num, num);
+    char buff_3[str3_len];
+    kio_sprintf(str3, buff_3, num, num);
+    gl_draw_str(PT2(50, 160), RGB_WHITE, RGB_BLACK, buff_3);
 }
 
 /*
