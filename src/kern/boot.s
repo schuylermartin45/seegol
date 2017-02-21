@@ -54,7 +54,7 @@ __floppy_read:
     movw    $0x7E00, %bx        # load the OS after the bootloader
 
     movb    $2,  %ah            # load to ES:BX
-    movb    $20, %al            # load N sectors (512-bytes each)
+    movb    $40, %al            # load N sectors (512-bytes each)
     movb    $0,  %ch            # cylinder 0
     movb    $2,  %cl            # sector 2
     movb    $0,  %dh            # head 0

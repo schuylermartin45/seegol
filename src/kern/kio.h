@@ -42,6 +42,25 @@
 
 /** Functions  **/
 
+/************************** String Functions **************************/
+
+/*
+** Compares two strings for equivalency
+**
+** @param str0 First string
+** @param str1 Second string
+** @return True if strings are the same, false otherwise
+*/
+bool kio_strcmp(const char* str0, const char* str1);
+
+/*
+** Returns the length of a string
+**
+** @param str String
+** @return Length of the string
+*/
+uint16_t kio_strlen(const char* str);
+
 /************************** Output Functions **************************/
 
 /*
@@ -150,14 +169,5 @@ void kio_prompt_color(char* prompt, uint8_t color_code, char* str);
 ** @param str String buffer to put chars into
 */
 void kio_prompt(char* prompt, char* str);
-
-/*
-** Compares two strings for equivalency
-**
-** @param str0 First string
-** @param str1 Second string
-** @return True if strings are the same, false otherwise
-*/
-bool kio_strcmp(char* str0, char* str1);
 
 #endif

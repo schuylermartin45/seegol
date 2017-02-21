@@ -22,6 +22,47 @@ static volatile char txt_fb[TEXT_MEM_SIZE];
 // buffer we are writing to
 static volatile char* txt_mem_begin = (volatile char*)TEXT_MEM_BEGIN;
 
+/************************** String Functions **************************/
+
+/*
+** Compares two strings for equivalency
+**
+** @param str0 First string
+** @param str1 Second string
+** @return True if strings are the same, false otherwise
+*/
+bool kio_strcmp(const char* str0, const char* str1)
+{
+    // check character by character, bailing if there's a mismatch
+    while(*str0 == *str1)
+    {
+        if ((*str0 == '\0') || (*str1 == '\0'))
+            break;
+        ++str0; ++str1;
+    }
+    // report matches
+    if ((*str0 == '\0') && (*str1 == '\0'))
+        return true;
+    else
+        return false;
+}
+
+/*
+** Returns the length of a string
+**
+** @param str String
+** @return Length of the string
+*/
+uint16_t kio_strlen(const char* str)
+{
+    uint16_t cntr = 0;
+    while(*str++ != 0)
+    {
+        ++cntr;
+    }
+    return cntr;
+}
+
 /************************** Output Functions **************************/
 
 /*
@@ -440,27 +481,4 @@ void kio_prompt_color(char* prompt, uint8_t color_code, char* str)
 void kio_prompt(char* prompt, char* str)
 {
     kio_prompt_color(prompt, KIO_DEFAULT_COLOR, str);
-}
-
-/*
-** Compares two strings for equivalency
-**
-** @param str0 First string
-** @param str1 Second string
-** @return True if strings are the same, false otherwise
-*/
-bool kio_strcmp(char* str0, char* str1)
-{
-    // check character by character, bailing if there's a mismatch
-    while(*str0 == *str1)
-    {
-        if ((*str0 == '\0') || (*str1 == '\0'))
-            break;
-        ++str0; ++str1;
-    }
-    // report matches
-    if ((*str0 == '\0') && (*str1 == '\0'))
-        return true;
-    else
-        return false;
 }
