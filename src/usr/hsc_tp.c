@@ -25,7 +25,9 @@ void hsc_tp_init(Program* prog)
 {
     prog->name = "hsc_tp";
     prog->desc =
-        "HSC Graphical Test Pattern Program. 'q' to quit. 'mode' picks a VGA driver mode. '-m' just draws the Macbeth chart. '-t' tests string drawing.";
+        "HSC Graphical Test Pattern Program. 'q' to quit. 'mode' picks a "
+        "VGA driver\n  mode. '-m' just draws the Macbeth chart. '-t' tests "
+        "string drawing.";
     prog->usage = "mode [-m | -t]";
     prog->main = &hsc_tp_main;
 }

@@ -25,6 +25,72 @@ static volatile char* txt_mem_begin = (volatile char*)TEXT_MEM_BEGIN;
 /************************** String Functions **************************/
 
 /*
+** Returns the digit length of a positive integer
+**
+** @param num Integer to print
+** @param base Base representation
+** @return Length of the integer
+*/
+static uint8_t __kio_int_len(uint16_t num, uint8_t base)
+{
+    uint8_t len = 0;
+    // perform the conversion, which reverses the digit order
+    do
+    {
+        num /= base;
+        ++len;
+    } while(num);
+    return len;
+}
+
+/*
+** Converts a positive integer into a string
+**
+** @param buff Buffer to write to
+** @param num Integer to print
+** @param base Base representation
+** @return Length of the integer
+*/
+static uint8_t __kio_int_str(char* buff, uint16_t num, uint8_t base)
+{
+    uint8_t len = 0;
+    // hex and binary get special prefixes
+    if ((base == 16) || (base == 2))
+    {
+        *buff++ = '0';
+        *buff++ = (base == 16) ? 'x' : 'b';
+    }
+    // mark the beginning of the buffer when we have to reverse the string
+    char* str = buff;
+    // perform the conversion, which reverses the digit order
+    do
+    {
+        uint8_t mod = num % base;
+        if (mod > 9)
+            *buff++ = (mod - 10) + 'A';
+        else
+            *buff++ = mod + '0';
+        num /= base;
+        ++len;
+    } while(num);
+    *buff = '\0';
+    // reverse the string back
+    uint8_t start = 0;
+    uint8_t end = len - 1;
+    while (start < end)
+    {
+        // swap beginning and end
+        char tmp = *(str + start);
+        *(str + start) = *(str + end);
+        *(str + end) = tmp;
+        // move towards the center
+        ++start;
+        --end;
+    }
+    return len;
+}
+
+/*
 ** Compares two strings for equivalency
 **
 ** @param str0 First string
@@ -63,51 +129,188 @@ uint16_t kio_strlen(const char* str)
     return cntr;
 }
 
-/************************** Output Functions **************************/
+/*
+** Supported patterns for sprintf/printf functions:
+**   %b | %B - Numeric in binary      (uint16_t | uint8_t)
+**   %d | %D - Numeric in decimal     (uint16_t | uint8_t)
+**   %x | %X - Numeric in hexadecimal (uint16_t | uint8_t)
+**   %c | %C - Character
+**   %s | %S - String
+*/
 
 /*
-** Converts a positive integer into a string
+** Gets the final length of a stringsprintf-like print function, limited to 2
+** arguments
 **
-** @param buff Buffer to write to
-** @param num Integer to print
+** @param str Formatted string to print
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
 */
-static void __kio_int_str(char* buff, uint16_t num, uint8_t base)
+uint16_t kio_sprintf_len(const char* str, void* a0, void* a1)
 {
-    uint8_t len = 0;
-    // hex and binary get special prefixes
-    if ((base == 16) || (base == 2))
+    uint16_t len = 0;
+    // argument counter
+    uint8_t ai = 0;
+    // loop until null byte
+    while(*str != 0)
     {
-        *buff++ = '0';
-        *buff++ = (base == 16) ? 'x' : 'b';
-    }
-    // mark the beginning of the buffer when we have to reverse the string
-    char* str = buff;
-    // perform the conversion, which reverses the digit order
-    do
-    {
-        uint8_t mod = num % base;
-        if (mod > 9)
-            *buff++ = (mod - 10) + 'A';
+        // delimeter for string formatting
+        if (*str == '%')
+        {
+            ++str;
+            // assume arguments are numbers out of convience
+            uint16_t* ptr = (ai == 0) ? (uint16_t*)a0 : (uint16_t*)a1;
+            uint16_t val = *ptr;
+            switch (*str)
+            {
+                // binary and hex numbers begin with 2 chars, so take that into
+                // account here (i.e. '0x' and '0b')
+                // binary numbers
+                case 'b':
+                    len += __kio_int_len(val, 2) + 2;
+                    break;
+                // upper case variants handle 8-bit numbers
+                case 'B':
+                {
+                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
+                    uint8_t val = *ptr;
+                    len += __kio_int_len(val, 2) + 2;
+                    break;
+                }
+                // decimal numbers
+                case 'd':
+                    len += __kio_int_len(val, 10);
+                    break;
+                case 'D':
+                {
+                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
+                    uint8_t val = *ptr;
+                    len += __kio_int_len(val, 10);
+                    break;
+                }
+                // hex numbers
+                case 'x':
+                    len += __kio_int_len(val, 16) + 2;
+                    break;
+                case 'X':
+                {
+                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
+                    uint8_t val = *ptr;
+                    len += __kio_int_len(val, 16) + 2;
+                    break;
+                }
+                // char/string
+                case 'c': case 'C':
+                    ++len;
+                    break;
+                case 's': case 'S':
+                    if (ai == 0)
+                        len += kio_strlen((char*)a0);
+                    else
+                        len += kio_strlen((char*)a1);
+                    break;
+            }
+            ++str;
+            ++ai;
+        }
         else
-            *buff++ = mod + '0';
-        num /= base;
-        ++len;
-    } while(num);
-    *buff = '\0';
-    // reverse the string back
-    uint8_t start = 0;
-    uint8_t end = len - 1;
-    while (start < end)
+        {
+            ++str;
+            ++len;
+        }
+    }
+    // and one for the null byte; just to be safe
+    return len + 1;
+}
+
+/*
+** sprintf-like print function, limited to 2 arguments
+**
+** @param str String to print
+** @param buff Buffer to put finalized string in
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
+*/
+void kio_sprintf(const char* str, char* buff, void* a0, void* a1)
+{
+    // argument counter
+    uint8_t ai = 0;
+    // loop until null byte
+    while(*str != 0)
     {
-        // swap beginning and end
-        char tmp = *(str + start);
-        *(str + start) = *(str + end);
-        *(str + end) = tmp;
-        // move towards the center
-        ++start;
-        --end;
+        // delimeter for string formatting
+        if (*str == '%')
+        {
+            ++str;
+            // buffer for printf text processing
+            char p_buff[TEXT_WIDTH];
+            // assume arguments are numbers out of convience
+            uint16_t* ptr = (ai == 0) ? (uint16_t*)a0 : (uint16_t*)a1;
+            uint16_t val = *ptr;
+            // determines with argument value to draw
+            char* arg_str = p_buff;
+            switch (*str)
+            {
+                // binary numbers
+                case 'b':
+                    __kio_int_str(p_buff, val, 2);
+                    break;
+                // upper case variants handle 8-bit numbers
+                case 'B':
+                {
+                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
+                    uint8_t val = *ptr;
+                    __kio_int_str(p_buff, val, 2);
+                    break;
+                }
+                // decimal numbers
+                case 'd':
+                    __kio_int_str(p_buff, val, 10);
+                    break;
+                case 'D':
+                {
+                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
+                    uint8_t val = *ptr;
+                    __kio_int_str(p_buff, val, 10);
+                    break;
+                }
+                // hex numbers
+                case 'x':
+                    __kio_int_str(p_buff, val, 16);
+                    break;
+                case 'X':
+                {
+                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
+                    uint8_t val = *ptr;
+                    __kio_int_str(p_buff, val, 16);
+                    break;
+                }
+                // char/string
+                case 'c': case 'C':
+                    arg_str = p_buff;
+                    p_buff[0] = (ai == 0) ? *((char*)a0) : *((char*)a1);
+                    p_buff[1] = '\0';
+                    break;
+                case 's': case 'S':
+                    arg_str = (ai == 0) ? (char*)a0 : (char*)a1;
+                    break;
+            }
+            // print the value of the argument
+            while(*arg_str != 0)
+            {
+                *buff++ = *arg_str++;
+            }
+            ++str;
+            ++ai;
+        }
+        else
+        {
+            *buff++ = *str++;
+        }
     }
 }
+
+/************************** Output Functions **************************/
 
 /*
 ** Check if text memory is used up; scroll all of text memory up one line
@@ -172,13 +375,7 @@ void kio_print(const char* str)
 }
 
 /*
-** Printf-like print function, limited to 2 arguments
-**   Supported patterns:
-**     %b | %B - Numeric in binary      (uint16_t | uint8_t)
-**     %d | %D - Numeric in decimal     (uint16_t | uint8_t)
-**     %x | %X - Numeric in hexadecimal (uint16_t | uint8_t)
-**     %c | %C - Character
-**     %s | %S - String
+** printf-like print function, limited to 2 arguments
 **
 ** @param str String to print
 ** @param color_code Set the color code of text to draw
@@ -187,104 +384,19 @@ void kio_print(const char* str)
 */
 void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1)
 {
-    // argument counter
-    uint8_t ai = 0;
-    // loop until null byte
-    while(*str != 0)
-    {
-        // encounter a newline, jump ahead to the next line
-        if (*str == '\n')
-        {
-            // jump to the start of the next line (one line after the current)
-            uint8_t ln_num = ((txt_ptr - txt_mem_begin) / TEXT_MEM_WIDTH) + 1;
-            txt_ptr = txt_mem_begin + (ln_num * TEXT_MEM_WIDTH);
-            // advance to next char
-            ++str;
-        }
-        // delimeter for string formatting
-        else if (*str == '%')
-        {
-            ++str;
-            // buffer for printf text processing
-            char buff[TEXT_WIDTH];
-            // assume arguments are numbers out of convience
-            uint16_t* ptr = (ai == 0) ? (uint16_t*)a0 : (uint16_t*)a1;
-            uint16_t val = *ptr;
-            // determines with argument value to draw
-            char* arg_str = buff;
-            switch (*str)
-            {
-                // binary numbers
-                case 'b':
-                    __kio_int_str(buff, val, 2);
-                    break;
-                // upper case variants handle 8-bit numbers
-                case 'B':
-                {
-                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
-                    uint8_t val = *ptr;
-                    __kio_int_str(buff, val, 2);
-                    break;
-                }
-                // decimal numbers
-                case 'd':
-                    __kio_int_str(buff, val, 10);
-                    break;
-                case 'D':
-                {
-                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
-                    uint8_t val = *ptr;
-                    __kio_int_str(buff, val, 10);
-                    break;
-                }
-                // hex numbers
-                case 'x':
-                    __kio_int_str(buff, val, 16);
-                    break;
-                case 'X':
-                {
-                    uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
-                    uint8_t val = *ptr;
-                    __kio_int_str(buff, val, 16);
-                    break;
-                }
-                // char/string
-                case 'c': case 'C':
-                    arg_str = buff;
-                    buff[0] = (ai == 0) ? *((char*)a0) : *((char*)a1);
-                    buff[1] = '\0';
-                    break;
-                case 's': case 'S':
-                    arg_str = (ai == 0) ? (char*)a0 : (char*)a1;
-                    break;
-            }
-            // print the value of the argument
-            while(*arg_str != 0)
-            {
-                __kio_chk_scroll();
-                *txt_ptr++ = *arg_str++;
-                *txt_ptr++ = color_code;
-            }
-            ++str;
-            ++ai;
-        }
-        else
-        {
-            __kio_chk_scroll();
-            *txt_ptr++ = *str++;
-            *txt_ptr++ = color_code;
-        }
-    }
+    // autosize buffer; first case of "dynamic memory" anywhere in the OS!
+    // Go me! WOOT!
+    uint16_t size = kio_sprintf_len(str, a0, a1);
+    char buff[size];
+    for (uint16_t i=0; i<size; ++i)
+        buff[i] = 0;
+    // call sprintf, then dump to the screen
+    kio_sprintf(str, buff, a0, a1);
+    kio_print_color(buff, color_code);
 }
 
 /*
-** Printf-like print function, limited to 2 arguments
-**   Supported patterns:
-**     %b | %B - Numeric in binary      (uint16_t | uint8_t)
-**     %d | %D - Numeric in decimal     (uint16_t | uint8_t)
-**     %x | %X - Numeric in hexadecimal (uint16_t | uint8_t)
-**     %c | %C - Character
-**     %s | %S - String
+** printf-like print function, limited to 2 arguments
 **
 ** @param str String to print
 ** @param a0 First arugment to print
@@ -294,7 +406,6 @@ void kio_printf(const char* str, void* a0, void* a1)
 {
     kio_printf_color(str, KIO_DEFAULT_COLOR, a0, a1);
 }
-
 
 /*
 ** Clears current screen
