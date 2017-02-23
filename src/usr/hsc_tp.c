@@ -45,6 +45,9 @@ static void __hsc_tp_draw_board(void)
     // round off may occur in some dimensions, leaving a some unused space
     uint16_t w = gl_getw() / MACBETH_COLS;
     uint16_t h = gl_geth() / MACBETH_ROWS;
+    // center the pattern
+    uint16_t x_offset = (gl_getw() % MACBETH_COLS) / 2;
+    uint16_t y_offset = (gl_geth() % MACBETH_ROWS) / 2;
     // set up the chart
     RGB_8 colors[MACBETH_ROWS * MACBETH_COLS] =
     {
@@ -73,7 +76,8 @@ static void __hsc_tp_draw_board(void)
     {
         for (uint8_t col=0; col<MACBETH_COLS; ++col)
         {
-            gl_draw_rect_wh(PT2(w*col, h*row), w, h, *color++);
+            gl_draw_rect_wh(PT2((w*col) + x_offset, (h*row) + y_offset),
+                w, h, *color++);
         }
     }
 }
