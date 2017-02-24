@@ -26,9 +26,9 @@ void hsc_tp_init(Program* prog)
     prog->name = "hsc_tp";
     prog->desc =
         "HSC Graphical Test Pattern Program. 'q' to quit. 'mode' picks a "
-        "VGA driver\n  mode. '-m' just draws the Macbeth chart. '-t' tests "
-        "string drawing.";
-    prog->usage = "mode [-m | -t]";
+        "VGA driver\n  mode. '-i' tests the image draw function. '-m' proced"
+        "urally draws\n the Macbeth chart. '-t' tests string drawing.";
+    prog->usage = "mode [-i | -m | -t]";
     prog->main = &hsc_tp_main;
 }
 
@@ -155,6 +155,8 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
     // draw string test
     if ((argc == 3) && (kio_strcmp(argv[2], "-t")))
         __hsc_tp_draw_str();
+    else if ((argc == 3) && (kio_strcmp(argv[2], "-i")))
+        gl_draw_img(PT2(0, 0));
     else
     {
         // background

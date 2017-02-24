@@ -49,6 +49,8 @@ other graphical components.
 ## src/res/
 Resource files, non-code (i.e. artwork, images, assets)
 
+TODO Put ownership info here on test images in src/res/images/
+
 ## src/usr/
 User level code (i.e. programs) including the `SeeSH` the first and only shell
 available shell written for SeeGOL.

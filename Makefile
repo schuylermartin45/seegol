@@ -56,7 +56,7 @@ INCLUDES = -I. -I./$(SRC) -I./$(KERN) -I.$(VGA) -I./$(GL) -I./$(USR)
 #
 CC = gcc
 CFLAGS = -g -Os -march=i686 -m32 -ffreestanding -Wall -Werror \
-		 -Wl,--oformat=binary $(INCLUDES)
+		 -Wno-trigraphs -Wl,--oformat=binary $(INCLUDES)
 
 #
 # Assembler setup
@@ -210,6 +210,7 @@ bin/gl_lib.o: src/kern/kio.h src/kern/vga/vga.h src/kern/gcc16.h
 bin/gl_lib.o: src/kern/types.h src/kern/vga/vga13.h src/kern/gcc16.h
 bin/gl_lib.o: src/kern/types.h src/kern/asm_lib.h src/kern/vga/vga.h
 bin/gl_lib.o: src/gl/see_font.h
+bin/gl_lib.o: src/res/dark_side_of_the_moon_50x50_50clr_dither.xpm
 bin/hellow.o: src/kern/gcc16.h src/usr/hellow.h src/kern/types.h
 bin/hellow.o: src/kern/kio.h src/usr/program.h
 bin/seesh.o: src/kern/gcc16.h src/usr/seesh.h src/kern/types.h

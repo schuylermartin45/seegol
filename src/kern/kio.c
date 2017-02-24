@@ -91,6 +91,39 @@ static uint8_t __kio_int_str(char* buff, uint16_t num, uint8_t base)
 }
 
 /*
+** Converts a string representation of a positive integer to an integer
+** assumes that bases > 10 use capital letters (following the ASCII chart)
+** and that input only uses valid digits (this may cause numeric overflow)
+**
+** @param buff Buffer to write to
+** @param base Base representation
+** @return Integer representation
+*/
+uint16_t kio_str_int(char* buff, uint16_t base)
+{
+    uint16_t sum = 0;
+    uint16_t pow = 1;
+    char* buff_end = buff;
+    // find the end of the buffer
+    while(*buff_end != '\0')
+    {
+        ++buff_end;
+    }
+    --buff_end;
+    // iterate backwards, summing the digits
+    while(buff_end >= buff)
+    {
+        if ((base > 10) && (*buff_end >= 'A'))
+            sum += ((*buff_end - 'A') + 10) * pow;
+        else
+            sum += (*buff_end - '0') * pow;
+        pow *= base;
+        --buff_end;
+    }
+    return sum;
+}
+
+/*
 ** Compares two strings for equivalency
 **
 ** @param str0 First string

@@ -224,14 +224,14 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
                     b_color
                 );
             }
-            for (uint8_t row=0; row<SEE_FONT_HEIGHT; ++row)
+            for(uint8_t row=0; row<SEE_FONT_HEIGHT; ++row)
             {
                 uint8_t row_map = see_font_tbl[ch][row];
                 // skip empty rows
                 if (row_map != 0)
                 {
                     uint8_t mask = 0b10000000;
-                    for (uint8_t col=0; col<SEE_FONT_WIDTH; ++col)
+                    for(uint8_t col=0; col<SEE_FONT_WIDTH; ++col)
                     {
                         if (row_map & mask)
                             vga_driver.vga_put_pixel(cur.x, cur.y, f_color);
@@ -248,6 +248,94 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
             // move right; the character to draw
             ++rc_cntr.x;
             ++str;
+        }
+    }
+}
+
+/*
+** Draws an image
+**
+** @param start Starting point to draw the string (upper left pixel)
+*/
+void gl_draw_img(Point_2D start)
+{
+    // TODO handle this better
+    #include "../res/dark_side_of_the_moon_50x50_50clr_dither.xpm"
+    // the file is "read in" from a chunk in memory. It should not be altered
+    // by the drawing method; think "read only"
+    char** fd = dark_side_of_the_moon_50x50_50clr_dither_xpm;
+    // file header information: width, height, number of colors, color table
+    // look-up value character length
+    uint16_t w = 0, h = 0, color_space = 0, px_len = 0;
+    // read 4 numbers from the file header
+    uint8_t val_cntr = 0;
+    // buffer to read digits out of the header string
+    #define IMG_HEAD_BUFF_SIZE 6
+    char head_buff[IMG_HEAD_BUFF_SIZE];
+    for (uint8_t i=0; i<IMG_HEAD_BUFF_SIZE; ++i)
+        head_buff[i] = '\0';
+    char* head_ptr = head_buff;
+    char* head_cur = fd[0];
+    while(*head_cur != '\0')
+    {
+        // we found the end of a number, convert the string to a number
+        if (*head_cur == ' ')
+        {
+            uint16_t val = kio_str_int(head_buff, 10);
+            switch (val_cntr)
+            {
+                case 0: w = val;
+                    break;
+                case 1: h = val;
+                    break;
+                case 2: color_space = val;
+                    break;
+            }
+            // advance to the next number and clear the buffer
+            ++val_cntr;
+            for (uint8_t i=0; i<IMG_HEAD_BUFF_SIZE; ++i)
+                head_buff[i] = '\0';
+            head_ptr = head_buff;
+        }
+        else
+            *head_ptr++ = *head_cur;
+        ++head_cur;
+    }
+    // set the last value from the header file
+    px_len = kio_str_int(head_buff, 10);
+
+    // build the bit-map color look-up table
+    RGB_8 color_map[color_space];
+    // ASCII character that the table starts at when making look-up values
+    char ascii_start = fd[1][0];
+    for (int i=1; i<color_space + 1; ++i)
+    {
+        // read the first line and jump to the first hex code
+        char* line = fd[i] + px_len + 4;
+        // convert the hex codes to color bytes
+        char hex_buff[3] = {line[0], line[1], '\0'};
+        uint8_t r = kio_str_int(hex_buff, 16);
+        line += 2;
+        hex_buff[0] = line[0]; hex_buff[1] = line[1];
+        uint8_t g = kio_str_int(head_ptr, 16);
+        line += 2;
+        hex_buff[0] = line[0]; hex_buff[1] = line[1];
+        uint8_t b = kio_str_int(head_ptr, 16);
+        // add the colors to the table; mapping the character to a color in
+        // the look-up table
+        color_map[fd[i][0] - ascii_start] = RGB(r, b, g);
+    }
+
+    // go over the image data, dropping pixels
+    for(uint16_t y=0; y<h; ++y)
+    {
+        for(uint16_t x=0; x<w; ++x)
+        {
+            // the image map starts after the header and the color code table
+            char color_code = fd[y + color_space + 1][x];
+            // perform the table look-up
+            RGB_8 color = color_map[color_code - ascii_start];
+            vga_driver.vga_put_pixel(x, y, color);
         }
     }
 }

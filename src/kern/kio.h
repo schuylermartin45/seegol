@@ -45,6 +45,17 @@
 /************************** String Functions **************************/
 
 /*
+** Converts a string representation of a positive integer to an integer
+** assumes that bases > 10 use capital letters (following the ASCII chart)
+** and that input only uses valid digits (this may cause numeric overflow)
+**
+** @param buff Buffer to write to
+** @param base Base representation
+** @return Integer representation
+*/
+uint16_t kio_str_int(char* buff, uint16_t base);
+
+/*
 ** Compares two strings for equivalency
 **
 ** @param str0 First string
