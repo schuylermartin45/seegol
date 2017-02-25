@@ -210,7 +210,7 @@ bin/gl_lib.o: src/kern/kio.h src/kern/vga/vga.h src/kern/gcc16.h
 bin/gl_lib.o: src/kern/types.h src/kern/vga/vga13.h src/kern/gcc16.h
 bin/gl_lib.o: src/kern/types.h src/kern/asm_lib.h src/kern/vga/vga.h
 bin/gl_lib.o: src/gl/see_font.h
-bin/gl_lib.o: src/res/dark_side_of_the_moon_50x50_50clr_dither.xpm
+bin/gl_lib.o: src/res/wish_you_were_here_small_8clr_150x100.cxpm
 bin/hellow.o: src/kern/gcc16.h src/usr/hellow.h src/kern/types.h
 bin/hellow.o: src/kern/kio.h src/usr/program.h
 bin/seesh.o: src/kern/gcc16.h src/usr/seesh.h src/kern/types.h

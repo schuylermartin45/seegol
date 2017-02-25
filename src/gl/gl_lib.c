@@ -260,10 +260,15 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
 void gl_draw_img(Point_2D start)
 {
     // TODO handle this better
-    #include "../res/dark_side_of_the_moon_50x50_50clr_dither.xpm"
+    //#include "../res/dark_side_of_the_moon_50x50_50clr_dither.xpm"
+    // TODO handle this
+    #include "../res/wish_you_were_here_small_8clr_150x100.cxpm"
+
     // the file is "read in" from a chunk in memory. It should not be altered
     // by the drawing method; think "read only"
-    char** fd = dark_side_of_the_moon_50x50_50clr_dither_xpm;
+    //char** fd = dark_side_of_the_moon_50x50_50clr_dither_xpm;
+    char** fd = wish_you_were_here_small_8clr_150x100_xpm;
+
     // file header information: width, height, number of colors, color table
     // look-up value character length
     uint16_t w = 0, h = 0, color_space = 0, px_len = 0;
