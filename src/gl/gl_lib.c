@@ -13,6 +13,16 @@
 /** Headers    **/
 #include "../kern/gcc16.h"
 #include "gl_lib.h"
+// TODO handle this better
+#include "../res/wish_you_were_here_small_8clr_150x100.cxpm"
+
+/** Macros     **/
+// buffer size to read digits out of the header string
+#define CXPM_HEAD_BUFF_SIZE 5
+// Base used to encode run length distances in the CXPM format
+#define CXPM_RL_BASE        36
+// byte used to indicate Huffman endcoded section in the CXPM decoder
+#define CXPM_HUFF_MARKER    1
 
 // structure that manages the driver mode currently activated
 // assumed to be text mode if graphics haven't been initialized yet
@@ -259,25 +269,17 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
 */
 void gl_draw_img(Point_2D start)
 {
-    // TODO handle this better
-    //#include "../res/dark_side_of_the_moon_50x50_50clr_dither.xpm"
-    // TODO handle this
-    #include "../res/wish_you_were_here_small_8clr_150x100.cxpm"
-
     // the file is "read in" from a chunk in memory. It should not be altered
     // by the drawing method; think "read only"
-    //char** fd = dark_side_of_the_moon_50x50_50clr_dither_xpm;
+    // TODO handle this better
     char** fd = wish_you_were_here_small_8clr_150x100_xpm;
 
-    // file header information: width, height, number of colors, color table
-    // look-up value character length
-    uint16_t w = 0, h = 0, color_space = 0, px_len = 0;
+    // file header information: width, height, number of colors
+    uint16_t w = 0, h = 0, color_space = 0;
     // read 4 numbers from the file header
     uint8_t val_cntr = 0;
-    // buffer to read digits out of the header string
-    #define IMG_HEAD_BUFF_SIZE 6
-    char head_buff[IMG_HEAD_BUFF_SIZE];
-    for (uint8_t i=0; i<IMG_HEAD_BUFF_SIZE; ++i)
+    char head_buff[CXPM_HEAD_BUFF_SIZE];
+    for (uint8_t i=0; i<CXPM_HEAD_BUFF_SIZE; ++i)
         head_buff[i] = '\0';
     char* head_ptr = head_buff;
     char* head_cur = fd[0];
@@ -293,12 +295,10 @@ void gl_draw_img(Point_2D start)
                     break;
                 case 1: h = val;
                     break;
-                case 2: color_space = val;
-                    break;
             }
             // advance to the next number and clear the buffer
             ++val_cntr;
-            for (uint8_t i=0; i<IMG_HEAD_BUFF_SIZE; ++i)
+            for (uint8_t i=0; i<CXPM_HEAD_BUFF_SIZE; ++i)
                 head_buff[i] = '\0';
             head_ptr = head_buff;
         }
@@ -307,25 +307,31 @@ void gl_draw_img(Point_2D start)
         ++head_cur;
     }
     // set the last value from the header file
-    px_len = kio_str_int(head_buff, 10);
+    color_space = kio_str_int(head_buff, 10);
+    // TODO rm
+    kio_printf("Image: %dx%d", &w, &h);
+    kio_printf(" w/ %d colors\n", &color_space, NULL);
 
-    // build the bit-map color look-up table
+    // build the bit-map color look-up table, organized as: <key><R><G><B>
     RGB_8 color_map[color_space];
     // ASCII character that the table starts at when making look-up values
     char ascii_start = fd[1][0];
     for (int i=1; i<color_space + 1; ++i)
     {
         // read the first line and jump to the first hex code
-        char* line = fd[i] + px_len + 4;
+        char* line = fd[i] + 1;
         // convert the hex codes to color bytes
         char hex_buff[3] = {line[0], line[1], '\0'};
         uint8_t r = kio_str_int(hex_buff, 16);
         line += 2;
         hex_buff[0] = line[0]; hex_buff[1] = line[1];
-        uint8_t g = kio_str_int(head_ptr, 16);
+        uint8_t g = kio_str_int(hex_buff, 16);
         line += 2;
         hex_buff[0] = line[0]; hex_buff[1] = line[1];
-        uint8_t b = kio_str_int(head_ptr, 16);
+        uint8_t b = kio_str_int(hex_buff, 16);
+        // TODO rm
+        kio_printf("(%D, %D, ", &r, &g);
+        kio_printf("%D)\n", &b, NULL);
         // add the colors to the table; mapping the character to a color in
         // the look-up table
         color_map[fd[i][0] - ascii_start] = RGB(r, b, g);
@@ -334,13 +340,43 @@ void gl_draw_img(Point_2D start)
     // go over the image data, dropping pixels
     for(uint16_t y=0; y<h; ++y)
     {
-        for(uint16_t x=0; x<w; ++x)
+        // x determines if we have reached the end of the image
+        uint16_t x = 0;
+        // x_b is they byte position on the line
+        uint16_t x_b = 0;
+        while(x < w)
         {
-            // the image map starts after the header and the color code table
-            char color_code = fd[y + color_space + 1][x];
-            // perform the table look-up
-            RGB_8 color = color_map[color_code - ascii_start];
-            vga_driver.vga_put_pixel(x, y, color);
+            // read in the color encoding; advancing to the next encoded
+            // position in the process
+            char encode = fd[y + color_space + 1][x_b++];
+            // decode huffman encoding runs
+            if (encode == CXPM_HUFF_MARKER)
+            {
+                // decode the next byte as the run length
+                char rl_buff[2] = {fd[y + color_space + 1][x_b++], '\0'};
+                uint16_t run_len = kio_str_int(rl_buff, CXPM_RL_BASE);
+                encode = fd[y + color_space + 1][x_b++];
+                for(uint16_t i=0; i<run_len; ++i)
+                {
+                    // perform the table look-up, on both pixels
+                    // upper 4 bits
+                    RGB_8 color0 = color_map[(encode >> 4) - ascii_start];
+                    // lower 4 bits
+                    RGB_8 color1 = color_map[(encode & 0x0F) - ascii_start];
+                    vga_driver.vga_put_pixel(x, y, color0);
+                    vga_driver.vga_put_pixel(x + 1, y, color1);
+                    x += 2;
+                }
+            }
+            // otherwise, draw two pixels at once
+            else
+            {
+                RGB_8 color0 = color_map[(encode >> 4) - ascii_start];
+                RGB_8 color1 = color_map[(encode & 0x0F) - ascii_start];
+                vga_driver.vga_put_pixel(x, y, color0);
+                vga_driver.vga_put_pixel(x + 1, y, color1);
+                x += 2;
+            }
         }
     }
 }

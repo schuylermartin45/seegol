@@ -33,7 +33,7 @@ BASE_ENCODE = 36
 # 1 byte for the marker -> costs 2 pixels
 # 1 byte for the run length digit -> costs 2 pixels
 # 1 byte for pixels to duplicate -> costs 1 pixel(?)
-RUN_BYTE_COST = 3
+RUN_BYTE_COST = 5
 # 14 colors available since the NULL byte is not allowed in a C string
 # and another byte is used as a marker
 MAX_COLOR_SPACE = 14
