@@ -15,6 +15,7 @@
 /** Headers    **/
 #include "../kern/gcc16.h"
 #include "../kern/types.h"
+#include "../kern/debug.h"
 // text controller
 #include "../kern/kio.h"
 // VGA mode drivers

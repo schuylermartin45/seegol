@@ -25,8 +25,8 @@ import sys
 #### GLOBALS    ####
 USAGE = "Usage: ./cxpm file"
 FILE_EXT = ".cxpm"
-# non-visible character used to mark duplicate length
-ENCODE_MARKER = chr(1)
+# ASCII value of non-visible character used to mark duplicate length
+ENCODE_MARKER = 1
 # base used to use Huffman encoding; 36 gives us 0-9 and A-Z
 BASE_ENCODE = 36
 # "cost" for performing a run length encoding
@@ -57,7 +57,7 @@ def write_file(data, fd):
     :param: data Lines of the file to write
     :param: fd Name of the file to write
     '''
-    fptr = open(fd, 'w')
+    fptr = open(fd, 'w', encoding="latin-1")
     for line in data:
         fptr.write(line)
     fptr.close()
@@ -119,9 +119,10 @@ def main():
     # reduce encoding on the color table; remapping characters
     cxpm_color_tbl = {}
     # re-assign color mappings to 4 bit values
-    new_key = 2
+    new_key = ENCODE_MARKER + 1
     for i in range(COLOR_TBL_START, COLOR_TBL_START + cxpm_color_space):
         cxpm_color_tbl[xpm_data[i][1]] = chr(new_key)
+        # strip pixel mapping down to <key_byte><R_HEX><G_HEX><B_HEX>
         cxpm_data.append( "\"" + chr(new_key) + xpm_data[i][6:])
         new_key += 1
     # start in the original file where the pixel mapping occurs
@@ -168,7 +169,7 @@ def main():
                     # the base, break the encoding in segments
                     digits = int_str(ch_cntr, BASE_ENCODE)
                     for digit in digits:
-                        compressed += ENCODE_MARKER + digit + cur_ch
+                        compressed += chr(ENCODE_MARKER) + digit + cur_ch
                 else:
                     for k in range(0, ch_cntr):
                         compressed += cur_ch

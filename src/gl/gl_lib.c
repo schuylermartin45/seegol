@@ -266,14 +266,17 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
 ** Draws an image
 **
 ** @param start Starting point to draw the string (upper left pixel)
+** TODO actually use the starting point
 */
 void gl_draw_img(Point_2D start)
 {
+    // Phase 0:
     // the file is "read in" from a chunk in memory. It should not be altered
     // by the drawing method; think "read only"
     // TODO handle this better
     char** fd = wish_you_were_here_small_8clr_150x100_xpm;
 
+    // Phase 1:
     // file header information: width, height, number of colors
     uint16_t w = 0, h = 0, color_space = 0;
     // read 4 numbers from the file header
@@ -308,10 +311,13 @@ void gl_draw_img(Point_2D start)
     }
     // set the last value from the header file
     color_space = kio_str_int(head_buff, 10);
-    // TODO rm
-    kio_printf("Image: %dx%d", &w, &h);
-    kio_printf(" w/ %d colors\n", &color_space, NULL);
+    // TODO image data
+    #ifdef DEBUG_MODE
+        kio_printf("Image resolution: %dx%d", &w, &h);
+        kio_printf(" w/ %d colors\n", &color_space, NULL);
+    #endif
 
+    // Phase 2:
     // build the bit-map color look-up table, organized as: <key><R><G><B>
     RGB_8 color_map[color_space];
     // ASCII character that the table starts at when making look-up values
@@ -329,14 +335,12 @@ void gl_draw_img(Point_2D start)
         line += 2;
         hex_buff[0] = line[0]; hex_buff[1] = line[1];
         uint8_t b = kio_str_int(hex_buff, 16);
-        // TODO rm
-        kio_printf("(%D, %D, ", &r, &g);
-        kio_printf("%D)\n", &b, NULL);
         // add the colors to the table; mapping the character to a color in
         // the look-up table
         color_map[fd[i][0] - ascii_start] = RGB(r, b, g);
     }
 
+    // Phase 3:
     // go over the image data, dropping pixels
     for(uint16_t y=0; y<h; ++y)
     {
@@ -344,35 +348,30 @@ void gl_draw_img(Point_2D start)
         uint16_t x = 0;
         // x_b is they byte position on the line
         uint16_t x_b = 0;
-        while(x < w)
+        // run until the end of the file
+        while(fd[y + color_space + 1][x_b] != '\0')
         {
             // read in the color encoding; advancing to the next encoded
             // position in the process
-            char encode = fd[y + color_space + 1][x_b++];
+            uint8_t encode = fd[y + color_space + 1][x_b++];
             // decode huffman encoding runs
+            // otherwise, draw two pixels at once, one time
+            uint16_t run_len = 1;
             if (encode == CXPM_HUFF_MARKER)
             {
                 // decode the next byte as the run length
                 char rl_buff[2] = {fd[y + color_space + 1][x_b++], '\0'};
-                uint16_t run_len = kio_str_int(rl_buff, CXPM_RL_BASE);
+                run_len = kio_str_int(rl_buff, CXPM_RL_BASE);
                 encode = fd[y + color_space + 1][x_b++];
-                for(uint16_t i=0; i<run_len; ++i)
-                {
-                    // perform the table look-up, on both pixels
-                    // upper 4 bits
-                    RGB_8 color0 = color_map[(encode >> 4) - ascii_start];
-                    // lower 4 bits
-                    RGB_8 color1 = color_map[(encode & 0x0F) - ascii_start];
-                    vga_driver.vga_put_pixel(x, y, color0);
-                    vga_driver.vga_put_pixel(x + 1, y, color1);
-                    x += 2;
-                }
             }
-            // otherwise, draw two pixels at once
-            else
+            // perform the table look-up, on both pixels
+            // upper 4 bits
+            RGB_8 color0 = color_map[(encode >> 4) - ascii_start];
+            // lower 4 bits
+            RGB_8 color1 = color_map[(encode & 0x0F) - ascii_start];
+            // draw the pixels
+            for(uint16_t i=0; i<run_len; ++i)
             {
-                RGB_8 color0 = color_map[(encode >> 4) - ascii_start];
-                RGB_8 color1 = color_map[(encode & 0x0F) - ascii_start];
                 vga_driver.vga_put_pixel(x, y, color0);
                 vga_driver.vga_put_pixel(x + 1, y, color1);
                 x += 2;
