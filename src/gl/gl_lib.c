@@ -376,15 +376,30 @@ void gl_draw_img(Point_2D start, uint8_t fid)
             }
             // perform the table look-up, on both pixels
             // upper 4 bits
-            RGB_8 color0 = color_map[(encode >> 4) - ascii_start];
+            uint8_t c0_key = (encode >> 4) - ascii_start;
             // lower 4 bits
-            RGB_8 color1 = color_map[(encode & 0x0F) - ascii_start];
-            // draw the pixels
-            for(uint16_t i=0; i<run_len; ++i)
+            uint8_t c1_key = (encode & 0x0F) - ascii_start;
+            RGB_8 color0 = color_map[c0_key];
+            RGB_8 color1 = color_map[c1_key];
+            // draw with fast rectangles when possible; when both colors
+            // are the same
+            if (c0_key == c1_key)
             {
-                vga_driver.vga_put_pixel(start.x + x, start.y + y, color0);
-                vga_driver.vga_put_pixel(start.x + x + 1, start.y + y, color1);
-                x += 2;
+                vga_driver.vga_draw_rect_wh(start.x + x, start.y + y,
+                    run_len * 2, 1, color0);
+                x += run_len * 2;
+            }
+            else
+            {
+                // draw the pixels
+                for(uint16_t i=0; i<run_len; ++i)
+                {
+                    vga_driver.vga_put_pixel(start.x + x,
+                        start.y + y, color0);
+                    vga_driver.vga_put_pixel(start.x + x + 1,
+                        start.y + y, color1);
+                    x += 2;
+                }
             }
         }
     }
