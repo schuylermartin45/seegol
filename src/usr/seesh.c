@@ -10,6 +10,14 @@
 #include "../kern/gcc16.h"
 #include "seesh.h"
 
+#include "../kern/debug.h"
+#include "../kern/kio.h"
+// definitions for all programs
+#include "program.h"
+// user program headers
+#include "hellow.h"
+#include "hsc_tp.h"
+
 /** Macros    **/
 // number of shell commands. This is kept in the C file out of convenience
 #define BUILT_IN_COUNT  3

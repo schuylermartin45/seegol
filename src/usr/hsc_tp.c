@@ -11,6 +11,10 @@
 #include "../kern/gcc16.h"
 #include "hsc_tp.h"
 
+#include "../kern/kio.h"
+#include "../gl/gl_lib.h"
+#include "../gl/img_fids.h"
+
 // info about the Macbeth color chart
 #define MACBETH_ROWS 4
 #define MACBETH_COLS 6

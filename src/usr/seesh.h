@@ -11,13 +11,6 @@
 /** Headers    **/
 #include "../kern/gcc16.h"
 #include "../kern/types.h"
-#include "../kern/debug.h"
-#include "../kern/kio.h"
-// definitions for all programs
-#include "program.h"
-// user program headers
-#include "hellow.h"
-#include "hsc_tp.h"
 
 /** Macros     **/
 // shell macros

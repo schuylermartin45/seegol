@@ -10,6 +10,8 @@
 #include "../kern/gcc16.h"
 #include "hellow.h"
 
+#include "../kern/kio.h"
+
 /*
 ** Initializes program structure
 **

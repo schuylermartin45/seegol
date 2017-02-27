@@ -14,6 +14,11 @@
 #include "../kern/gcc16.h"
 #include "gl_lib.h"
 
+#include "../kern/debug.h"
+#include "../kern/kio.h"
+// VGA mode drivers
+#include "../kern/vga/vga13.h"
+
 // Includes only needed local to the C file and don't need to be included
 // everywhere else (especially since these ones are fairly large)
 // image data array
