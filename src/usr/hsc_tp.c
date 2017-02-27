@@ -155,15 +155,23 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
     // draw string test
     if ((argc == 3) && (kio_strcmp(argv[2], "-t")))
         __hsc_tp_draw_str();
+    // draw image test
     else if ((argc == 3) && (kio_strcmp(argv[2], "-i")))
-        gl_draw_img(PT2(0, 0));
+        gl_draw_img(PT2(50, 50), IMG_FID_WYWH_8_150x100);
+    // draw colors test (Macbeth color chart)
+    else if ((argc == 3) && (kio_strcmp(argv[2], "-m")))
+        __hsc_tp_draw_board();
+    // putting it all together: HSC Logo w/ color chart and text
+    else if (argc < 3)
+    {
+        __hsc_tp_draw_board();
+        __hsc_tp_draw_HSC();
+    }
+    // error; exit graphics mode
     else
     {
-        // background
-        __hsc_tp_draw_board();
-        // foreground (HSC logo); drawn conditionally based on the -m flag
-        if ((argc < 3) && (!kio_strcmp(argv[2], "-m")))
-            __hsc_tp_draw_HSC();
+        gl_exit();
+        return ERR_PROG_BAD_ARGS;
     }
 
     // block for user input

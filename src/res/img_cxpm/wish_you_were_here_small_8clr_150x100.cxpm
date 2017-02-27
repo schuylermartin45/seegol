@@ -1,4 +1,4 @@
-static char * wish_you_were_here_small_8clr_150x100_xpm[] = {
+static char * wish_you_were_here_small_8clr_150x100_cxpm[] = {
 "150 100 8",
 "110C09",
 "3A2C24",

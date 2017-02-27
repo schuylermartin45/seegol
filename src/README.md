@@ -47,9 +47,8 @@ Graphics library files. These provide user-level functions to make GUIs and
 other graphical components.
 
 ## src/res/
-Resource files, non-code (i.e. artwork, images, assets)
-
-TODO Put ownership info here on test images in src/res/images/
+Resource files, non-code (i.e. artwork, images, assets). Ownership infomation
+can be found in the src/res/README.md file.
 
 ## src/usr/
 User level code (i.e. programs) including the `SeeSH` the first and only shell

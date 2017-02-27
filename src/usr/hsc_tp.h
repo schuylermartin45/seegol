@@ -15,6 +15,7 @@
 #include "../kern/types.h"
 #include "../kern/kio.h"
 #include "../gl/gl_lib.h"
+#include "../gl/img_fids.h"
 #include "program.h"
 
 /** Macros     **/

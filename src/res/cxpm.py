@@ -15,6 +15,8 @@
 ##                  + 2 pixels per byte; 4 bits for RGB pixel lookup
 ##                  + One byte indicates Huffman encoded portion:
 ##                      <MARKER><hex_byte_num_duplicates><pixel_byte>
+##              Files are encoded in "Latin-1" although any 8-bit fixed-length
+##              encoding should work. i.e. UTF-8 won't.
 ##
 
 # Python libraries
@@ -24,7 +26,9 @@ import sys
 
 #### GLOBALS    ####
 USAGE = "Usage: ./cxpm file"
-FILE_EXT = ".cxpm"
+# file naming convetions
+FILE_EXT    = ".cxpm"
+FILE_PATH   = "img_cxpm/"
 # ASCII value of non-visible character used to mark duplicate length
 ENCODE_MARKER = 1
 # base used to use Huffman encoding; 36 gives us 0-9 and A-Z
@@ -57,6 +61,7 @@ def write_file(data, fd):
     :param: data Lines of the file to write
     :param: fd Name of the file to write
     '''
+    # must use a fixed-length 8-bit encoding. See note above for more info
     fptr = open(fd, 'w', encoding="latin-1")
     for line in data:
         fptr.write(line)
@@ -95,6 +100,8 @@ def main():
     xpm_data = read_file(sys.argv[1])
     cxpm_data = []
 
+    # mark array as "compressed XPM"
+    xpm_data[1] = xpm_data[1].replace("_xpm", "_cxpm");
     # read XPM header info
     header = xpm_data[2][1:-3].split()
     dim_w = int(header[0])
@@ -183,7 +190,8 @@ def main():
     cxpm_data[-1] = cxpm_data[-1][:-4] + "\"};"
 
     # dump the new data into a file
-    out_fd = os.path.splitext(sys.argv[1])[0] + FILE_EXT
+    basename = os.path.basename(sys.argv[1])
+    out_fd = FILE_PATH + os.path.splitext(basename)[0] + FILE_EXT
     write_file(cxpm_data, out_fd)
 
 if __name__ == "__main__":

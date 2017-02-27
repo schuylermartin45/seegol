@@ -21,8 +21,6 @@
 // VGA mode drivers
 #include "../kern/vga/vga.h"
 #include "../kern/vga/vga13.h"
-// defines the font used to draw strings
-#include "see_font.h"
 
 /** Globals    **/
 
@@ -144,10 +142,12 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color);
 void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
 
 /*
-** Draws an image
+** Draws an image "installed" on the OS
 **
 ** @param start Starting point to draw the string (upper left pixel)
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
 */
-void gl_draw_img(Point_2D start);
+void gl_draw_img(Point_2D start, uint8_t fid);
 
 #endif

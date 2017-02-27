@@ -13,8 +13,13 @@
 /** Headers    **/
 #include "../kern/gcc16.h"
 #include "gl_lib.h"
-// TODO handle this better
-#include "../res/wish_you_were_here_small_8clr_150x100.cxpm"
+
+// Includes only needed local to the C file and don't need to be included
+// everywhere else (especially since these ones are fairly large)
+// image data array
+#include "img_tbl.h"
+// defines the font used to draw strings
+#include "see_font.h"
 
 /** Macros     **/
 // buffer size to read digits out of the header string
@@ -263,18 +268,18 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
 }
 
 /*
-** Draws an image
+** Draws an image "installed" on the OS
 **
 ** @param start Starting point to draw the string (upper left pixel)
-** TODO actually use the starting point
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
 */
-void gl_draw_img(Point_2D start)
+void gl_draw_img(Point_2D start, uint8_t fid)
 {
     // Phase 0:
     // the file is "read in" from a chunk in memory. It should not be altered
     // by the drawing method; think "read only"
-    // TODO handle this better
-    char** fd = wish_you_were_here_small_8clr_150x100_xpm;
+    char** fd = gl_img_tbl[fid];
 
     // Phase 1:
     // file header information: width, height, number of colors
@@ -372,8 +377,8 @@ void gl_draw_img(Point_2D start)
             // draw the pixels
             for(uint16_t i=0; i<run_len; ++i)
             {
-                vga_driver.vga_put_pixel(x, y, color0);
-                vga_driver.vga_put_pixel(x + 1, y, color1);
+                vga_driver.vga_put_pixel(start.x + x, start.y + y, color0);
+                vga_driver.vga_put_pixel(start.x + x + 1, start.y + y, color1);
                 x += 2;
             }
         }
