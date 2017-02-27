@@ -130,7 +130,7 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color);
 ** "Transparent" backgrounds are achieved by setting the background and
 ** foreground colors to the same value.
 **
-** @param start Starting point to draw the string (upper left pixel)
+** @param ul Upper-left starting point
 ** @param b_color Background color of the text
 ** @param f_color Foreground color of the text
 ** @param str String to draw
@@ -138,12 +138,23 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color);
 void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
 
 /*
+** Draws a scaled image "installed" on the OS
+**
+** @param ul Upper-left starting point
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
+** @param scale Simple (integer) scale factor to make an image larger
+**        (duplicates pixels)
+*/
+void gl_draw_img_scale(Point_2D ul, uint8_t fid, uint8_t scale);
+
+/*
 ** Draws an image "installed" on the OS
 **
-** @param start Starting point to draw the string (upper left pixel)
+** @param ul Upper-left starting point
 ** @param fid File id that identifies the image data to draw from the image
 **        file look-up table (users can just simply use a macro)
 */
-void gl_draw_img(Point_2D start, uint8_t fid);
+void gl_draw_img(Point_2D ul, uint8_t fid);
 
 #endif

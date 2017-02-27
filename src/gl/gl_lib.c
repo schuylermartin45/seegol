@@ -38,6 +38,10 @@
 // assumed to be text mode if graphics haven't been initialized yet
 static VGA_Driver vga_driver;
 
+/************************** Internal Functions *************************/
+
+/************************** User Functions    **************************/
+
 /*
 ** Initialize the graphics library with default values. User should call this
 ** once per program
@@ -183,15 +187,15 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color)
 ** "Transparent" backgrounds are achieved by setting the background and
 ** foreground colors to the same value.
 **
-** @param start Starting point to draw the string (upper left pixel)
+** @param ul Upper-left starting point
 ** @param b_color Background color of the text
 ** @param f_color Foreground color of the text
 ** @param str String to draw
 */
-void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
+void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
 {
     // current position to draw
-    Point_2D cur = start;
+    Point_2D cur = ul;
     // keeps character row, col counters as we move along
     Point_2D rc_cntr = {0, 0};
     // pad vertically
@@ -211,7 +215,7 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
         {
             uint8_t ch = *str;
             // enforce a newline if we are about to go out of bounds, in x
-            cur.x = start.x
+            cur.x = ul.x
                 + (rc_cntr.x * (SEE_FONT_WIDTH + (2 * SEE_FONT_PAD_HORZ)))
                 + SEE_FONT_PAD_HORZ;
             if ((cur.x + SEE_FONT_WIDTH + (3 * SEE_FONT_PAD_HORZ)) 
@@ -220,9 +224,9 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
                 // reset before draw
                 rc_cntr.x = 0;
                 ++rc_cntr.y;
-                cur.x = start.x + SEE_FONT_PAD_HORZ;
+                cur.x = ul.x + SEE_FONT_PAD_HORZ;
             }
-            cur.y = start.y
+            cur.y = ul.y
                 + (rc_cntr.y * (SEE_FONT_HEIGHT + (2 * SEE_FONT_PAD_VERT)))
                 + SEE_FONT_PAD_VERT;
             // check for transparent backgrounds; both colors are the same
@@ -231,11 +235,11 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
                 // quickly draw the background color using the rectangle draw
                 // function and use this assumption for other optimizations
                 vga_driver.vga_draw_rect_wh(
-                    start.x + 
+                    ul.x + 
                         (rc_cntr.x * (SEE_FONT_WIDTH + (2
                             * SEE_FONT_PAD_HORZ))
                         ),
-                    start.y +
+                    ul.y +
                         (rc_cntr.y * (SEE_FONT_HEIGHT + (2
                             * SEE_FONT_PAD_VERT))
                         ),
@@ -260,7 +264,7 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
                     }
                 }
                 // reset x, draw next row of font pixels
-                cur.x = start.x
+                cur.x = ul.x
                     + (rc_cntr.x * (SEE_FONT_WIDTH + (2 * SEE_FONT_PAD_HORZ)))
                     + SEE_FONT_PAD_HORZ;
                 ++cur.y;
@@ -273,13 +277,15 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str)
 }
 
 /*
-** Draws an image "installed" on the OS
+** Draws a scaled image "installed" on the OS
 **
-** @param start Starting point to draw the string (upper left pixel)
+** @param ul Upper-left starting point
 ** @param fid File id that identifies the image data to draw from the image
 **        file look-up table (users can just simply use a macro)
+** @param scale Simple (integer) scale factor to make an image larger
+**        (duplicates pixels)
 */
-void gl_draw_img(Point_2D start, uint8_t fid)
+void gl_draw_img_scale(Point_2D ul, uint8_t fid, uint8_t scale)
 {
     // Phase 0:
     // the file is "read in" from a chunk in memory. It should not be altered
@@ -354,12 +360,16 @@ void gl_draw_img(Point_2D start, uint8_t fid)
     // go over the image data, dropping pixels
     for(uint16_t y=0; y<h; ++y)
     {
+        // skip drawing scanlines that are out-of-bounds
+        if (ul.y + (y * scale) > vga_driver.screen_h)
+            break;
         // x determines if we have reached the end of the image
         uint16_t x = 0;
         // x_b is they byte position on the line
         uint16_t x_b = 0;
-        // run until the end of the file
-        while(fd[y + color_space + 1][x_b] != '\0')
+        // run until the end of the line or terminate if we go off the screen
+        while((fd[y + color_space + 1][x_b] != '\0')
+            && ((ul.x + x) <= vga_driver.screen_w))
         {
             // read in the color encoding; advancing to the next encoded
             // position in the process
@@ -381,26 +391,57 @@ void gl_draw_img(Point_2D start, uint8_t fid)
             uint8_t c1_key = (encode & 0x0F) - ascii_start;
             RGB_8 color0 = color_map[c0_key];
             RGB_8 color1 = color_map[c1_key];
-            // draw with fast rectangles when possible; when both colors
-            // are the same
+            // scale, taking account for the fact that 2 pixels are drawn at
+            // one time
+            uint16_t px_scale = 2 * scale;
+            uint16_t draw_w = run_len * px_scale;
+            uint16_t draw_h = scale;
+            // draw until far edge
+            if ((ul.x + x + draw_w) > vga_driver.screen_w)
+                draw_w = vga_driver.screen_w - (ul.x + x);
+            // bounds checking; don't draw past the bottom and left borders
             if (c0_key == c1_key)
             {
-                vga_driver.vga_draw_rect_wh(start.x + x, start.y + y,
-                    run_len * 2, 1, color0);
-                x += run_len * 2;
+                // draw with fast rectangles when possible; when both colors
+                // are the same
+                vga_driver.vga_draw_rect_wh(
+                    ul.x + x, ul.y + (y * scale),
+                    draw_w, draw_h, color0
+                );
             }
             else
             {
-                // draw the pixels
                 for(uint16_t i=0; i<run_len; ++i)
                 {
-                    vga_driver.vga_put_pixel(start.x + x,
-                        start.y + y, color0);
-                    vga_driver.vga_put_pixel(start.x + x + 1,
-                        start.y + y, color1);
-                    x += 2;
+                    // bounds checking
+                    if ((ul.x + x + scale) > vga_driver.screen_w)
+                        break;
+                    // draw the pixels, individually accounting for scale
+                    vga_driver.vga_draw_rect_wh(
+                        ul.x + x, ul.y + (y * scale),
+                        scale, draw_h, color0
+                    );
+                    if ((ul.x + x + (2 * scale)) > vga_driver.screen_w)
+                        break;
+                    vga_driver.vga_draw_rect_wh(
+                        ul.x + x + scale, ul.y + (y * scale),
+                        scale, draw_h, color1
+                    );
                 }
             }
+            x += run_len * px_scale;
         }
     }
+}
+
+/*
+** Draws a scaled image "installed" on the OS
+**
+** @param ul Upper-left starting point
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
+*/
+void gl_draw_img(Point_2D ul, uint8_t fid)
+{
+    gl_draw_img_scale(ul, fid, 1);
 }
