@@ -137,24 +137,56 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color);
 */
 void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
 
+/***** Image Draw Functions (driver-independent)     *****/
+
+/*
+** Gets information about an image
+**
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
+** @param dims Pointer to a point that will store image size information
+**        (i.e. the dimensions; x stores width, y stores height)
+**
+** @return Color space size of the image
+*/
+uint16_t gl_img_stat(uint8_t fid, Point_2D* dims);
+
 /*
 ** Draws a scaled image "installed" on the OS
 **
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
 ** @param ul Upper-left starting point
+** @param scale Simple (integer) scale factor to make an image larger
+**        (duplicates pixels)
+*/
+void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale);
+
+/*
+** Draws an image "installed" on the OS
+**
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
+** @param ul Upper-left starting point
+*/
+void gl_draw_img(uint8_t fid, Point_2D ul);
+
+/*
+** Draws a scaled image "installed" on the OS, auto-centered on the screen
+**
 ** @param fid File id that identifies the image data to draw from the image
 **        file look-up table (users can just simply use a macro)
 ** @param scale Simple (integer) scale factor to make an image larger
 **        (duplicates pixels)
 */
-void gl_draw_img_scale(Point_2D ul, uint8_t fid, uint8_t scale);
+void gl_draw_img_center_scale(uint8_t fid, uint8_t scale);
 
 /*
-** Draws an image "installed" on the OS
+** Draws an image "installed" on the OS, auto-centered on the screen
 **
-** @param ul Upper-left starting point
 ** @param fid File id that identifies the image data to draw from the image
 **        file look-up table (users can just simply use a macro)
 */
-void gl_draw_img(Point_2D ul, uint8_t fid);
+void gl_draw_img_center(uint8_t fid);
 
 #endif

@@ -162,7 +162,7 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
     // draw image test
     else if ((argc == 3) && (kio_strcmp(argv[2], "-i")))
         // TODO use HSC logo from Kailey's original PNG
-        gl_draw_img_scale(PT2(10, 0), IMG_FID_WYWH_8_150x100, 2);
+        gl_draw_img_center_scale(IMG_FID_WYWH_8_150x100, 2);
     // draw colors test (Macbeth color chart)
     else if ((argc == 3) && (kio_strcmp(argv[2], "-m")))
         __hsc_tp_draw_board();

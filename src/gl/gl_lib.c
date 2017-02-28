@@ -276,32 +276,27 @@ void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
     }
 }
 
+/***** Image Draw Functions (driver-independent)     *****/
+
 /*
-** Draws a scaled image "installed" on the OS
+** Gets information about an image
 **
-** @param ul Upper-left starting point
 ** @param fid File id that identifies the image data to draw from the image
 **        file look-up table (users can just simply use a macro)
-** @param scale Simple (integer) scale factor to make an image larger
-**        (duplicates pixels)
+** @param dims Pointer to a point that will store image size information
+**        (i.e. the dimensions; x stores width, y stores height)
+**
+** @return Color space size of the image
 */
-void gl_draw_img_scale(Point_2D ul, uint8_t fid, uint8_t scale)
+uint16_t gl_img_stat(uint8_t fid, Point_2D* dims)
 {
-    // Phase 0:
-    // the file is "read in" from a chunk in memory. It should not be altered
-    // by the drawing method; think "read only"
-    char** fd = gl_img_tbl[fid];
-
-    // Phase 1:
-    // file header information: width, height, number of colors
-    uint16_t w = 0, h = 0, color_space = 0;
-    // read 4 numbers from the file header
+    // read 3 numbers from the file header
     uint8_t val_cntr = 0;
     char head_buff[CXPM_HEAD_BUFF_SIZE];
     for (uint8_t i=0; i<CXPM_HEAD_BUFF_SIZE; ++i)
         head_buff[i] = '\0';
     char* head_ptr = head_buff;
-    char* head_cur = fd[0];
+    char* head_cur = gl_img_tbl[fid][0];
     while(*head_cur != '\0')
     {
         // we found the end of a number, convert the string to a number
@@ -310,9 +305,9 @@ void gl_draw_img_scale(Point_2D ul, uint8_t fid, uint8_t scale)
             uint16_t val = kio_str_int(head_buff, 10);
             switch (val_cntr)
             {
-                case 0: w = val;
+                case 0: dims->x = val;
                     break;
-                case 1: h = val;
+                case 1: dims->y = val;
                     break;
             }
             // advance to the next number and clear the buffer
@@ -325,13 +320,31 @@ void gl_draw_img_scale(Point_2D ul, uint8_t fid, uint8_t scale)
             *head_ptr++ = *head_cur;
         ++head_cur;
     }
-    // set the last value from the header file
-    color_space = kio_str_int(head_buff, 10);
-    // TODO image data
-    #ifdef DEBUG_MODE
-        kio_printf("Image resolution: %dx%d", &w, &h);
-        kio_printf(" w/ %d colors\n", &color_space, NULL);
-    #endif
+    // get the last value from the header file
+    return kio_str_int(head_buff, 10);
+}
+
+/*
+** Draws a scaled image "installed" on the OS
+**
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
+** @param ul Upper-left starting point
+** @param scale Simple (integer) scale factor to make an image larger
+**        (duplicates pixels)
+*/
+void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
+{
+    // Phase 0:
+    // the file is "read in" from a chunk in memory. It should not be altered
+    // by the drawing method; think "read only"
+    char** fd = gl_img_tbl[fid];
+
+    // Phase 1:
+    // file header information: width, height, number of colors
+    Point_2D dims;
+    uint16_t color_space = gl_img_stat(fid, &dims);
+    uint16_t h = dims.y;
 
     // Phase 2:
     // build the bit-map color look-up table, organized as: <key><R><G><B>
@@ -435,13 +448,47 @@ void gl_draw_img_scale(Point_2D ul, uint8_t fid, uint8_t scale)
 }
 
 /*
-** Draws a scaled image "installed" on the OS
+** Draws an image "installed" on the OS
 **
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
 ** @param ul Upper-left starting point
+*/
+void gl_draw_img(uint8_t fid, Point_2D ul)
+{
+    gl_draw_img_scale(fid, ul, 1);
+}
+
+/*
+** Draws a scaled image "installed" on the OS, auto-centered on the screen
+**
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
+** @param scale Simple (integer) scale factor to make an image larger
+**        (duplicates pixels)
+*/
+void gl_draw_img_center_scale(uint8_t fid, uint8_t scale)
+{
+    // perform centering calculations by getting size info on the image
+    // if the image is scaled too much and goes off the screen, position to 0
+    Point_2D ul;
+    gl_img_stat(fid, &ul);
+    uint16_t x_scale = ul.x * scale;
+    uint16_t y_scale = ul.y * scale;
+    ul.x = (gl_getw() > x_scale) ? (gl_getw() - x_scale) / 2 : 0;
+    ul.y = (gl_geth() > y_scale) ? (gl_geth() - y_scale) / 2 : 0;
+    // calculate the upper left corner that will center the image on the screen
+    gl_draw_img_scale(fid, ul, scale);
+}
+
+/*
+** Draws an image "installed" on the OS, auto-centered on the screen
+**
 ** @param fid File id that identifies the image data to draw from the image
 **        file look-up table (users can just simply use a macro)
 */
-void gl_draw_img(Point_2D ul, uint8_t fid)
+void gl_draw_img_center(uint8_t fid)
 {
-    gl_draw_img_scale(ul, fid, 1);
+    // calculate the upper left corner that will center the image on the screen
+    gl_draw_img_center_scale(fid, 1);
 }
