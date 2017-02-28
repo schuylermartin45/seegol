@@ -172,7 +172,9 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale);
 void gl_draw_img(uint8_t fid, Point_2D ul);
 
 /*
-** Draws a scaled image "installed" on the OS, auto-centered on the screen
+** Draws a scaled image "installed" on the OS, auto-centered on the screen.
+** If the image is scaled too much and goes off the screen, zoom in on the
+** upper left corner of the image.
 **
 ** @param fid File id that identifies the image data to draw from the image
 **        file look-up table (users can just simply use a macro)
@@ -182,7 +184,9 @@ void gl_draw_img(uint8_t fid, Point_2D ul);
 void gl_draw_img_center_scale(uint8_t fid, uint8_t scale);
 
 /*
-** Draws an image "installed" on the OS, auto-centered on the screen
+** Draws an image "installed" on the OS, auto-centered on the screen.
+** If the image is scaled too much and goes off the screen, zoom in on the
+** upper left corner of the image.
 **
 ** @param fid File id that identifies the image data to draw from the image
 **        file look-up table (users can just simply use a macro)

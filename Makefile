@@ -207,6 +207,7 @@ bin/gl_lib.o: src/kern/vga/vga13.h src/kern/gcc16.h src/kern/types.h
 bin/gl_lib.o: src/kern/asm_lib.h src/kern/vga/vga.h src/gl/img_tbl.h
 bin/gl_lib.o: src/gl/img_fids.h
 bin/gl_lib.o: src/res/img_cxpm/wish_you_were_here_small_8clr_150x100.cxpm
+bin/gl_lib.o: src/res/img_cxpm/dark_side_of_the_moon_8clr_50x50.cxpm
 bin/gl_lib.o: src/gl/see_font.h
 bin/slideshow.o: src/kern/gcc16.h src/usr/slideshow.h
 bin/slideshow.o: src/kern/types.h src/usr/program.h src/kern/kio.h

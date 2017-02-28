@@ -84,9 +84,30 @@ uint8_t slideshow_main(uint8_t argc, char* argv[])
     // interactive features
     else
     {
-        gl_draw_img_center_scale(fid, scale);
-        // block for user input
-        kio_wait_key('q');
+        // block for user input and commands
+        char key = '\0';
+        do
+        {
+            gl_draw_img_center_scale(fid, scale);
+            key = kio_getchr();
+            switch (key)
+            {
+                // increase scale
+                case '1': case '2': case '3': 
+                case '4': case '5': case '6':
+                case '7': case '8': case '9':
+                    scale = key - '0';
+                    break;
+                case KEY_SPACE:
+                    ++fid;
+                    break;
+            }
+            // break if we've seen everything
+            if (fid >= GL_IMG_TBL_SIZE)
+                break;
+            gl_clrscr();
+        }
+        while (key != 'q');
     }
 
     // exit graphics mode

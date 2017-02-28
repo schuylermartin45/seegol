@@ -36,6 +36,10 @@
 // default
 #define KIO_DEFAULT_COLOR       KIO_WHITE_ON_BLACK
 
+// common key codes
+#define KEY_ESC     27
+#define KEY_SPACE   32
+
 /** Globals    **/
 
 /** Structures **/
