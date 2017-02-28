@@ -57,4 +57,8 @@ available shell written for SeeGOL.
 SeeSH is aware of all programs "installed" on the system and comes with a few
 built-in commands. To install a program, a user program must follow the
 convention and structure laid out in the `program.h` file. Look at `hellow.*`
-for an example on how to write and integrate a program into SeeSH.
+and `seesh.c` for an example on how to write and integrate a program into
+SeeSH. As of now, a program is manually "installed" by including the program's
+header file in `seesh.c`, adding that program's init function to the program
+list of function pointers, and incrementing the `PROG_COUNT` macro that tracks
+the number of programs installed.
