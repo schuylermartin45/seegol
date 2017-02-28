@@ -167,3 +167,42 @@ This a higher-level discussion of the project status while in development.
   SeeSH shell interface) must access the graphics hardware through the Graphics
   Library (GL) package. This is actually enforced by design, unlike my work in
   Sys Prog.
+
+### February 27, 2017
+A few major bugs/realizations came out of this past weekend, while laying the
+ground work for SeeGOL's image drawing capabilities.
+- gcc's 16-bit compilation process does not use the segment registers. I
+  previously thought that I was able to address 20 bits of memory (up to the
+  A20 gate, 1mb barrier) but that is not the case. Since gcc does not manage
+  the segment registers in Real Mode; I only have 64kb of memory to work with.
+  I found this out the hard way while developing the image drawing code in the
+  GL package, running out of memory while trying to import XPM files.
+- XPM is a file format developed for X11 that stores image data as an indexed
+  array of byte data. The file format is C code; you can simply include the
+  file and to access an array of strings, each character byte representing a
+  a value in a color look-up table. This would be an ideal image format for
+  SeeGOL, as the image data can be baked into the OS, without the need of a
+  reading image files...which would require a file system...that I don't have.
+- However in my initial testing I found that the XPM file format is not space
+  efficient...and ate up all my text memory. So I came up with a modified
+  version of XPM: CXPM, Compressed X Pixel Map (the first proprietary element
+  in SeeGOL that isn't prefixed with 'See'). To save space, the CXPM format is
+  limited to less than 16 colors (each byte represents 2 pixels, identified
+  by 4 bits) and then Huffman encoded in one dimension, per scanline. The
+  run-length encoding greatly reduces the space used since so few colors are
+  used. The full details of the spec are described currently in the `cxpm.py`
+  file under `src/res/`. The spec may be further modified and I hope to write
+  an OpenCV program that will quantize images and write them to the CXPM
+  program, further automating the process. Currently I'm relying on Gimp and
+  a Python script to convert color-quantized images to XPM and then to CXPM.
+- One major (and painful to figure out) bug I ran into is that Python3 defaults
+  to encoding strings in UTF-8. UTF-8 is a variable length encoding scheme and
+  when I initially created CXPM files, it looked like text information was
+  being saved correctly (confirmed through vim, less, cat, etc). However, when
+  I compiled my code, I noticed that extra color information was being added to
+  my test image, causing the images to "bleed out" of frame. Turns out that
+  the UTF-8 encoding scheme was putting the extra bytes in my C strings and I
+  was trying to interpret those bytes as color. To solve this issue, I switched
+  the encoding scheme to 'latin-1', which is a fixed length 8-bit encoding
+  scheme...so when I write 8 bits of bit-packed color information in Python,
+  I get 8 bits and not occassionally 16 bits.
