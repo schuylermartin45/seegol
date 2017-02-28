@@ -5,6 +5,9 @@
 ## Author:  Schuyler Martin <sam8050@rit.edu>
 ##
 ## Description: Compresses an XPM to my own "cxpm" format that I invented
+##              This script takes an XPM file, converting it and storing it as
+##              a CXPM file in the "img_cxpm" directory.
+##
 ##              The file is formatted as follows:
 ##                - An array declaration
 ##                - A line of header information:
@@ -187,12 +190,13 @@ def main():
         cxpm_data.append(compressed)
     # close array, on the last line, also correcting for the omitted ,
     # on the last line
-    cxpm_data[-1] = cxpm_data[-1][:-4] + "\"};"
+    cxpm_data.append("};")
 
     # dump the new data into a file
     basename = os.path.basename(sys.argv[1])
     out_fd = FILE_PATH + os.path.splitext(basename)[0] + FILE_EXT
     write_file(cxpm_data, out_fd)
+    print("Compressed and written to: " + out_fd)
 
 if __name__ == "__main__":
     main()
