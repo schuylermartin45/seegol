@@ -51,3 +51,4 @@ http://f.osdev.org/viewtopic.php?p=260739
 http://wiki.osdev.org/Drawing_In_Protected_Mode
 http://www.brackeen.com/vga/bitmaps.html
 https://en.wikipedia.org/wiki/INT_10H
+http://www.delorie.com/djgpp/doc/ug/graphics/vga.html
