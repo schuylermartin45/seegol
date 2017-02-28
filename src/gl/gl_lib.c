@@ -57,6 +57,7 @@ void gl_init(void)
     // NULL for now
     vga_driver.vga_enter = NULL;
     vga_driver.vga_clrscr = NULL;
+    vga_driver.vga_vsync = NULL;
     vga_driver.vga_put_pixel = NULL;
     vga_driver.vga_get_pixel = NULL;
     vga_driver.vga_draw_rect = NULL;
@@ -129,6 +130,14 @@ uint16_t gl_geth(void)
 void gl_clrscr(void)
 {
     vga_driver.vga_clrscr();
+}
+
+/*
+** Vertical sync control. Useful for slow electron-gun-based displays
+*/
+void gl_vsync(void)
+{
+    vga_driver.vga_vsync();
 }
 
 /* Draw functions */

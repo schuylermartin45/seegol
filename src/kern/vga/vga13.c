@@ -118,6 +118,18 @@ static void __vga13_clrscr(void)
 }
 
 /*
+** Vertical sync control. Useful for slow electron-gun-based displays
+*/
+static void __vga13_vsync(void)
+{
+    // bit 3 indicates whether or not the display has finished tracing pixels
+    // wait for a previous retrace to end
+    while (_inb(VGA13_VSYNC_PORT) & 0b100) {};
+    // wait for a new retrace to begin
+    while (!(_inb(VGA13_VSYNC_PORT) & 0b100)) {};
+}
+
+/*
 ** Write a pixel out to the frame buffer. This represents a single pixel
 **
 ** @param x coordinate on the screen
@@ -231,6 +243,7 @@ void _vga13_enter(VGA_Driver* driver)
     // set all the functions here
     driver->vga_enter = &_vga13_enter;
     driver->vga_clrscr = &__vga13_clrscr;
+    driver->vga_vsync = &__vga13_vsync;
     driver->vga_put_pixel = &__vga13_put_pixel;
     driver->vga_get_pixel = &__vga13_get_pixel;
     driver->vga_draw_rect = &__vga13_draw_rect;

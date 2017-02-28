@@ -37,6 +37,8 @@
 // Port addresses for palette control; these are 
 #define VGA13_PALETTE_PORT_IDX  0x03C8
 #define VGA13_PALETTE_PORT_CLR  0x03C9
+// Port for retrace information, used for V-Sync
+#define VGA13_VSYNC_PORT        0x3DA
 
 /** Globals    **/
 

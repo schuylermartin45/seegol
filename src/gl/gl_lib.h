@@ -89,6 +89,11 @@ uint16_t gl_geth(void);
 void gl_clrscr(void);
 
 /*
+** Vertical sync control. Useful for slow electron-gun-based displays
+*/
+void gl_vsync(void);
+
+/*
 ** Draws a pixel to the screen. Coordinates start in the upper-left corner
 **
 ** @param pt Pixel position

@@ -51,6 +51,11 @@ struct VGA_Driver
     void (*vga_clrscr)(void);
 
     /*
+    ** Vertical sync control. Useful for slow electron-gun-based displays
+    */
+    void (*vga_vsync)(void);
+
+    /*
     ** Write a pixel out to the frame buffer. This represents a single pixel
     **
     ** @param x coordinate on the screen
