@@ -27,12 +27,8 @@
 #include "see_font.h"
 
 /** Macros     **/
-// buffer size to read digits out of the header string
-#define CXPM_HEAD_BUFF_SIZE 5
-// Base used to encode run length distances in the CXPM format
-#define CXPM_RL_BASE        36
 // byte used to indicate Huffman endcoded section in the CXPM decoder
-#define CXPM_HUFF_MARKER    1
+#define CXPM_HUFF_MARKER    0
 
 // structure that manages the driver mode currently activated
 // assumed to be text mode if graphics haven't been initialized yet
@@ -299,38 +295,9 @@ void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
 */
 uint16_t gl_img_stat(uint8_t fid, Point_2D* dims)
 {
-    // read 3 numbers from the file header
-    uint8_t val_cntr = 0;
-    char head_buff[CXPM_HEAD_BUFF_SIZE];
-    for (uint8_t i=0; i<CXPM_HEAD_BUFF_SIZE; ++i)
-        head_buff[i] = '\0';
-    char* head_ptr = head_buff;
-    char* head_cur = gl_img_tbl[fid][0];
-    while(*head_cur != '\0')
-    {
-        // we found the end of a number, convert the string to a number
-        if (*head_cur == ' ')
-        {
-            uint16_t val = kio_str_int(head_buff, 10);
-            switch (val_cntr)
-            {
-                case 0: dims->x = val;
-                    break;
-                case 1: dims->y = val;
-                    break;
-            }
-            // advance to the next number and clear the buffer
-            ++val_cntr;
-            for (uint8_t i=0; i<CXPM_HEAD_BUFF_SIZE; ++i)
-                head_buff[i] = '\0';
-            head_ptr = head_buff;
-        }
-        else
-            *head_ptr++ = *head_cur;
-        ++head_cur;
-    }
-    // get the last value from the header file
-    return kio_str_int(head_buff, 10);
+    dims->x = gl_img_tbl[fid][0][0];
+    dims->y = gl_img_tbl[fid][0][1];
+    return gl_img_tbl[fid][0][2];
 }
 
 /*
@@ -347,40 +314,26 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
     // Phase 0:
     // the file is "read in" from a chunk in memory. It should not be altered
     // by the drawing method; think "read only"
-    char** fd = gl_img_tbl[fid];
+    const uint8_t** fd = gl_img_tbl[fid];
 
     // Phase 1:
     // file header information: width, height, number of colors
     Point_2D dims;
     uint16_t color_space = gl_img_stat(fid, &dims);
-    uint16_t h = dims.y;
 
     // Phase 2:
-    // build the bit-map color look-up table, organized as: <key><R><G><B>
+    // build the bit-map color look-up table, organized as: {key, R, G, B}
     RGB_8 color_map[color_space];
-    // ASCII character that the table starts at when making look-up values
-    char ascii_start = fd[1][0];
+    // value that the table starts at when making look-up values
+    // subsequent keys are guaranteed to be consecutive
+    uint8_t start_code = fd[1][0];
+    // add the colors to the table, based on the header information
     for (int i=1; i<color_space + 1; ++i)
-    {
-        // read the first line and jump to the first hex code
-        char* line = fd[i] + 1;
-        // convert the hex codes to color bytes
-        char hex_buff[3] = {line[0], line[1], '\0'};
-        uint8_t r = kio_str_int(hex_buff, 16);
-        line += 2;
-        hex_buff[0] = line[0]; hex_buff[1] = line[1];
-        uint8_t g = kio_str_int(hex_buff, 16);
-        line += 2;
-        hex_buff[0] = line[0]; hex_buff[1] = line[1];
-        uint8_t b = kio_str_int(hex_buff, 16);
-        // add the colors to the table; mapping the character to a color in
-        // the look-up table
-        color_map[fd[i][0] - ascii_start] = RGB(r, b, g);
-    }
+        color_map[fd[i][0] - start_code] = RGB(fd[i][1], fd[i][2], fd[i][3]);
 
     // Phase 3:
     // go over the image data, dropping pixels
-    for(uint16_t y=0; y<h; ++y)
+    for(uint16_t y=0; y<dims.y; ++y)
     {
         // skip drawing scanlines that are out-of-bounds
         if (ul.y + (y * scale) > vga_driver.screen_h)
@@ -389,9 +342,9 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
         uint16_t x = 0;
         // x_b is they byte position on the line
         uint16_t x_b = 0;
-        // run until the end of the line or terminate if we go off the screen
-        while((fd[y + color_space + 1][x_b] != '\0')
-            && ((ul.x + x) <= vga_driver.screen_w))
+        // run until the end of the scanline or terminate if we go off the 
+        // screen
+        while((x < (dims.x * scale)) && ((ul.x + x) <= vga_driver.screen_w))
         {
             // read in the color encoding; advancing to the next encoded
             // position in the process
@@ -402,15 +355,15 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
             if (encode == CXPM_HUFF_MARKER)
             {
                 // decode the next byte as the run length
-                char rl_buff[2] = {fd[y + color_space + 1][x_b++], '\0'};
-                run_len = kio_str_int(rl_buff, CXPM_RL_BASE);
+                run_len = fd[y + color_space + 1][x_b++];
+                // then this byte is the color key to draw
                 encode = fd[y + color_space + 1][x_b++];
             }
             // perform the table look-up, on both pixels
             // upper 4 bits
-            uint8_t c0_key = (encode >> 4) - ascii_start;
+            uint8_t c0_key = (encode >> 4) - start_code;
             // lower 4 bits
-            uint8_t c1_key = (encode & 0x0F) - ascii_start;
+            uint8_t c1_key = (encode & 0x0F) - start_code;
             RGB_8 color0 = color_map[c0_key];
             RGB_8 color1 = color_map[c1_key];
             // scale, taking account for the fact that 2 pixels are drawn at

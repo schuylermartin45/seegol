@@ -6,20 +6,21 @@
 ##
 ## Description: Compresses an XPM to my own "cxpm" format that I invented
 ##              This script takes an XPM file, converting it and storing it as
-##              a CXPM file in the "img_cxpm" directory.
+##              a CXPM file in the "img_cxpm" directory. XPM files use an
+##              array of strings to store the image data. I have elected to use
+##              arrays of raw bytes instead. This makes the parsing code much
+##              easier the CXPM encoding easier to debug.
 ##
 ##              The file is formatted as follows:
 ##                - An array declaration
 ##                - A line of header information:
-##                  <width> <height> <color_map_size>
-##                - The color mapping (up to 15 colors)
-##                  <ch_color><RGB_HEX_CODE>
+##                  {width, height, color_map_size}
+##                - The color mapping, 4 bits
+##                  {color_code, R, G, B}
 ##                - Character mappings
 ##                  + 2 pixels per byte; 4 bits for RGB pixel lookup
 ##                  + One byte indicates Huffman encoded portion:
-##                      <MARKER><hex_byte_num_duplicates><pixel_byte>
-##              Files are encoded in "Latin-1" although any 8-bit fixed-length
-##              encoding should work. i.e. UTF-8 won't.
+##                      {... MARKER, number_of_duplicates, pixel_byte, ...}
 ##
 
 # Python libraries
@@ -32,18 +33,23 @@ USAGE = "Usage: ./cxpm file"
 # file naming convetions
 FILE_EXT    = ".cxpm"
 FILE_PATH   = "img_cxpm/"
-# ASCII value of non-visible character used to mark duplicate length
-ENCODE_MARKER = 1
-# base used to use Huffman encoding; 36 gives us 0-9 and A-Z
-BASE_ENCODE = 36
+# value used to mark run lengths
+ENCODE_MARKER = 0
 # "cost" for performing a run length encoding
 # 1 byte for the marker -> costs 2 pixels
 # 1 byte for the run length digit -> costs 2 pixels
 # 1 byte for pixels to duplicate -> costs 1 pixel(?)
 RUN_BYTE_COST = 5
-# 14 colors available since the NULL byte is not allowed in a C string
-# and another byte is used as a marker
-MAX_COLOR_SPACE = 14
+# 15 colors available since we give up one for the encoding marker
+MAX_COLOR_SPACE = 15
+# indent for readability
+INDENT = "  "
+# casting statement pre-pended to every byte array in our table
+# so we get:
+# unsigned char* arr = { (char[]){1, 2, 3}}, ... }
+ROW_ARR_CAST = INDENT + "(const unsigned char[])"
+# line that starts the color table in the original file
+COLOR_TBL_START = 3
 
 #### FUNCTIONS  ####
 
@@ -64,31 +70,27 @@ def write_file(data, fd):
     :param: data Lines of the file to write
     :param: fd Name of the file to write
     '''
-    # must use a fixed-length 8-bit encoding. See note above for more info
     fptr = open(fd, 'w', encoding="latin-1")
     for line in data:
         fptr.write(line)
     fptr.close()
 
-def int_str(num, base):
+def huff_run(byte, byte_cntr):
     '''
-    Converts an integer to a string, using a given base
-    Bases > 10 start at A and then follow the ASCII chart
-    :param: num Integer to convert
-    :param: base Base to put representation in
-    :return: Return the string equivalent
+    Compresses byte data using a Huffman encoding scheme
+    :param: byte Repeated byte to compress
+    :param: byte_cntr Number of occurances of a byte
+    :return: String of comma separated integers (to be stored in an array)
     '''
-    s = ""
-    # perform the conversion, which reverses the digit order
-    while(num > 0):
-        mod = num % base
-        if (mod > 9):
-            s += chr((mod - 10) + ord('A'))
-        else:
-            s += chr(mod + ord('0'))
-        num //= base
-    # reverse the string
-    return s[::-1]
+    compressed = ""
+    while ((byte_cntr - 255) > 0):
+        compressed += (str(ENCODE_MARKER) + ","
+            + str(255) + ","
+            + str(byte) + ",")
+    compressed += (str(ENCODE_MARKER) + ","
+        + str(byte_cntr) + ","
+        + str(byte) + ",")
+    return compressed
 
 #### MAIN       ####
 
@@ -103,8 +105,13 @@ def main():
     xpm_data = read_file(sys.argv[1])
     cxpm_data = []
 
+    # modify array naming
+    xpm_data[1] = xpm_data[1].replace("static", "static const");
+    # mark as a "unint8_t" without needing to use types file
+    xpm_data[1] = xpm_data[1].replace("char", "unsigned char");
     # mark array as "compressed XPM"
     xpm_data[1] = xpm_data[1].replace("_xpm", "_cxpm");
+
     # read XPM header info
     header = xpm_data[2][1:-3].split()
     dim_w = int(header[0])
@@ -119,77 +126,74 @@ def main():
     # this line defines the character array structure
     cxpm_data.append(xpm_data[1])
     # this line contains the header information
-    cxpm_data.append("\""
-        + header[0] + " "
-        + header[1] + " "
-        + str(cxpm_color_space) + "\",\n"
+    cxpm_data.append(ROW_ARR_CAST + "{"
+        + header[0] + ","
+        + header[1] + ","
+        + str(cxpm_color_space) + "},\n"
     )
-    # line that starts the color table
-    COLOR_TBL_START = 3
-    # reduce encoding on the color table; remapping characters
+    # reduce encoding on the color table; remapping characters to 4-bit ints
     cxpm_color_tbl = {}
     # re-assign color mappings to 4 bit values
     new_key = ENCODE_MARKER + 1
     for i in range(COLOR_TBL_START, COLOR_TBL_START + cxpm_color_space):
-        cxpm_color_tbl[xpm_data[i][1]] = chr(new_key)
-        # strip pixel mapping down to <key_byte><R_HEX><G_HEX><B_HEX>
-        cxpm_data.append( "\"" + chr(new_key) + xpm_data[i][6:])
+        cxpm_color_tbl[xpm_data[i][1]] = new_key
+        # strip pixel mapping down to { key_byte, R_byte, G_byte, B_byte }
+        cxpm_data.append(ROW_ARR_CAST + "{" +
+            str(new_key) + ","
+            + "0x" + xpm_data[i][6:8] + ","
+            + "0x" + xpm_data[i][8:10] + ","
+            + "0x" + xpm_data[i][10:12] + ","
+            + "},\n"
+        )
         new_key += 1
     # start in the original file where the pixel mapping occurs
     pixel_map_start = COLOR_TBL_START + color_space
 
-    # first pass: replace characters in the table with 4 bit encodings
-    # and combine 4 bits into 8 bit values
+    # first pass: replace characters in the table with 2, 4 bit encodings
+    # and combine 4 bits into 8 bit values; 2 pixels per byte
+    # this is stored as an array of integers for easier parsing later
     xpm_pass_1 = []
     for i in range(pixel_map_start, pixel_map_start + dim_h):
-        line = ""
-        # perform the bit packing (2, 4 bit values into one byte)
+        line = []
         for j in range(1, len(xpm_data[i]) - 4, 2):
             # TODO key error; use another pixel
-            ch0 = ord(cxpm_color_tbl[xpm_data[i][j]]) << 4
-            ch1 = ord(cxpm_color_tbl[xpm_data[i][j + 1]])
-            new_ch = ch0 + ch1
-            # escape quotes and backslash so C doesn't freak out
-            if (chr(new_ch) == "\""):
-                line += "\\\""
-            elif (chr(new_ch) == "\\"):
-                line += "\\\\"
-            else:
-                line += chr(new_ch)
-        # TODO odd length case; pad with another pixel (copy)
-        xpm_pass_1.append(line + "\n")
+            hi = cxpm_color_tbl[xpm_data[i][j]] << 4
+            lo = cxpm_color_tbl[xpm_data[i][j + 1]]
+            line.append(hi + lo)
+        xpm_pass_1.append(line)
 
     # second pass: Huffman encoding
     for i in range(0, len(xpm_pass_1)):
         compressed = ""
-        # start at the first character
-        cur_ch = xpm_pass_1[i][0]
-        ch_cntr = 1
+        # a NULL byte is added to the end of the array to make parsing easier
+        # prevents the last byte(s) from being left out
+        xpm_pass_1[i].append(0)
+        cur_byte = xpm_pass_1[i].pop(0)
+        byte_cntr = 1
         # scan for duplicates
-        for j in range(1, len(xpm_pass_1[i])):
+        while (len(xpm_pass_1[i]) > 0):
             # count duplicates
-            if (cur_ch == xpm_pass_1[i][j]):
-                ch_cntr += 1
-            # write on change in character and reset for next run length
+            top_byte = xpm_pass_1[i].pop(0)
+            # count duplicates
+            if (cur_byte == top_byte):
+                byte_cntr += 1
+            # write on byte change and reset for next run length
             else:
                 # only compress when it's worth the cost of marking a run
                 # of repeated values
-                if (ch_cntr > RUN_BYTE_COST):
-                    # for run lengths that can't be expressed in one digit in
-                    # the base, break the encoding in segments
-                    digits = int_str(ch_cntr, BASE_ENCODE)
-                    for digit in digits:
-                        compressed += chr(ENCODE_MARKER) + digit + cur_ch
+                if (byte_cntr > RUN_BYTE_COST):
+                    # for run lengths that can't be expressed in 8 bits,
+                    # break the encoding in segments
+                    compressed += huff_run(cur_byte, byte_cntr)
                 else:
-                    for k in range(0, ch_cntr):
-                        compressed += cur_ch
-                cur_ch = xpm_pass_1[i][j]
-                ch_cntr = 1
+                    for k in range(0, byte_cntr):
+                        compressed += str(cur_byte) + ","
+                cur_byte = top_byte
+                byte_cntr = 1
+
         # commit the new line to the compressed file
-        compressed = '"' + compressed + '",\n'
-        cxpm_data.append(compressed)
-    # close array, on the last line, also correcting for the omitted ,
-    # on the last line
+        cxpm_data.append(ROW_ARR_CAST + "{" + compressed + "},\n")
+    # close the outer array
     cxpm_data.append("};")
 
     # dump the new data into a file

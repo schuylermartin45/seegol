@@ -23,7 +23,7 @@
 /** Macros     **/
 
 /** Globals    **/
-char** gl_img_tbl[GL_IMG_TBL_SIZE] =
+static const uint8_t** gl_img_tbl[GL_IMG_TBL_SIZE] =
 {
     wish_you_were_here_small_8clr_150x100_cxpm,
     dark_side_of_the_moon_8clr_50x50_cxpm,

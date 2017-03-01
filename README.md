@@ -206,3 +206,13 @@ ground work for SeeGOL's image drawing capabilities.
   the encoding scheme to 'latin-1', which is a fixed length 8-bit encoding
   scheme...so when I write 8 bits of bit-packed color information in Python,
   I get 8 bits and not occassionally 16 bits.
+
+### February 28, 2017
+- After talking with a friend, I realized that there was no reason that CXPM
+  needed to store pixel information in strings. I have now re-worked the format
+  to store unsigned bytes instead of characters. This simplifies the encoding
+  and decoding process and, in the process, solved multiple issues with
+  encoding and decoding the image data as characters. I can now use 0 as a
+  marker (i.e. the NULL byte) and I don't have to deal with issues in using
+  newline characters (byte value of 10) in the string code. tl;dr I can store
+  more color information while speeding up the decoding process.
