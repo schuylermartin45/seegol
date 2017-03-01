@@ -4,7 +4,7 @@
 #
 # Author:  Schuyler Martin <sam8050@rit.edu>
 #
-# Description: Converts all files in img_xpm to cxpm files stored in img_cxpm
+# Description: Converts all files in img_xpm/ to cxpm files stored in img_cxpm/
 #
 
 for file in img_xpm/*.xpm; do

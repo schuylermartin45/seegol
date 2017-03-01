@@ -28,6 +28,7 @@ These programs are necessary to build and install
 - dd
 - make
 - makedepend
+- ImageMagick (the `convert` program is used to down-sample image files)
 TODO [more here]
 An emulator (such as QEMU) may also be helpful in running the OS.
 
