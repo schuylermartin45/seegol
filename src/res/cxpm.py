@@ -24,6 +24,7 @@
 ##
 
 # Python libraries
+import math
 import os
 import sys
 # project libraries
@@ -75,6 +76,42 @@ def write_file(data, fd):
         fptr.write(line)
     fptr.close()
 
+def rgb_dist(rgb0, rgb1):
+    '''
+    Calculates the distance between two RGB values
+    RGB values are stored as hex strings, as they are read from a text file
+    :param: rgb0 First RGB value
+    :param: rgb1 Second RGB value
+    '''
+    return math.sqrt(
+          math.pow(int(rgb0[0], 16) - int(rgb1[0], 16), 2)
+        + math.pow(int(rgb0[1], 16) - int(rgb1[1], 16), 2)
+        + math.pow(int(rgb0[2], 16) - int(rgb1[2], 16), 2)
+    )
+
+def closest_color(chr_tbl, rgb_tbl, chr_code, chr_rgb):
+    '''
+    This function provides a close approximation of a color in the table, based
+    on values already in the table. This is used when an image is provided that
+    has more colors than CXPM supports.
+    :param: chr_tbl Table that maps the XPM characters to the new look-up codes
+            This is the table that will be updated by this method
+    :param: rgb_tbl Table that maps XPM characters to RGB values
+    :param: chr_code XPM character code to find the closest color to
+    :param: rgb RGB tuple to find the closest color approximation of
+    '''
+    closest = 255 * 3
+    closest_code = chr_code
+    for chr_key in rgb_tbl:
+        rgb = rgb_tbl[chr_key]
+        # find the closest approximation thus far
+        chk_dist = rgb_dist(chr_rgb, rgb)
+        if (chk_dist < closest):
+            closest = chk_dist
+            closest_code = chr_tbl[chr_key]
+    # indicate that this character should map to the closest color code
+    chr_tbl[chr_code] = closest_code
+
 def huff_run(byte, byte_cntr):
     '''
     Compresses byte data using a Huffman encoding scheme
@@ -120,7 +157,7 @@ def main():
     # the actual amount of color being used
     cxpm_color_space = color_space
     if (color_space > MAX_COLOR_SPACE):
-        cxpm_color_space = color_space
+        cxpm_color_space = MAX_COLOR_SPACE
 
     # start building the file again
     # this line defines the character array structure
@@ -133,19 +170,40 @@ def main():
     )
     # reduce encoding on the color table; remapping characters to 4-bit ints
     cxpm_color_tbl = {}
+    # record mappings of the character codes to RGB values in case we need to
+    # approximate colors later
+    chr_rgb_tbl = {}
     # re-assign color mappings to 4 bit values
     new_key = ENCODE_MARKER + 1
-    for i in range(COLOR_TBL_START, COLOR_TBL_START + cxpm_color_space):
-        cxpm_color_tbl[xpm_data[i][1]] = new_key
-        # strip pixel mapping down to { key_byte, R_byte, G_byte, B_byte }
-        cxpm_data.append(ROW_ARR_CAST + "{" +
-            str(new_key) + ","
-            + "0x" + xpm_data[i][6:8] + ","
-            + "0x" + xpm_data[i][8:10] + ","
-            + "0x" + xpm_data[i][10:12] + ","
-            + "},\n"
-        )
-        new_key += 1
+    for i in range(0, color_space):
+        # first N colors are left in the table
+        if (i < MAX_COLOR_SPACE):
+            cxpm_color_tbl[xpm_data[i + COLOR_TBL_START][1]] = new_key
+            rgb = (
+                xpm_data[i + COLOR_TBL_START][6:8],
+                xpm_data[i + COLOR_TBL_START][8:10],
+                xpm_data[i + COLOR_TBL_START][10:12],
+            )
+            chr_rgb_tbl[xpm_data[i + COLOR_TBL_START][1]] = rgb
+            # strip pixel mapping down to { key_byte, R_byte, G_byte, B_byte }
+            cxpm_data.append(ROW_ARR_CAST + "{" +
+                str(new_key) + ","
+                + "0x" + rgb[0] + ","
+                + "0x" + rgb[1] + ","
+                + "0x" + rgb[2] + ","
+                + "},\n"
+            )
+            new_key += 1
+        # once we get past the limits of CXPM, we try to render new colors
+        # to the closest approximations
+        else:
+            chr_code = xpm_data[i + COLOR_TBL_START][1]
+            chr_rgb = (
+                xpm_data[i + COLOR_TBL_START][6:8],
+                xpm_data[i + COLOR_TBL_START][8:10],
+                xpm_data[i + COLOR_TBL_START][10:12],
+            )
+            closest_color(cxpm_color_tbl, chr_rgb_tbl, chr_code, chr_rgb)
     # start in the original file where the pixel mapping occurs
     pixel_map_start = COLOR_TBL_START + color_space
 
