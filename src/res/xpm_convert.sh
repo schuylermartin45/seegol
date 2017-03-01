@@ -26,7 +26,7 @@ fd_out="${fd_in%.*}".xpm
 fd_out=$(echo "${fd_out}" | sed 's/img_original/img_xpm/g')
 
 # run conversion
-convert "${fd_in}" -colors ${COLOR_QUANT} -size ${SIZE} "${fd_out}"
+convert "${fd_in}" -resize ${SIZE} -colors ${COLOR_QUANT} "${fd_out}"
 
 # check for errors
 if [ $? -eq 0 ]; then
