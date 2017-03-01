@@ -7,10 +7,11 @@ PCjr
 http://www.oldskool.org/shrines/pcjr_tandy
 http://www.brutman.com/PCjr/
 
-OS References
--------------
+General OS References
+---------------------
 https://www.cs.bham.ac.uk/~exr/lectures/opsys/10_11/lectures/os-dev.pdf
 https://gitlab.com/sortie/meaty-skeleton/tree/master/kernel
+https://littleosbook.github.io/
 
 x86 References
 --------------
@@ -35,6 +36,8 @@ http://mikeos.sourceforge.net/write-your-own-os.html
 https://github.com/csssuf/bobbyjunior/blob/master/kernel/src/mbr.s
 http://duartes.org/gustavo/blog/post/kernel-boot-process/
 https://en.wikipedia.org/wiki/X86_memory_segmentation
+http://wiki.osdev.org/System_Initialization_(x86)
+http://www.independent-software.com/writing-your-own-bootloader-for-a-toy-operating-system-2/
 
 Graphics on the PCjr (CGA)
 --------------------------
@@ -52,3 +55,4 @@ http://wiki.osdev.org/Drawing_In_Protected_Mode
 http://www.brackeen.com/vga/bitmaps.html
 https://en.wikipedia.org/wiki/INT_10H
 http://www.delorie.com/djgpp/doc/ug/graphics/vga.html
+http://www.drdobbs.com/parallel/graphics-programming-black-book/184404919
