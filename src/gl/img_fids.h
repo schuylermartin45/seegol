@@ -15,13 +15,12 @@
 
 /** Macros     **/
 // size of the image table
-#define GL_IMG_TBL_SIZE  2
+#define GL_IMG_TBL_SIZE  1
 
 // file IDs, keys into the table
 // TODO not enough space for some images
-//#define IMG_FID_WYWH_8_150x100  0   // Wish You Were Here
-#define IMG_FID_WYWH_16_150x100 0   // Wish You Were Here, with more colors
-#define IMG_FID_DSTM_8_50x50    1   // Dark Side of the Moon
+#define IMG_FID_WYWH     0   // Wish You Were Here, with more colors
+#define IMG_FID_DSTM     1   // Dark Side of the Moon
 
 /** Globals    **/
 

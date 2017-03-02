@@ -15,6 +15,10 @@ SRC	     = src/
 KERN     = $(SRC)kern/
 VGA      = $(KERN)vga/
 GL       = $(SRC)gl/
+RES      = $(SRC)res/
+IMG_ORIG = $(RES)img_original/
+IMG_XPM  = $(RES)img_xpm/
+IMG_CXPM = $(RES)img_cxpm/
 USR      = $(SRC)usr/
 
 #
@@ -23,6 +27,17 @@ USR      = $(SRC)usr/
 C_SRC_KERN = $(shell find $(KERN) -name '*.c')
 C_SRC_GL   = $(shell find $(GL)   -name '*.c')
 C_SRC_USR  = $(shell find $(USR)  -name '*.c')
+
+#
+# Image files
+#
+IMG_SRC_ORIG = $(shell find $(IMG_ORIG) -name '*.*')
+# explicitly list image file types
+IMG_SRC_OFT0 = $(IMG_SRC_ORIG:.png=.xpm)
+IMG_SRC_OFT1 = $(IMG_SRC_OFT0:.jpg=.xpm)
+IMG_SRC_XPM  = $(subst $(IMG_ORIG),$(IMG_XPM),$(IMG_SRC_OFT1))
+IMG_SRC_XFT0 = $(IMG_SRC_XPM:.xpm=.cxpm)
+IMG_SRC_CXPM = $(subst $(IMG_XPM),$(IMG_CXPM),$(IMG_SRC_XFT0))
 
 #
 # Source and object files
@@ -71,12 +86,17 @@ LD = ld
 LDFLAGS = -melf_i386 -static -Tlinker.ld -nostdlib --nmagic
 
 #
+# Image conversion scripts setup
+#
+SCRIPT_XPM  = $(RES)xpm_convert.sh
+SCRIPT_CXPM = $(RES)cxpm.py
+
+#
 # Make compiling, assembling, and linking rules
 # Notes:
 #     - *.lst files contain helpful dumps of the assembly code
 #     - Files are compiled as an ELF and copied to flat binaries using objcopy
 #
-
 $(BIN)%.o: $(KERN)%.s
 	##
 	## MAKE: assemble kern/
@@ -104,15 +124,28 @@ $(BIN)%.o: $(USR)%.c
 	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
 
 #
+# Rules for manipulating and compressing images to be included in the OS
+#
+$(IMG_CXPM)%.cxpm: $(IMG_ORIG)%.* $(SCRIPT_XPM) $(SCRIPT_CXPM) 
+	$(SCRIPT_XPM) $<
+	$(SCRIPT_CXPM) $(patsubst $(IMG_CXPM)%.cxpm,$(IMG_XPM)%.xpm,$@)
+
+#
 # Compiling, assembling, and linking the project
 # 1) Compile using file pattern rules
 # 2) Link object files using a manual link script to a flat binary
 #
-see_gol: depend linker.ld $(OBJS)
+see_gol: res_img depend linker.ld $(OBJS)
 	##
 	## MAKE: see_gol
 	##
 	$(LD) $(LDFLAGS) -o $(BIN)os.b $(OBJS)
+
+#
+# Converting OS resource images directive (images drawn by the OS)
+# If the image conversion scripts are changed, re-run image creation
+#
+res_img: $(IMG_SRC_CXPM)
 
 #
 # Targets for building a floppy image
@@ -165,6 +198,8 @@ clean:
 	##
 	rm -f $(BIN)*
 	rm -f $(IMG)*
+	rm -f $(IMG_XPM)*
+	rm -f $(IMG_CXPM)*
 
 #
 # makedepend is a program which creates dependency lists by
@@ -206,8 +241,7 @@ bin/gl_lib.o: src/kern/debug.h src/kern/kio.h src/kern/kio.h
 bin/gl_lib.o: src/kern/vga/vga13.h src/kern/gcc16.h src/kern/types.h
 bin/gl_lib.o: src/kern/asm_lib.h src/kern/vga/vga.h src/gl/img_tbl.h
 bin/gl_lib.o: src/gl/img_fids.h
-bin/gl_lib.o: src/res/img_cxpm/wish_you_were_here_small_16clr_150x100.cxpm
-bin/gl_lib.o: src/res/img_cxpm/dark_side_of_the_moon_8clr_50x50.cxpm
+bin/gl_lib.o: src/res/img_cxpm/wish_you_were_here_small.cxpm
 bin/gl_lib.o: src/gl/see_font.h
 bin/slideshow.o: src/kern/gcc16.h src/usr/slideshow.h
 bin/slideshow.o: src/kern/types.h src/usr/program.h src/kern/kio.h

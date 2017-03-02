@@ -18,9 +18,8 @@
 #include "img_fids.h"
 // image data
 // TODO not enough space for some images
-//#include "../res/img_cxpm/wish_you_were_here_small_8clr_150x100.cxpm"
-#include "../res/img_cxpm/wish_you_were_here_small_16clr_150x100.cxpm"
-#include "../res/img_cxpm/dark_side_of_the_moon_8clr_50x50.cxpm"
+#include "../res/img_cxpm/wish_you_were_here_small.cxpm"
+//#include "../res/img_cxpm/dark_side_of_the_moon.cxpm"
 
 /** Macros     **/
 
@@ -28,9 +27,8 @@
 static const uint8_t** gl_img_tbl[GL_IMG_TBL_SIZE] =
 {
     // TODO not enough space for some images
-    //wish_you_were_here_small_8clr_150x100_cxpm,
-    wish_you_were_here_small_16clr_150x100_cxpm,
-    dark_side_of_the_moon_8clr_50x50_cxpm,
+    wish_you_were_here_small,
+    //dark_side_of_the_moon,
 };
 
 /** Structures **/
