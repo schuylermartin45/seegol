@@ -11,6 +11,8 @@
 USAGE="./xpm_convert.sh file"
 # quantization factor; how many colors should be in the image
 COLOR_QUANT=16
+# color space quantization is done in
+COLOR_QUANT_SPACE="YCbCr"
 # size parameters for the image
 SIZE="150x100"
 
@@ -26,7 +28,12 @@ fd_out="${fd_in%.*}".xpm
 fd_out=$(echo "${fd_out}" | sed 's/img_original/img_xpm/g')
 
 # run conversion
-convert "${fd_in}" -resize ${SIZE} -colors ${COLOR_QUANT} "${fd_out}"
+convert "${fd_in}" \
+    -quantize ${COLOR_QUANT_SPACE} \
+    +dither \
+    -resize ${SIZE} \
+    -colors ${COLOR_QUANT} \
+    "${fd_out}"
 
 # check for errors
 if [ $? -eq 0 ]; then

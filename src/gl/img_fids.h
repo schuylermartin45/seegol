@@ -15,7 +15,7 @@
 
 /** Macros     **/
 // size of the image table
-#define GL_IMG_TBL_SIZE  1
+#define GL_IMG_TBL_SIZE  2
 
 // file IDs, keys into the table
 // TODO not enough space for some images

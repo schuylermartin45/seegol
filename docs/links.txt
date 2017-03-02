@@ -56,3 +56,8 @@ http://www.brackeen.com/vga/bitmaps.html
 https://en.wikipedia.org/wiki/INT_10H
 http://www.delorie.com/djgpp/doc/ug/graphics/vga.html
 http://www.drdobbs.com/parallel/graphics-programming-black-book/184404919
+
+Image Quantization/Reduction
+----------------------------
+http://www.imagemagick.org/Usage/quantize/#extract
+http://www.imagemagick.org/script/quantize.php
