@@ -154,7 +154,18 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
 **
 ** @return Color space size of the image
 */
-uint16_t gl_img_stat(uint8_t fid, Point_2D* dims);
+uint8_t gl_img_stat(uint8_t fid, Point_2D* dims);
+
+/*
+** Gets transparency information about an image, providing the color code
+** representing a transparent portion.
+**
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
+**
+** @return 0 if no transparent pixels exist, color code otherwise
+*/
+uint8_t gl_img_stat_tcode(uint8_t fid);
 
 /*
 ** Draws a scaled image "installed" on the OS

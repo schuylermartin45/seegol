@@ -19,8 +19,9 @@
 
 // file IDs, keys into the table
 // TODO not enough space for some images
-#define IMG_FID_WYWH     0   // Wish You Were Here, with more colors
+#define IMG_FID_HSC      0   // Original HSC Logo
 #define IMG_FID_DSTM     1   // Dark Side of the Moon
+#define IMG_FID_WYWH     2   // Wish You Were Here
 
 /** Globals    **/
 

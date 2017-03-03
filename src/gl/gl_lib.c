@@ -293,11 +293,26 @@ void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
 **
 ** @return Color space size of the image
 */
-uint16_t gl_img_stat(uint8_t fid, Point_2D* dims)
+uint8_t gl_img_stat(uint8_t fid, Point_2D* dims)
 {
     dims->x = gl_img_tbl[fid][0][0];
     dims->y = gl_img_tbl[fid][0][1];
-    return gl_img_tbl[fid][0][2];
+    // upper 4 bits have transparency information
+    return 0x0F & gl_img_tbl[fid][0][2];
+}
+
+/*
+** Gets transparency information about an image, providing the color code
+** representing a transparent portion.
+**
+** @param fid File id that identifies the image data to draw from the image
+**        file look-up table (users can just simply use a macro)
+**
+** @return 0 if no transparent pixels exist, color code otherwise
+*/
+uint8_t gl_img_stat_tcode(uint8_t fid)
+{
+    return (0xF0 & gl_img_tbl[fid][0][2]) >> 4;
 }
 
 /*
@@ -319,7 +334,9 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
     // Phase 1:
     // file header information: width, height, number of colors
     Point_2D dims;
-    uint16_t color_space = gl_img_stat(fid, &dims);
+    uint8_t color_space = gl_img_stat(fid, &dims);
+    // transparency color code
+    uint8_t t_code = gl_img_stat_tcode(fid);
 
     // Phase 2:
     // build the bit-map color look-up table, organized as: {key, R, G, B}
@@ -361,11 +378,11 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
             }
             // perform the table look-up, on both pixels
             // upper 4 bits
-            uint8_t c0_key = (encode >> 4) - start_code;
+            uint8_t c0_key = encode >> 4;
             // lower 4 bits
-            uint8_t c1_key = (encode & 0x0F) - start_code;
-            RGB_8 color0 = color_map[c0_key];
-            RGB_8 color1 = color_map[c1_key];
+            uint8_t c1_key = encode & 0x0F;
+            RGB_8 color0 = color_map[c0_key - start_code];
+            RGB_8 color1 = color_map[c1_key - start_code];
             // scale, taking account for the fact that 2 pixels are drawn at
             // one time
             uint16_t px_scale = 2 * scale;
@@ -374,15 +391,18 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
             // draw until far edge
             if ((ul.x + x + draw_w) > vga_driver.screen_w)
                 draw_w = vga_driver.screen_w - (ul.x + x);
-            // bounds checking; don't draw past the bottom and left borders
+            // draw larger region if codes match and check for transparency
             if (c0_key == c1_key)
             {
-                // draw with fast rectangles when possible; when both colors
-                // are the same
-                vga_driver.vga_draw_rect_wh(
-                    ul.x + x, ul.y + (y * scale),
-                    draw_w, draw_h, color0
-                );
+                if (c0_key != t_code)
+                {
+                    // draw with fast rectangles when possible; when both
+                    // colors are the same
+                    vga_driver.vga_draw_rect_wh(
+                        ul.x + x, ul.y + (y * scale),
+                        draw_w, draw_h, color0
+                    );
+                }
             }
             else
             {
@@ -391,17 +411,24 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
                     // bounds checking
                     if ((ul.x + x + scale) > vga_driver.screen_w)
                         break;
-                    // draw the pixels, individually accounting for scale
-                    vga_driver.vga_draw_rect_wh(
-                        ul.x + x, ul.y + (y * scale),
-                        scale, draw_h, color0
-                    );
+                    // check for transparency
+                    if (c0_key != t_code)
+                    {
+                        // draw the pixels, individually accounting for scale
+                        vga_driver.vga_draw_rect_wh(
+                            ul.x + x, ul.y + (y * scale),
+                            scale, draw_h, color0
+                        );
+                    }
                     if ((ul.x + x + (2 * scale)) > vga_driver.screen_w)
                         break;
-                    vga_driver.vga_draw_rect_wh(
-                        ul.x + x + scale, ul.y + (y * scale),
-                        scale, draw_h, color1
-                    );
+                    if (c1_key != t_code)
+                    {
+                        vga_driver.vga_draw_rect_wh(
+                            ul.x + x + scale, ul.y + (y * scale),
+                            scale, draw_h, color1
+                        );
+                    }
                 }
             }
             x += run_len * px_scale;

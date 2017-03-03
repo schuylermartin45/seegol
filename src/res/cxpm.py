@@ -14,7 +14,10 @@
 ##              The file is formatted as follows:
 ##                - An array declaration
 ##                - A line of header information:
-##                  {width, height, color_map_size}
+##                  {width, height, transparency_code & color_map_size}
+##                  + Upper 4 bits: Color code mapped to "transparent"
+##                    (0 if not used)
+##                  + Lower 4 bits: Size of the color table
 ##                - The color mapping, 4 bits
 ##                  {color_code, R, G, B}
 ##                - Character mappings
@@ -53,7 +56,7 @@ INDENT = "  "
 ROW_ARR_CAST = INDENT + "(const unsigned char[])"
 # line that starts the color table in the original file
 COLOR_TBL_START = 3
-# RGB values to mark something as transparent. For now, assume black
+# RGB values to mark something as transparent. This is just a placeholder
 TRANSPARENT_RGB = ("00", "00", "00")
 
 #### FUNCTIONS  ####
@@ -193,6 +196,15 @@ def main():
                 rgb = ("00", "00", "00")
             elif(color_chk =="None"):
                 rgb = TRANSPARENT_RGB
+                # TODO
+                # encode transparency code in upper 4 bits of color table size
+                # by rebuilding the header information
+                bit_packed = (new_key << 4) + cxpm_color_space
+                cxpm_data[1] = (ROW_ARR_CAST + "{"
+                    + header[0] + ","
+                    + header[1] + ","
+                    + str(bit_packed) + "},\n"
+                )
             else:
                 rgb = (
                     xpm_data[i + COLOR_TBL_START][6:8],

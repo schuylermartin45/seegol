@@ -31,7 +31,8 @@ void hsc_tp_init(Program* prog)
     prog->desc =
         "HSC Graphical Test Pattern Program. 'q' to quit. 'mode' picks a "
         "VGA driver\n  mode. '-i' tests the image draw function. '-m' proced"
-        "urally draws\n the Macbeth chart. '-t' tests string drawing.";
+        "urally draws the\n  Macbeth chart. '-t' tests string drawing. -o "
+        "draw the original test image.";
     prog->usage = "mode [-i | -m | -t]";
     prog->main = &hsc_tp_main;
 }
@@ -161,16 +162,26 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
         __hsc_tp_draw_str();
     // draw image test
     else if ((argc == 3) && (kio_strcmp(argv[2], "-i")))
-        // TODO use HSC logo from Kailey's original PNG
-        gl_draw_img_center_scale(IMG_FID_WYWH, 2);
+        // HSC logo from Kailey's original PNG
+        gl_draw_img_center_scale(IMG_FID_HSC, 2);
     // draw colors test (Macbeth color chart)
     else if ((argc == 3) && (kio_strcmp(argv[2], "-m")))
         __hsc_tp_draw_board();
-    // putting it all together: HSC Logo w/ color chart and text
-    else if (argc < 3)
+    // original HSC Test Pattern, logo made in rectangles
+    else if ((argc == 3) && (kio_strcmp(argv[2], "-o")))
     {
         __hsc_tp_draw_board();
         __hsc_tp_draw_HSC();
+    }
+    // putting it all together: transparent HSC Logo w/ color chart and text
+    else if (argc < 3)
+    {
+        __hsc_tp_draw_board();
+        // white background to make the logo pop out
+        gl_draw_rect_wh(PT2(40, 55), 240, 90, RGB_WHITE);
+        gl_draw_img_center_scale(IMG_FID_HSC, 2);
+        // draw a string; hides crappy compressed text in the image
+        gl_draw_str(PT2(20, 145), RGB(255, 100, 0), RGB_HSC, HSC_NAME);
     }
     // error; exit graphics mode
     else
