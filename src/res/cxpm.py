@@ -196,7 +196,6 @@ def main():
                 rgb = ("00", "00", "00")
             elif(color_chk =="None"):
                 rgb = TRANSPARENT_RGB
-                # TODO
                 # encode transparency code in upper 4 bits of color table size
                 # by rebuilding the header information
                 bit_packed = (new_key << 4) + cxpm_color_space
