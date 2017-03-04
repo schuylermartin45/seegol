@@ -27,8 +27,8 @@
 #include "see_font.h"
 
 /** Macros     **/
-// byte used to indicate Huffman endcoded section in the CXPM decoder
-#define CXPM_HUFF_MARKER    0
+// byte used to indicate various states in the CXPM encoding
+#define CXPM_MARKER    0
 
 // structure that manages the driver mode currently activated
 // assumed to be text mode if graphics haven't been initialized yet
@@ -345,37 +345,33 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
     // subsequent keys are guaranteed to be consecutive
     uint8_t start_code = fd[1][0];
     // add the colors to the table, based on the header information
-    for (int i=1; i<color_space + 1; ++i)
+    for(int i=1; i<color_space + 1; ++i)
         color_map[fd[i][0] - start_code] = RGB(fd[i][1], fd[i][2], fd[i][3]);
 
     // Phase 3:
     // go over the image data, dropping pixels
-    for(uint16_t y=0; y<dims.y; ++y)
+    uint16_t px_cntr = 0;
+    uint16_t px_total = dims.x * dims.y;
+    Point_2D cursor = {0, 0};
+    const uint8_t* byte_arr = fd[color_space + 1];
+    // keep track of everything that's been drawn
+    while(px_cntr < px_total)
     {
-        // skip drawing scanlines that are out-of-bounds
-        if (ul.y + (y * scale) > vga_driver.screen_h)
-            break;
-        // x determines if we have reached the end of the image
-        uint16_t x = 0;
-        // x_b is they byte position on the line
-        uint16_t x_b = 0;
-        // run until the end of the scanline or terminate if we go off the 
-        // screen
-        while((x < (dims.x * scale)) && ((ul.x + x) <= vga_driver.screen_w))
+        // determine the action to perform based on a pattern of bytes
+        uint8_t byte = *byte_arr++;
+        if (byte == CXPM_MARKER)
         {
-            // read in the color encoding; advancing to the next encoded
-            // position in the process
-            uint8_t encode = fd[y + color_space + 1][x_b++];
-            // decode huffman encoding runs
-            // otherwise, draw two pixels at once, one time
-            uint16_t run_len = 1;
-            if (encode == CXPM_HUFF_MARKER)
-            {
-                // decode the next byte as the run length
-                run_len = fd[y + color_space + 1][x_b++];
-                // then this byte is the color key to draw
-                encode = fd[y + color_space + 1][x_b++];
-            }
+            // 0XY format: jump cursor to next left region
+            cursor.x = *byte_arr++;
+            cursor.y = *byte_arr++;
+            continue;
+        }
+        else
+        {
+            uint8_t encode = byte;
+            // actual pixels to be drawn
+            uint16_t draw_w = 1;
+            uint16_t draw_h = 1;
             // perform the table look-up, on both pixels
             // upper 4 bits
             uint8_t c0_key = encode >> 4;
@@ -383,14 +379,23 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
             uint8_t c1_key = encode & 0x0F;
             RGB_8 color0 = color_map[c0_key - start_code];
             RGB_8 color1 = color_map[c1_key - start_code];
-            // scale, taking account for the fact that 2 pixels are drawn at
-            // one time
-            uint16_t px_scale = 2 * scale;
-            uint16_t draw_w = run_len * px_scale;
-            uint16_t draw_h = scale;
+            // TODO bounds checks
             // draw until far edge
-            if ((ul.x + x + draw_w) > vga_driver.screen_w)
-                draw_w = vga_driver.screen_w - (ul.x + x);
+            //if ((ul.x + x + draw_w) > vga_driver.screen_w)
+            //    draw_w = vga_driver.screen_w - (ul.x + x);
+            // draw one color code byte
+            if (*byte_arr == CXPM_MARKER)
+            {
+                ++byte_arr;
+            }
+            // draw region
+            else
+            {
+                draw_w = *byte_arr++;
+                draw_h = *byte_arr++;
+                // jump if a region has already been painted
+                cursor.x = *byte_arr++;
+            }
             // draw larger region if codes match and check for transparency
             if (c0_key == c1_key)
             {
@@ -399,39 +404,44 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
                     // draw with fast rectangles when possible; when both
                     // colors are the same
                     vga_driver.vga_draw_rect_wh(
-                        ul.x + x, ul.y + (y * scale),
-                        draw_w, draw_h, color0
+                        (2 * cursor.x * scale) + ul.x,
+                        (cursor.y * scale) + ul.y,
+                        2 * draw_w * scale, draw_h * scale, color0
                     );
                 }
             }
             else
             {
-                for(uint16_t i=0; i<run_len; ++i)
+                // TODO this
+                // bounds checking
+                //if ((ul.x + x + scale) > vga_driver.screen_w)
+                //    break;
+                // check for transparency
+                if (c0_key != t_code)
                 {
-                    // bounds checking
-                    if ((ul.x + x + scale) > vga_driver.screen_w)
-                        break;
-                    // check for transparency
-                    if (c0_key != t_code)
-                    {
-                        // draw the pixels, individually accounting for scale
-                        vga_driver.vga_draw_rect_wh(
-                            ul.x + x, ul.y + (y * scale),
-                            scale, draw_h, color0
-                        );
-                    }
-                    if ((ul.x + x + (2 * scale)) > vga_driver.screen_w)
-                        break;
-                    if (c1_key != t_code)
-                    {
-                        vga_driver.vga_draw_rect_wh(
-                            ul.x + x + scale, ul.y + (y * scale),
-                            scale, draw_h, color1
-                        );
-                    }
+                    // draw the pixels, individually accounting for scale
+                    vga_driver.vga_draw_rect_wh(
+                        (2 * cursor.x * scale) + ul.x,
+                        (cursor.y * scale) + ul.y,
+                        draw_w * scale, draw_h * scale, color0
+                    );
+                }
+                // TODO this
+                //if ((ul.x + x + (2 * scale)) > vga_driver.screen_w)
+                //    break;
+                if (c1_key != t_code)
+                {
+                    vga_driver.vga_draw_rect_wh(
+                        (2 * cursor.x * scale) + ul.x,
+                        (cursor.y * scale) + ul.y,
+                        draw_w * scale, draw_h * scale, color1
+                    );
                 }
             }
-            x += run_len * px_scale;
+            // advance cursor
+            cursor.x += draw_w;
+            // increment what we have drawn thus far
+            px_cntr += 2 * draw_w * draw_h;
         }
     }
 }

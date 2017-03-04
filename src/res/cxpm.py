@@ -20,10 +20,15 @@
 ##                  + Lower 4 bits: Size of the color table
 ##                - The color mapping, 4 bits
 ##                  {color_code, R, G, B}
-##                - Character mappings
-##                  + 2 pixels per byte; 4 bits for RGB pixel lookup
-##                  + One byte indicates Huffman encoded portion:
-##                      {... MARKER, number_of_duplicates, pixel_byte, ...}
+##                - Pixel information, an array of bytes:
+##                  + Each "color code" byte represents 2 pixel color codes
+##                  + Regions start at the 0,0 and are built from left to right
+##                  + CWHX paints a region starting with an upper-left pixel
+##                    at X, color code C, and a W,H-sized rectangle
+##                  + C0 Paints one byte worth of color coding (2 pixels)
+##                  + Regions are sequential, moving a cursor left to right
+##                  + 0XY indicates the upper-left coordinate of next left-most
+##                    region when the cursor has reached the end of the frame
 ##
 
 # Python libraries
@@ -41,11 +46,6 @@ XPM_FILE_PATH    = "img_xpm/"
 CXPM_FILE_PATH   = "img_cxpm/"
 # value used to mark run lengths
 ENCODE_MARKER = 0
-# "cost" for performing a run length encoding
-# 1 byte for the marker -> costs 2 pixels
-# 1 byte for the run length digit -> costs 2 pixels
-# 1 byte for pixels to duplicate -> costs 1 pixel(?)
-RUN_BYTE_COST = 5
 # 15 colors available since we give up one for the encoding marker
 MAX_COLOR_SPACE = 15
 # indent for readability
@@ -58,6 +58,19 @@ ROW_ARR_CAST = INDENT + "(const unsigned char[])"
 COLOR_TBL_START = 3
 # RGB values to mark something as transparent. This is just a placeholder
 TRANSPARENT_RGB = ("00", "00", "00")
+
+#### Class      ####
+
+class Point:
+    '''
+    Simple point class for storing 2D information
+    '''
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __str__(self):
+        return "(" + str(self.x) + "," + str(self.y) + ")"
 
 #### FUNCTIONS  ####
 
@@ -194,7 +207,7 @@ def main():
                 rgb = ("FF", "FF", "FF")
             elif (color_chk == "black"):
                 rgb = ("00", "00", "00")
-            elif(color_chk =="None"):
+            elif (color_chk =="None"):
                 rgb = TRANSPARENT_RGB
                 # encode transparency code in upper 4 bits of color table size
                 # by rebuilding the header information
@@ -233,49 +246,123 @@ def main():
     # start in the original file where the pixel mapping occurs
     pixel_map_start = COLOR_TBL_START + color_space
 
-    # first pass: replace characters in the table with 2, 4 bit encodings
+    # First Pass: replace characters in the table with 2, 4 bit encodings
     # and combine 4 bits into 8 bit values; 2 pixels per byte
     # this is stored as an array of integers for easier parsing later
     xpm_pass_1 = []
     for i in range(pixel_map_start, pixel_map_start + dim_h):
         line = []
-        for j in range(1, len(xpm_data[i]) - 4, 2):
+        l_idx = xpm_data[i].index('"') + 1
+        r_idx = xpm_data[i].rindex('"')
+        for j in range(l_idx, r_idx, 2):
             hi = cxpm_color_tbl[xpm_data[i][j]] << 4
-            lo = cxpm_color_tbl[xpm_data[i][j + 1]]
+            # if an odd length, copy a pixel over
+            if (j + 1 >= r_idx):
+                lo = hi
+            else:
+                lo = cxpm_color_tbl[xpm_data[i][j + 1]]
             line.append(hi + lo)
         xpm_pass_1.append(line)
 
-    # second pass: Huffman encoding
-    for i in range(0, len(xpm_pass_1)):
-        compressed = ""
-        # a NULL byte is added to the end of the array to make parsing easier
-        # prevents the last byte(s) from being left out
-        xpm_pass_1[i].append(0)
-        cur_byte = xpm_pass_1[i].pop(0)
-        byte_cntr = 1
-        # scan for duplicates
-        while (len(xpm_pass_1[i]) > 0):
-            # count duplicates
-            top_byte = xpm_pass_1[i].pop(0)
-            # count duplicates
-            if (cur_byte == top_byte):
-                byte_cntr += 1
-            # write on byte change and reset for next run length
-            else:
-                # only compress when it's worth the cost of marking a run
-                # of repeated values
-                if (byte_cntr > RUN_BYTE_COST):
-                    # for run lengths that can't be expressed in 8 bits,
-                    # break the encoding in segments
-                    compressed += huff_run(cur_byte, byte_cntr)
-                else:
-                    for k in range(0, byte_cntr):
-                        compressed += str(cur_byte) + ","
-                cur_byte = top_byte
-                byte_cntr = 1
+    # Second Pass: 2D Huffman encoding
+    compressed = ""
+    # cursor holds the current upper-left coordinate designating the start of
+    # a rectangular region
+    cursor = Point(0, 0)
+    # determine if we have represented the whole image
+    total_pixels = dim_w * dim_h
+    pixel_cntr = 0
+    while (pixel_cntr < total_pixels):
+        cur_val = xpm_pass_1[cursor.y][cursor.x]
+        # find max region size in both directions
+        max_w = 0
+        max_h = 0
+        # x direction
+        for x in range(cursor.x, len(xpm_pass_1[cursor.y])):
+            if (cur_val != xpm_pass_1[cursor.y][x]):
+                break
+            max_w += 1
+        # y direction
+        for y in range(cursor.y, len(xpm_pass_1)):
+            if (cur_val != xpm_pass_1[y][cursor.x]):
+                break
+            max_h += 1
+        # Now check to see if that region stays uniform, shrinking it if it
+        # doesn't. For example, if we just used the values from the previous
+        # check, we could accidentally throw out color information if the
+        # cursor was on an edge.
+        w_val = max_w
+        h_val = max_h
+        for y in range(cursor.y, cursor.y + max_h):
+            for x in range(cursor.x, cursor.x + max_w):
+                if (xpm_pass_1[y][x] != cur_val):
+                    # minimize width and height
+                    if (x < w_val):
+                        w_val = x
+                    if (y < h_val):
+                        h_val = y
+        # store region data
+        if ((w_val == 1) and (h_val == 1)):
+            compressed += (
+                str(cur_val) + ","
+                + str(ENCODE_MARKER) + ", "
+            )
+        else:
+            compressed += (
+                str(cur_val) + ","
+                + str(w_val) + ","
+                + str(h_val) + ","
+                + str(cursor.x) + ", "
+            )
 
-        # commit the new line to the compressed file
-        cxpm_data.append(ROW_ARR_CAST + "{" + compressed + "},\n")
+        # fill the region with a marker in the image array so that we can
+        # easily find the upper-left starting point when we move in the y
+        # y direction
+        for y in range(cursor.y, cursor.y + h_val):
+            for x in range(cursor.x, cursor.x + w_val):
+                xpm_pass_1[y][x] = ENCODE_MARKER
+
+        # advance the cursor
+        cursor.x += w_val
+        # skip marked/covered regions
+        if (cursor.x < (dim_w // 2)):
+            if (xpm_pass_1[cursor.y][cursor.x] == ENCODE_MARKER):
+                for x in range(cursor.x, len(xpm_pass_1[cursor.y])):
+                    if (xpm_pass_1[cursor.y][x] != ENCODE_MARKER):
+                        cursor.x = x
+                        break
+                # in case there are 0s leading to the end boundry, force
+                # the end of line check
+                if (xpm_pass_1[cursor.y][cursor.x] == ENCODE_MARKER):
+                    cursor.x = dim_w // 2
+
+        # if we've reached the end of the line, skip to the next left-most
+        # upper-left region position and put in an end marker
+        if (cursor.x >= (dim_w // 2)):
+            # find the next coordinate to start looking at
+            for y in range(cursor.y, len(xpm_pass_1)):
+                for x in range(0, len(xpm_pass_1[y])):
+                    if (xpm_pass_1[y][x] != ENCODE_MARKER):
+                        cursor.x = x
+                        cursor.y = y
+                        break
+                else:
+                    continue
+                break
+            # put in an end-of-line marker 
+            compressed += (
+                str(ENCODE_MARKER) + ","
+                + str(cursor.x) + ","
+                + str(cursor.y) + ","
+            )
+            # add a newline for readability
+            compressed += "\n";
+
+        # count the total number of pixels drawn by this region
+        pixel_cntr += w_val * h_val * 2
+
+    # commit the new line to the compressed file
+    cxpm_data.append(ROW_ARR_CAST + "{" + compressed + "},\n")
     # close the outer array
     cxpm_data.append("};")
 
