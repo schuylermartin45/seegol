@@ -142,6 +142,21 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color);
 */
 void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
 
+/*
+** Draws a string using kio_sprintf, based on a custom-made bitmap font.
+** "Transparent" backgrounds are achieved by setting the background and
+** foreground colors to the same value.
+**
+** @param ul Upper-left starting point
+** @param b_color Background color of the text
+** @param f_color Foreground color of the text
+** @param str String to draw
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
+*/
+void gl_draw_strf(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
+    void* a0, void* a1);
+
 /***** Image Draw Functions (driver-independent)     *****/
 
 /*

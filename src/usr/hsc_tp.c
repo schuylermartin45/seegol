@@ -134,12 +134,8 @@ static void __hsc_tp_draw_str(void)
     gl_draw_str(PT2(0, 100), RGB_WHITE, RGB_BLACK, str2);
     // TEST 3: sprintf and transparent backgrounds
     char* str3 = "BIN %b  HEX %x WORDS WORDS WORDS NEWLINE\nWORDS WORDS";
-    uint16_t num[1];
-    num[0] = 42;
-    uint16_t str3_len = kio_sprintf_len(str3, num, num);
-    char buff_3[str3_len];
-    kio_sprintf(str3, buff_3, num, num);
-    gl_draw_str(PT2(50, 160), RGB_WHITE, RGB_WHITE, buff_3);
+    uint16_t num = 42;
+    gl_draw_strf(PT2(50, 160), RGB_WHITE, RGB_WHITE, str3, &num, &num);
 }
 
 /*
