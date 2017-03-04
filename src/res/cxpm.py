@@ -25,6 +25,7 @@
 ##                  + Regions start at the 0,0 and are built from left to right
 ##                  + CWHX paints a region starting with an upper-left pixel
 ##                    at X, color code C, and a W,H-sized rectangle
+##                  + CW0 Height is 1
 ##                  + C0 Paints one byte worth of color coding (2 pixels)
 ##                  + Regions are sequential, moving a cursor left to right
 ##                  + 0XY indicates the upper-left coordinate of next left-most
@@ -291,20 +292,48 @@ def main():
         # doesn't. For example, if we just used the values from the previous
         # check, we could accidentally throw out color information if the
         # cursor was on an edge.
-        w_val = max_w
-        h_val = max_h
+        x_w_val = max_w
+        x_h_val = max_h
+        y_w_val = max_w
+        y_h_val = max_h
+        # search in both dimensions for the largest continous grouping
+        break_out = False
         for y in range(cursor.y, cursor.y + max_h):
             for x in range(cursor.x, cursor.x + max_w):
                 if (xpm_pass_1[y][x] != cur_val):
-                    # minimize width and height
-                    if (x < w_val):
-                        w_val = x
-                    if (y < h_val):
-                        h_val = y
+                    # as soon as we hit an issue, cut off the region
+                    x_w_val = x - cursor.x
+                    x_h_val = y - cursor.y
+                    break_out = True
+            if (break_out):
+                break
+        break_out = False
+        for x in range(cursor.x, cursor.x + max_w):
+            for y in range(cursor.y, cursor.y + max_h):
+                if (xpm_pass_1[y][x] != cur_val):
+                    # as soon as we hit an issue, cut off the region
+                    y_w_val = x - cursor.x
+                    y_h_val = y - cursor.y
+                    break_out = True
+            if (break_out):
+                break
+        # pick the largest rectanlge
+        if ((x_w_val * x_h_val) > (y_w_val * y_h_val)):
+            w_val = x_w_val
+            h_val = x_h_val
+        else:
+            w_val = y_w_val
+            h_val = y_h_val
         # store region data
         if ((w_val == 1) and (h_val == 1)):
             compressed += (
                 str(cur_val) + ","
+                + str(ENCODE_MARKER) + ", "
+            )
+        elif (h_val == 1):
+            compressed += (
+                str(cur_val) + ","
+                + str(w_val) + ","
                 + str(ENCODE_MARKER) + ", "
             )
         else:
@@ -321,9 +350,18 @@ def main():
         for y in range(cursor.y, cursor.y + h_val):
             for x in range(cursor.x, cursor.x + w_val):
                 xpm_pass_1[y][x] = ENCODE_MARKER
+        # TODO rm
+        #for y in range(0, len(xpm_pass_1)):
+        #    for x in range(0, len(xpm_pass_1[y])):
+        #        if (xpm_pass_1[y][x] == 0):
+        #            print(0,end="")
+        #        else:
+        #            print(1,end="")
+        #    print("")
+        #print("---------")
 
         # advance the cursor
-        cursor.x += w_val
+        cursor.x += w_val + 1
         # skip marked/covered regions
         if (cursor.x < (dim_w // 2)):
             if (xpm_pass_1[cursor.y][cursor.x] == ENCODE_MARKER):
@@ -339,16 +377,16 @@ def main():
         # if we've reached the end of the line, skip to the next left-most
         # upper-left region position and put in an end marker
         if (cursor.x >= (dim_w // 2)):
+            break_out = False
             # find the next coordinate to start looking at
-            for y in range(cursor.y, len(xpm_pass_1)):
+            for y in range(0, len(xpm_pass_1)):
                 for x in range(0, len(xpm_pass_1[y])):
                     if (xpm_pass_1[y][x] != ENCODE_MARKER):
                         cursor.x = x
                         cursor.y = y
-                        break
-                else:
-                    continue
-                break
+                        break_out = True
+                if (break_out):
+                    break
             # put in an end-of-line marker 
             compressed += (
                 str(ENCODE_MARKER) + ","
@@ -356,7 +394,7 @@ def main():
                 + str(cursor.y) + ","
             )
             # add a newline for readability
-            compressed += "\n";
+            compressed += "\n" + INDENT;
 
         # count the total number of pixels drawn by this region
         pixel_cntr += w_val * h_val * 2

@@ -369,9 +369,9 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
         else
         {
             uint8_t encode = byte;
-            // actual pixels to be drawn
-            uint16_t draw_w = 1;
-            uint16_t draw_h = 1;
+            // region dimensions read from file
+            uint16_t w = 1;
+            uint16_t h = 1;
             // perform the table look-up, on both pixels
             // upper 4 bits
             uint8_t c0_key = encode >> 4;
@@ -379,10 +379,6 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
             uint8_t c1_key = encode & 0x0F;
             RGB_8 color0 = color_map[c0_key - start_code];
             RGB_8 color1 = color_map[c1_key - start_code];
-            // TODO bounds checks
-            // draw until far edge
-            //if ((ul.x + x + draw_w) > vga_driver.screen_w)
-            //    draw_w = vga_driver.screen_w - (ul.x + x);
             // draw one color code byte
             if (*byte_arr == CXPM_MARKER)
             {
@@ -391,14 +387,22 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
             // draw region
             else
             {
-                draw_w = *byte_arr++;
-                draw_h = *byte_arr++;
+                w = *byte_arr++;
+                h = *byte_arr++;
                 // jump if a region has already been painted
                 cursor.x = *byte_arr++;
             }
             // draw larger region if codes match and check for transparency
             if (c0_key == c1_key)
             {
+                uint16_t draw_w = 2 * w * scale;
+                uint16_t draw_h = h * scale;
+                // bounds checking
+                // TODO this overflows???!!!
+                if ((2 * cursor.x * scale) + ul.x + draw_w > gl_getw())
+                    draw_w = gl_getw() - ((2 * cursor.x * scale) + ul.x);
+                if ((cursor.y * scale) + ul.y + draw_h > gl_geth())
+                    draw_h = gl_geth() - ((cursor.y * scale) + ul.y);
                 if (c0_key != t_code)
                 {
                     // draw with fast rectangles when possible; when both
@@ -406,12 +410,13 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
                     vga_driver.vga_draw_rect_wh(
                         (2 * cursor.x * scale) + ul.x,
                         (cursor.y * scale) + ul.y,
-                        2 * draw_w * scale, draw_h * scale, color0
+                        draw_w, draw_h, color0
                     );
                 }
             }
             else
             {
+/*
                 // TODO this
                 // bounds checking
                 //if ((ul.x + x + scale) > vga_driver.screen_w)
@@ -423,7 +428,7 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
                     vga_driver.vga_draw_rect_wh(
                         (2 * cursor.x * scale) + ul.x,
                         (cursor.y * scale) + ul.y,
-                        draw_w * scale, draw_h * scale, color0
+                        w * scale, h * scale, color0
                     );
                 }
                 // TODO this
@@ -432,16 +437,18 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
                 if (c1_key != t_code)
                 {
                     vga_driver.vga_draw_rect_wh(
-                        (2 * cursor.x * scale) + ul.x,
+                        (2 * (cursor.x + 1) * scale) + ul.x,
                         (cursor.y * scale) + ul.y,
-                        draw_w * scale, draw_h * scale, color1
+                        w * scale, h * scale, color1
                     );
                 }
+*/
+                color1.r += 3;
             }
             // advance cursor
-            cursor.x += draw_w;
+            cursor.x += w;
             // increment what we have drawn thus far
-            px_cntr += 2 * draw_w * draw_h;
+            px_cntr += 2 * w * h;
         }
     }
 }
