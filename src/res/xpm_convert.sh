@@ -14,7 +14,7 @@ COLOR_QUANT=16
 # color space quantization is done in
 COLOR_QUANT_SPACE="YCbCr"
 # size parameters for the image
-SIZE="150x100"
+SIZE="80x50"
 
 if [[ -z $1 ]]; then
     >&2 echo ${USAGE}

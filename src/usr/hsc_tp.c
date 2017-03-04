@@ -163,7 +163,7 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
     // draw image test
     else if ((argc == 3) && (kio_strcmp(argv[2], "-i")))
         // HSC logo from Kailey's original PNG
-        gl_draw_img_center_scale(IMG_FID_HSC, 2);
+        gl_draw_img_center_scale(IMG_FID_HSC, 3);
     // draw colors test (Macbeth color chart)
     else if ((argc == 3) && (kio_strcmp(argv[2], "-m")))
         __hsc_tp_draw_board();
@@ -178,8 +178,8 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
     {
         __hsc_tp_draw_board();
         // white background to make the logo pop out
-        gl_draw_rect_wh(PT2(40, 55), 240, 90, RGB_WHITE);
-        gl_draw_img_center_scale(IMG_FID_HSC, 2);
+        gl_draw_rect_wh(PT2(35, 55), 250, 90, RGB_WHITE);
+        gl_draw_img_center_scale(IMG_FID_HSC, 4);
         // draw a string; hides crappy compressed text in the image
         gl_draw_str(PT2(20, 145), RGB(255, 100, 0), RGB_HSC, HSC_NAME);
     }

@@ -20,7 +20,8 @@
 // TODO not enough space for some images
 #include "../res/img_cxpm/dark_side_of_the_moon.cxpm"
 #include "../res/img_cxpm/hsc_logo.cxpm"
-//#include "../res/img_cxpm/wish_you_were_here_small.cxpm"
+#include "../res/img_cxpm/wish_you_were_here_small.cxpm"
+#include "../res/img_cxpm/me_rick_and_morty.cxpm"
 
 /** Macros     **/
 
@@ -30,7 +31,8 @@ static const uint8_t** gl_img_tbl[GL_IMG_TBL_SIZE] =
     // TODO not enough space for some images
     hsc_logo,
     dark_side_of_the_moon,
-    //wish_you_were_here_small,
+    wish_you_were_here_small,
+    me_rick_and_morty,
 };
 
 /** Structures **/

@@ -15,13 +15,14 @@
 
 /** Macros     **/
 // size of the image table
-#define GL_IMG_TBL_SIZE  2
+#define GL_IMG_TBL_SIZE  4
 
 // file IDs, keys into the table
 // TODO not enough space for some images
 #define IMG_FID_HSC      0   // Original HSC Logo
 #define IMG_FID_DSTM     1   // Dark Side of the Moon
 #define IMG_FID_WYWH     2   // Wish You Were Here
+#define IMG_FID_SGRM     3   // Shoyler and Glaude ans Rick and Morty
 
 /** Globals    **/
 

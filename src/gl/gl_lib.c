@@ -27,8 +27,8 @@
 #include "see_font.h"
 
 /** Macros     **/
-// byte used to indicate Huffman endcoded section in the CXPM decoder
-#define CXPM_HUFF_MARKER    0
+// byte used to indicate run-length endcoded section in the CXPM decoder
+#define CXPM_MARKER    0
 
 // structure that manages the driver mode currently activated
 // assumed to be text mode if graphics haven't been initialized yet
@@ -345,7 +345,7 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
     // subsequent keys are guaranteed to be consecutive
     uint8_t start_code = fd[1][0];
     // add the colors to the table, based on the header information
-    for (int i=1; i<color_space + 1; ++i)
+    for(int i=1; i<color_space + 1; ++i)
         color_map[fd[i][0] - start_code] = RGB(fd[i][1], fd[i][2], fd[i][3]);
 
     // Phase 3:
@@ -366,10 +366,10 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
             // read in the color encoding; advancing to the next encoded
             // position in the process
             uint8_t encode = fd[y + color_space + 1][x_b++];
-            // decode huffman encoding runs
+            // decode run-length encoding
             // otherwise, draw two pixels at once, one time
             uint16_t run_len = 1;
-            if (encode == CXPM_HUFF_MARKER)
+            if (encode == CXPM_MARKER)
             {
                 // decode the next byte as the run length
                 run_len = fd[y + color_space + 1][x_b++];

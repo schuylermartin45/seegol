@@ -20,9 +20,9 @@
 ##                  + Lower 4 bits: Size of the color table
 ##                - The color mapping, 4 bits
 ##                  {color_code, R, G, B}
-##                - Character mappings
+##                - Pixel information:
 ##                  + 2 pixels per byte; 4 bits for RGB pixel lookup
-##                  + One byte indicates Huffman encoded portion:
+##                  + One byte indicates run-length encoded portion:
 ##                      {... MARKER, number_of_duplicates, pixel_byte, ...}
 ##
 
@@ -44,8 +44,7 @@ ENCODE_MARKER = 0
 # "cost" for performing a run length encoding
 # 1 byte for the marker -> costs 2 pixels
 # 1 byte for the run length digit -> costs 2 pixels
-# 1 byte for pixels to duplicate -> costs 1 pixel(?)
-RUN_BYTE_COST = 5
+RUN_BYTE_COST = 4
 # 15 colors available since we give up one for the encoding marker
 MAX_COLOR_SPACE = 15
 # indent for readability
@@ -121,7 +120,7 @@ def closest_color(chr_tbl, rgb_tbl, chr_code, chr_rgb):
 
 def huff_run(byte, byte_cntr):
     '''
-    Compresses byte data using a Huffman encoding scheme
+    Compresses byte data using a run-length encoding scheme
     :param: byte Repeated byte to compress
     :param: byte_cntr Number of occurances of a byte
     :return: String of comma separated integers (to be stored in an array)
@@ -194,7 +193,7 @@ def main():
                 rgb = ("FF", "FF", "FF")
             elif (color_chk == "black"):
                 rgb = ("00", "00", "00")
-            elif(color_chk =="None"):
+            elif (color_chk =="None"):
                 rgb = TRANSPARENT_RGB
                 # encode transparency code in upper 4 bits of color table size
                 # by rebuilding the header information
@@ -233,19 +232,25 @@ def main():
     # start in the original file where the pixel mapping occurs
     pixel_map_start = COLOR_TBL_START + color_space
 
-    # first pass: replace characters in the table with 2, 4 bit encodings
+    # First Pass: replace characters in the table with 2, 4 bit encodings
     # and combine 4 bits into 8 bit values; 2 pixels per byte
     # this is stored as an array of integers for easier parsing later
     xpm_pass_1 = []
     for i in range(pixel_map_start, pixel_map_start + dim_h):
         line = []
-        for j in range(1, len(xpm_data[i]) - 4, 2):
+        l_idx = xpm_data[i].index('"') + 1
+        r_idx = xpm_data[i].rindex('"')
+        for j in range(l_idx, r_idx, 2):
             hi = cxpm_color_tbl[xpm_data[i][j]] << 4
-            lo = cxpm_color_tbl[xpm_data[i][j + 1]]
+            # if an odd length, copy a pixel over
+            if (j + 1 >= r_idx):
+                lo = hi >> 4
+            else:
+                lo = cxpm_color_tbl[xpm_data[i][j + 1]]
             line.append(hi + lo)
         xpm_pass_1.append(line)
 
-    # second pass: Huffman encoding
+    # Second Pass: run-length encoding
     for i in range(0, len(xpm_pass_1)):
         compressed = ""
         # a NULL byte is added to the end of the array to make parsing easier
