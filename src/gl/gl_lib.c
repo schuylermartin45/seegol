@@ -509,3 +509,170 @@ void gl_draw_img_center(uint8_t fid)
     // calculate the upper left corner that will center the image on the screen
     gl_draw_img_center_scale(fid, 1);
 }
+
+/***** Line Draw Functions (driver-independent)      *****/
+
+/*
+** Draw a horizontal line
+**
+** @param p0 First point
+** @param p1 Second point
+** @param color Color to draw
+*/
+static void __gl_draw_horz(Point_2D p0, Point_2D p1, RGB_8 color)
+{
+    for (uint16_t x=p0.x; x<=p1.x; ++x)
+        vga_driver.vga_put_pixel(x, p0.y, color);
+}
+
+/*
+** Draw a vertical line
+**
+** @param p0 First point
+** @param p1 Second point
+** @param color Color to draw
+*/
+static void __gl_draw_vert(Point_2D p0, Point_2D p1, RGB_8 color)
+{
+    // perform the "left-right" swapping of the coordinates but for drawing
+    // vertical lines (ensure that p1-p0 is positive)
+    if (p0.y > p1.y)
+    {
+        Point_2D tp = p0;
+        p0 = p1, p1=tp;
+    }
+    for (uint16_t y=p0.y; y<=p1.y; ++y)
+        vga_driver.vga_put_pixel(p0.x, y, color);
+}
+
+/*
+** Draw a diagonal line (m = +/- 1)
+**
+** @param p0 First point
+** @param p1 Second point
+** @param color Color to draw
+*/
+static void __gl_draw_diag(Point_2D p0, Point_2D p1, RGB_8 color)
+{
+    for (uint16_t i=0; i<=(p1.x - p0.x); ++i)
+    {
+        // negative slopes
+        if (p0.y < p1.y)
+            vga_driver.vga_put_pixel(p0.x + i, p0.y + i, color);
+        // positive slopes
+        else
+            vga_driver.vga_put_pixel(p0.x + i, p0.y - i, color);
+    }
+}
+
+/*
+** Draw a line found in the octants, using the midpoint-line algorithm
+**
+** @param p0 First point
+** @param p1 Second point
+** @param color Color to draw
+*/
+static void __gl_draw_octs(Point_2D p0, Point_2D p1, RGB_8 color)
+{
+    // set x and y to the starting point/pixel; these then change with each
+    // iteration of the drawing
+    int16_t x = p0.x, y = p0.y;
+    // calculate slope component for each direction
+    int16_t dx = p1.x - p0.x, dy = p1.y - p0.y;
+    // choose which direction (+/-) to increment x or y in
+    int16_t incr_x = 1, incr_y = (dy > 0) ? 1 : -1;
+
+    int16_t abs_dy = (dy < 0) ? -dy : dy;
+    // steep lines iterate over y instead of x (this occurs when |dy| > dx)
+    // **Note: dx will always be positive as we always draw left-to-right
+    if (abs_dy > dx)
+    {
+        // establish deltas for next movement
+        int16_t dE = 2 * dx;
+        int16_t dNE = (dy > 0) ? 2 * (dx - dy) : 2 * (dx + dy);
+        // initial delta value
+        int16_t delta = (dy > 0) ? dE - dy : dE + dy;
+        // as dy can be positive or negative, >= or <= checks aren't going to
+        // cut it. So instead we will loop until we barely reach p1...(*)
+        for (; y != p1.y; y += incr_y)
+        {
+            // color and pick the next pixel
+            vga_driver.vga_put_pixel(x, y, color);
+            if (delta <= 0)
+                delta += dE;
+            else
+            {
+                x += incr_x;
+                delta += dNE;
+            }
+        }
+        // (*)... and then draw the last point at p1
+        vga_driver.vga_put_pixel(x, y, color);
+    }
+    // draw gradual-sloped  lines (first and last octant)
+    // this works similar to the code above but is a bit simpler as dx will
+    // always be positive because we gaurantee left-to-right coordinates
+    else
+    {
+        // establish deltas for next movement
+        int16_t dE = (dy > 0) ? 2 * dy : -2 * dy;
+        int16_t dNE = (dy > 0) ? 2 * (dy - dx) : 2 * (-dy - dx);
+        // initial delta value
+        int16_t delta = dE - dx;
+        for (; x <= p1.x; x += incr_x)
+        {
+            // color and pick the next pixel
+            vga_driver.vga_put_pixel(x, y, color);
+            if (delta <= 0)
+                delta += dE;
+            else
+            {
+                y += incr_y;
+                delta += dNE;
+            }
+        }
+        vga_driver.vga_put_pixel(x, y, color);
+    }
+}
+
+/*
+** Draw a line anywhere on the screen
+**
+** @param p0 First point
+** @param p1 Second point
+** @param color Color to draw
+*/
+void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
+{
+    // start by performing the left-right coordinate check-and-swap
+    if (p0.x > p1.x)
+    {
+        Point_2D tp = p0;
+        p0 = p1; p1 = tp;
+    }
+    // bound points to within the draw space
+    if (p0.x > gl_getw())
+        p0.x = gl_getw();
+    if (p1.x > gl_getw())
+        p1.x = gl_getw();
+    if (p0.y > gl_geth())
+        p0.y = gl_geth();
+    if (p1.y > gl_geth())
+        p1.y = gl_geth();
+
+    // check for optimized line drawing
+    if (p0.y == p1.y)
+        __gl_draw_horz(p0, p1, color);
+    else if (p0.x == p1.x)
+        __gl_draw_vert(p0, p1, color);
+    else
+    {
+        int16_t dx = p1.x - p0.x, dy = p1.y - p0.y;
+        // draw diagonal lines if slope is +/-1
+        if ((dx == dy) || (dx == -dy))
+            __gl_draw_diag(p0, p1, color);
+        // draw...everything else (in the octants)
+        else
+            __gl_draw_octs(p0, p1, color);
+    }
+}

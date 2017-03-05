@@ -224,4 +224,15 @@ void gl_draw_img_center_scale(uint8_t fid, uint8_t scale);
 */
 void gl_draw_img_center(uint8_t fid);
 
+/***** Line Draw Functions (driver-independent)      *****/
+
+/*
+** Draw a line anywhere on the screen
+**
+** @param p0 First point
+** @param p1 Second point
+** @param color Color to draw
+*/
+void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color);
+
 #endif

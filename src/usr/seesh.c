@@ -18,11 +18,12 @@
 #include "hellow.h"
 #include "hsc_tp.h"
 #include "slideshow.h"
+#include "trench_run.h"
 
 /** Macros    **/
 // number of shell commands. This is kept in the C file out of convenience
 #define BUILT_IN_COUNT  3
-#define PROG_COUNT      (BUILT_IN_COUNT + 3)
+#define PROG_COUNT      (BUILT_IN_COUNT + 4)
 
 // structure that holds all program information
 static Program prog_lst[PROG_COUNT];
@@ -133,6 +134,8 @@ static void __init(Program* prog_lst)
     hsc_tp_init(prog_lst);
     ++prog_lst;
     slideshow_init(prog_lst);
+    ++prog_lst;
+    trench_run_init(prog_lst);
     ++prog_lst;
 }
 
