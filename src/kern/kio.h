@@ -87,6 +87,8 @@ uint16_t kio_strlen(const char* str);
 ** Putting a single digit in front of the type will left-pad if the argument
 ** is shorter than the padding. Example: "|%5d|%5d|"
 **   |   12|123456|
+** This feature can also pad with 0s. Example: "|%05d|%05d|"
+**   |00012|123456|
 */
 
 /*

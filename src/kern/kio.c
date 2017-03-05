@@ -169,6 +169,8 @@ uint16_t kio_strlen(const char* str)
 ** Putting a single digit in front of the type will left-pad if the argument
 ** is shorter than the padding. Example: "|%5d|%5d|"
 **   |   12|123456|
+** This feature can also pad with 0s. Example: "|%05d|%05d|"
+**   |00012|123456|
 */
 
 /*
@@ -197,6 +199,9 @@ uint16_t kio_sprintf_len(const char* str, void* a0, void* a1)
             uint16_t arg_len = 0;
             // optional format length
             uint8_t fmt_len = 0;
+            // skip if padding char is being indicated
+            if (*str == '0')
+                ++str;
             if ((*str > '0') && (*str <= '9'))
             {
                 fmt_len = *str - '0';
@@ -288,6 +293,7 @@ void kio_sprintf(const char* str, char* buff, void* a0, void* a1)
         if (*str == '%')
         {
             ++str;
+            char pad_ch = ' ';
             // buffer for printf text processing
             char p_buff[TEXT_WIDTH];
             // assume arguments are numbers out of convience
@@ -297,6 +303,12 @@ void kio_sprintf(const char* str, char* buff, void* a0, void* a1)
             char* arg_str = p_buff;
             // optional format length
             uint8_t fmt_len = 0;
+            // pad with 0s option
+            if (*str == '0')
+            {
+                pad_ch = '0';
+                ++str;
+            }
             if ((*str > '0') && (*str <= '9'))
             {
                 fmt_len = *str - '0';
@@ -353,7 +365,7 @@ void kio_sprintf(const char* str, char* buff, void* a0, void* a1)
             if (arg_len < fmt_len)
             {
                 for (uint8_t i=0; i<(fmt_len - arg_len); ++i)
-                    *buff++ = ' ';
+                    *buff++ = pad_ch;
             }
             // print the value of the argument
             while(*arg_str != '\0')

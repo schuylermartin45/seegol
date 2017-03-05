@@ -631,7 +631,6 @@ static void __gl_draw_octs(Point_2D p0, Point_2D p1, RGB_8 color)
                 delta += dNE;
             }
         }
-        vga_driver.vga_put_pixel(x, y, color);
     }
 }
 
