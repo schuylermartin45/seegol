@@ -83,6 +83,10 @@ uint16_t kio_strlen(const char* str);
 **   %x | %X - Numeric in hexadecimal (uint16_t | uint8_t)
 **   %c | %C - Character
 **   %s | %S - String
+**
+** Putting a single digit in front of the type will left-pad if the argument
+** is shorter than the padding. Example: "|%5d|%5d|"
+**   |   12|123456|
 */
 
 /*

@@ -3,7 +3,7 @@
 **
 ** Author:  Schuyler Martin <sam8050@rit.edu>
 **
-** Description: Kernel I/O for basic debugging purposes
+** Description: Kernel I/O for basic debugging purposes and string manipulation
 **              This file provides the faculties to print an auxiliary buffer
 **              when graphics mode is enabled
 */
@@ -106,9 +106,7 @@ uint16_t kio_str_int(char* buff, uint16_t base)
     char* buff_end = buff;
     // find the end of the buffer
     while(*buff_end != '\0')
-    {
         ++buff_end;
-    }
     --buff_end;
     // iterate backwards, summing the digits
     while(buff_end >= buff)
@@ -156,9 +154,7 @@ uint16_t kio_strlen(const char* str)
 {
     uint16_t cntr = 0;
     while(*str++ != 0)
-    {
         ++cntr;
-    }
     return cntr;
 }
 
@@ -169,6 +165,10 @@ uint16_t kio_strlen(const char* str)
 **   %x | %X - Numeric in hexadecimal (uint16_t | uint8_t)
 **   %c | %C - Character
 **   %s | %S - String
+**
+** Putting a single digit in front of the type will left-pad if the argument
+** is shorter than the padding. Example: "|%5d|%5d|"
+**   |   12|123456|
 */
 
 /*
@@ -194,55 +194,68 @@ uint16_t kio_sprintf_len(const char* str, void* a0, void* a1)
             // assume arguments are numbers out of convience
             uint16_t* ptr = (ai == 0) ? (uint16_t*)a0 : (uint16_t*)a1;
             uint16_t val = *ptr;
+            uint16_t arg_len = 0;
+            // optional format length
+            uint8_t fmt_len = 0;
+            if ((*str > '0') && (*str <= '9'))
+            {
+                fmt_len = *str - '0';
+                ++str;
+            }
             switch (*str)
             {
                 // binary and hex numbers begin with 2 chars, so take that into
                 // account here (i.e. '0x' and '0b')
                 // binary numbers
                 case 'b':
-                    len += __kio_int_len(val, 2) + 2;
+                    arg_len = __kio_int_len(val, 2) + 2;
                     break;
                 // upper case variants handle 8-bit numbers
                 case 'B':
                 {
                     uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
                     uint8_t val = *ptr;
-                    len += __kio_int_len(val, 2) + 2;
+                    arg_len = __kio_int_len(val, 2) + 2;
                     break;
                 }
                 // decimal numbers
                 case 'd':
-                    len += __kio_int_len(val, 10);
+                    arg_len = __kio_int_len(val, 10);
                     break;
                 case 'D':
                 {
                     uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
                     uint8_t val = *ptr;
-                    len += __kio_int_len(val, 10);
+                    arg_len = __kio_int_len(val, 10);
                     break;
                 }
                 // hex numbers
                 case 'x':
-                    len += __kio_int_len(val, 16) + 2;
+                    arg_len = __kio_int_len(val, 16) + 2;
                     break;
                 case 'X':
                 {
                     uint8_t* ptr = (ai == 0) ? (uint8_t*)a0 : (uint8_t*)a1;
                     uint8_t val = *ptr;
-                    len += __kio_int_len(val, 16) + 2;
+                    arg_len = __kio_int_len(val, 16) + 2;
                     break;
                 }
                 // char/string
                 case 'c': case 'C':
-                    ++len;
+                    arg_len = 1;
                     break;
                 case 's': case 'S':
                     if (ai == 0)
-                        len += kio_strlen((char*)a0);
+                        arg_len = kio_strlen((char*)a0);
                     else
-                        len += kio_strlen((char*)a1);
+                        arg_len = kio_strlen((char*)a1);
                     break;
             }
+            // left pad string
+            if (arg_len > fmt_len)
+                len += arg_len;
+            else
+                len += fmt_len;
             ++str;
             ++ai;
         }
@@ -280,8 +293,15 @@ void kio_sprintf(const char* str, char* buff, void* a0, void* a1)
             // assume arguments are numbers out of convience
             uint16_t* ptr = (ai == 0) ? (uint16_t*)a0 : (uint16_t*)a1;
             uint16_t val = *ptr;
-            // determines with argument value to draw
+            // determines which argument value to draw
             char* arg_str = p_buff;
+            // optional format length
+            uint8_t fmt_len = 0;
+            if ((*str > '0') && (*str <= '9'))
+            {
+                fmt_len = *str - '0';
+                ++str;
+            }
             switch (*str)
             {
                 // binary numbers
@@ -328,11 +348,16 @@ void kio_sprintf(const char* str, char* buff, void* a0, void* a1)
                     arg_str = (ai == 0) ? (char*)a0 : (char*)a1;
                     break;
             }
-            // print the value of the argument
-            while(*arg_str != 0)
+            // left pad string
+            uint16_t arg_len = kio_strlen(arg_str);
+            if (arg_len < fmt_len)
             {
-                *buff++ = *arg_str++;
+                for (uint8_t i=0; i<(fmt_len - arg_len); ++i)
+                    *buff++ = ' ';
             }
+            // print the value of the argument
+            while(*arg_str != '\0')
+                *buff++ = *arg_str++;
             ++str;
             ++ai;
         }

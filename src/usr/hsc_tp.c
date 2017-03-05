@@ -136,6 +136,8 @@ static void __hsc_tp_draw_str(void)
     char* str3 = "BIN %b  HEX %x WORDS WORDS WORDS NEWLINE\nWORDS WORDS";
     uint16_t num = 42;
     gl_draw_strf(PT2(50, 160), RGB_WHITE, RGB_WHITE, str3, &num, &num);
+    char* str4 = "|%6b|%6x| left pad of 6 both.";
+    gl_draw_strf(PT2(0, 140), RGB_BLACK, RGB_WHITE, str4, &num, &num);
 }
 
 /*
