@@ -26,7 +26,7 @@ void __asm_func()
 ** @param name expl
 ** @return
 */
-void _intern_func()
+static void __intern_func()
 {
 }
 

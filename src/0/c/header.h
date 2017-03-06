@@ -35,14 +35,6 @@ void __asm_func();
 ** @param name expl
 ** @return
 */
-void _intern_func();
-
-/*
-** TODO description
-**
-** @param name expl
-** @return
-*/
 void extern_func();
 
 #endif
