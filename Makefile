@@ -70,7 +70,7 @@ INCLUDES = -I. -I./$(SRC) -I./$(KERN) -I.$(VGA) -I./$(GL) -I./$(USR)
 # Note: we prepend all C files with a directive to target Real Mode
 #
 CC = gcc
-CFLAGS = -g -Os -march=i686 -m32 -ffreestanding -Wall -Werror \
+CFLAGS = -g -Os -march=i686 -m32 -std=c99 -ffreestanding -Wall -Werror \
 		 -Wno-trigraphs -Wl,--oformat=binary $(INCLUDES)
 
 #
