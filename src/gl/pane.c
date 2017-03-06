@@ -93,5 +93,7 @@ void pane_draw_title(char* title, char* subtitle)
 {
     __pane_draw_bg();
     // center the title text and scale up
+    gl_draw_str_scale(PT2(pane_pad.x, 50), RGB_HSC, RGB_HSC, title, 3);
     // subtitle goes underneath that
+    gl_draw_str(PT2(100,100), RGB_HSC, RGB_HSC, subtitle);
 }

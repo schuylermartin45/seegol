@@ -128,7 +128,21 @@ void gl_draw_rect(Point_2D ur, Point_2D ll, RGB_8 color);
 */
 void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color);
 
-/***** Generic Draw Functions (implemented in GL *****/
+/***** String Draw Functions (driver-independent)    *****/
+
+/*
+** Draws a string, based on a custom-made bitmap font.
+** "Transparent" backgrounds are achieved by setting the background and
+** foreground colors to the same value. Includes font scaling
+**
+** @param ul Upper-left starting point
+** @param b_color Background color of the text
+** @param f_color Foreground color of the text
+** @param str String to draw
+** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+*/
+void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
+    uint8_t scale);
 
 /*
 ** Draws a string, based on a custom-made bitmap font.
@@ -141,6 +155,22 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color);
 ** @param str String to draw
 */
 void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
+
+/*
+** Draws a string using kio_sprintf, based on a custom-made bitmap font.
+** "Transparent" backgrounds are achieved by setting the background and
+** foreground colors to the same value. Includes font scaling.
+**
+** @param ul Upper-left starting point
+** @param b_color Background color of the text
+** @param f_color Foreground color of the text
+** @param str String to draw
+** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
+*/
+void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
+    uint8_t scale, void* a0, void* a1);
 
 /*
 ** Draws a string using kio_sprintf, based on a custom-made bitmap font.

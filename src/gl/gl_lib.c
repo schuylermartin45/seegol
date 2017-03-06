@@ -185,19 +185,21 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color)
     vga_driver.vga_draw_rect_wh(ul.x, ul.y, w, h, color);
 }
 
-/***** Generic Draw Functions (implemented in GL *****/
+/***** String Draw Functions (driver-independent)    *****/
 
 /*
 ** Draws a string, based on a custom-made bitmap font.
 ** "Transparent" backgrounds are achieved by setting the background and
-** foreground colors to the same value.
+** foreground colors to the same value. Includes font scaling
 **
 ** @param ul Upper-left starting point
 ** @param b_color Background color of the text
 ** @param f_color Foreground color of the text
 ** @param str String to draw
+** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
 */
-void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
+void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
+    uint8_t scale)
 {
     // current position to draw
     Point_2D cur = ul;
@@ -221,9 +223,10 @@ void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
             uint8_t ch = *str;
             // enforce a newline if we are about to go out of bounds, in x
             cur.x = ul.x
-                + (rc_cntr.x * (SEE_FONT_WIDTH + (2 * SEE_FONT_PAD_HORZ)))
+                + (rc_cntr.x * ((scale * SEE_FONT_WIDTH) 
+                    + (2 * SEE_FONT_PAD_HORZ)))
                 + SEE_FONT_PAD_HORZ;
-            if ((cur.x + SEE_FONT_WIDTH + (3 * SEE_FONT_PAD_HORZ)) 
+            if ((cur.x + (scale * SEE_FONT_WIDTH) + (3 * SEE_FONT_PAD_HORZ)) 
                 >= vga_driver.screen_w)
             {
                 // reset before draw
@@ -232,7 +235,8 @@ void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
                 cur.x = ul.x + SEE_FONT_PAD_HORZ;
             }
             cur.y = ul.y
-                + (rc_cntr.y * (SEE_FONT_HEIGHT + (2 * SEE_FONT_PAD_VERT)))
+                + (rc_cntr.y * ((scale * SEE_FONT_HEIGHT)
+                + (2 * SEE_FONT_PAD_VERT)))
                 + SEE_FONT_PAD_VERT;
             // check for transparent backgrounds; both colors are the same
             if (!vga_RGB_8_cmp(b_color, f_color))
@@ -241,15 +245,15 @@ void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
                 // function and use this assumption for other optimizations
                 vga_driver.vga_draw_rect_wh(
                     ul.x + 
-                        (rc_cntr.x * (SEE_FONT_WIDTH + (2
-                            * SEE_FONT_PAD_HORZ))
+                        (rc_cntr.x * ((scale * SEE_FONT_WIDTH)
+                            + (2 * SEE_FONT_PAD_HORZ))
                         ),
                     ul.y +
-                        (rc_cntr.y * (SEE_FONT_HEIGHT + (2
-                            * SEE_FONT_PAD_VERT))
+                        (rc_cntr.y * ((scale * SEE_FONT_HEIGHT)
+                            + (2 * SEE_FONT_PAD_VERT))
                         ),
-                    SEE_FONT_WIDTH  + (2 * SEE_FONT_PAD_HORZ),
-                    SEE_FONT_HEIGHT + (2 * SEE_FONT_PAD_VERT),
+                    (scale * SEE_FONT_WIDTH)  + (2 * SEE_FONT_PAD_HORZ),
+                    (scale * SEE_FONT_HEIGHT) + (2 * SEE_FONT_PAD_VERT),
                     b_color
                 );
             }
@@ -263,22 +267,65 @@ void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
                     for(uint8_t col=0; col<SEE_FONT_WIDTH; ++col)
                     {
                         if (row_map & mask)
-                            vga_driver.vga_put_pixel(cur.x, cur.y, f_color);
+                        {
+                            vga_driver.vga_draw_rect_wh(cur.x, cur.y,
+                                scale, scale, f_color);
+                        }
                         mask >>= 1;
-                        ++cur.x;
+                        cur.x += scale;
                     }
                 }
                 // reset x, draw next row of font pixels
                 cur.x = ul.x
-                    + (rc_cntr.x * (SEE_FONT_WIDTH + (2 * SEE_FONT_PAD_HORZ)))
+                    + (rc_cntr.x *
+                        (scale * SEE_FONT_WIDTH) + (2 * SEE_FONT_PAD_HORZ))
                     + SEE_FONT_PAD_HORZ;
-                ++cur.y;
+                cur.y += scale;
             }
             // move right; the character to draw
             ++rc_cntr.x;
             ++str;
         }
     }
+}
+
+/*
+** Draws a string, based on a custom-made bitmap font.
+** "Transparent" backgrounds are achieved by setting the background and
+** foreground colors to the same value.
+**
+** @param ul Upper-left starting point
+** @param b_color Background color of the text
+** @param f_color Foreground color of the text
+** @param str String to draw
+*/
+void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
+{
+    gl_draw_str_scale(ul, b_color, f_color, str, 1);
+}
+
+/*
+** Draws a string using kio_sprintf, based on a custom-made bitmap font.
+** "Transparent" backgrounds are achieved by setting the background and
+** foreground colors to the same value. Includes font scaling.
+**
+** @param ul Upper-left starting point
+** @param b_color Background color of the text
+** @param f_color Foreground color of the text
+** @param str String to draw
+** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
+*/
+void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
+    uint8_t scale, void* a0, void* a1)
+{
+    // autosize buffer
+    uint16_t size = kio_sprintf_len(str, a0, a1);
+    char buff[size];
+    // call sprintf, then dump to the screen
+    kio_sprintf(str, buff, a0, a1);
+    gl_draw_str_scale(ul, b_color, f_color, buff, scale);
 }
 
 /*
@@ -296,12 +343,7 @@ void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
 void gl_draw_strf(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
     void* a0, void* a1)
 {
-    // autosize buffer
-    uint16_t size = kio_sprintf_len(str, a0, a1);
-    char buff[size];
-    // call sprintf, then dump to the screen
-    kio_sprintf(str, buff, a0, a1);
-    gl_draw_str(ul, b_color, f_color, buff);
+    gl_draw_strf_scale(ul, b_color, f_color, str, 1, a0, a1);
 }
 
 /***** Image Draw Functions (driver-independent)     *****/
