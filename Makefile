@@ -267,4 +267,4 @@ bin/seesh.o: src/usr/slideshow.h src/usr/trench_run.h
 bin/hsc_tp.o: src/kern/gcc16.h src/usr/hsc_tp.h src/kern/types.h
 bin/hsc_tp.o: src/usr/program.h src/kern/kio.h src/gl/gl_lib.h
 bin/hsc_tp.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
-bin/hsc_tp.o: src/gl/img_fids.h
+bin/hsc_tp.o: src/gl/img_fids.h src/gl/pane.h

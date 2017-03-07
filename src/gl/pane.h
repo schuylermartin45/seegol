@@ -43,4 +43,12 @@ void pane_exit(void);
 */
 void pane_draw_title(char* title, char* subtitle);
 
+/*
+** Draws a pane with a title and text
+**
+** @param title Title string
+** @param text Text string
+*/
+void pane_draw_title_text(char* title, char* text);
+
 #endif

@@ -14,11 +14,36 @@
 #include "../kern/kio.h"
 #include "../gl/gl_lib.h"
 #include "../gl/img_fids.h"
+#include "../gl/pane.h"
 
 // info about the Macbeth color chart
 #define MACBETH_ROWS 4
 #define MACBETH_COLS 6
 #define HSC_NAME     "HENRIETTA SEMICONDUCTOR CORPORATION"
+// pane drawing tests
+#define PANE_TEST_TITLE "Wish You Were Here - Pink Floyd"
+#define PANE_TEST_TEXT  \
+    "So, so you think you can tell. "\
+    "Heaven from hell. "\
+    "Blue skies from pain. "\
+    "Can you tell a green field. "\
+    "From a cold steel rail? "\
+    "A smile from a veil? "\
+    "Do you think you can tell? "\
+    "Did they get you to trade. "\
+    "Your heroes for ghosts? "\
+    "Hot ashes for trees? "\
+    "Hot air for a cool breeze? "\
+    "Cold comfort for change? "\
+    "And did you exchange. "\
+    "A walk on part in the war. "\
+    "For a lead role in a cage? "\
+    "How I wish, how I wish you were here. "\
+    "We're just two lost souls. "\
+    "Swimming in a fish bowl. "\
+    "Year after year. "\
+    "Running over the same old ground. "\
+    "And how we found..." //"The same old fears. "\"Wish you were here. "
 
 /*
 ** Initializes program structure
@@ -31,9 +56,9 @@ void hsc_tp_init(Program* prog)
     prog->desc =
         "HSC Graphical Test Pattern Program. 'q' to quit. 'mode' picks a "
         "VGA driver\n  mode. '-i' tests the image draw function. '-m' proced"
-        "urally draws the\n  Macbeth chart. '-t' tests string drawing. -o "
-        "draw the original test image.";
-    prog->usage = "mode [-i | -m | -t]";
+        "urally draws the\n  Macbeth chart. '-t' tests string drawing. '-o' "
+        "draw the original test image.\n  '-p' tests pane drawing.";
+    prog->usage = "mode [-i|-m|-t|-o|-p]";
     prog->main = &hsc_tp_main;
 }
 
@@ -150,10 +175,14 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
         return ERR_PROG_USAGE;
     // enter graphics mode, based on user input
     gl_init();
+    uint16_t vga_mode = 0;
     if (kio_strcmp(argv[1], "13"))
-        gl_enter(VGA_MODE_13);
+    {
+        vga_mode = VGA_MODE_13;
+    }
     else
         return ERR_PROG_BAD_ARGS;
+    gl_enter(vga_mode);
 
     // draw string test
     if ((argc == 3) && (kio_strcmp(argv[2], "-t")))
@@ -170,6 +199,18 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
     {
         __hsc_tp_draw_board();
         __hsc_tp_draw_HSC();
+    }
+    // tests the pane drawing library; this test is "self contained" because
+    // all the other tests rely on the GL package and the Pane package has its
+    // own intialization system.
+    else if ((argc == 3) && (kio_strcmp(argv[2], "-p")))
+    {
+        gl_exit();
+        pane_enter(vga_mode);
+        pane_draw_title_text(PANE_TEST_TITLE, PANE_TEST_TEXT);
+        kio_wait_key('q');
+        pane_exit();
+        return EXIT_SUCCESS;
     }
     // putting it all together: transparent HSC Logo w/ color chart and text
     else if (argc < 3)

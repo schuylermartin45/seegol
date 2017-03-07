@@ -18,13 +18,16 @@
 // Common colors used in panes
 #define RGB_OFF_WHITE       RGB(230, 230, 230)
 #define RGB_DROP_SHADOW     RGB( 30,  30,  30)
+#define RGB_PANE_TITLE      RGB( 20,  26, 68)
 
 // fraction used to determine
 #define PANE_W_FRAC_PAD 36
 #define PANE_H_FRAC_PAD 32
 
+// default font scale
+#define DEFAULT_FONT_SCALE  1
 // max font scale to test when trying to auto-scale text to fit in a pane
-#define MAX_FONT_SCALE  5
+#define MAX_FONT_SCALE      5
 
 // screen dimensions
 static uint16_t fr_w;
@@ -77,8 +80,7 @@ static void __pane_draw_bg()
     // clear screen with background color
     gl_draw_rect_wh(PT2(0, 0), fr_w, fr_h, RGB_HSC);
     // draw the pane on top of the background color
-    gl_draw_rect_wh(pane_pad, fr_w - (2 * pane_pad.x), fr_h - (2 * pane_pad.y),
-        RGB_OFF_WHITE);
+    gl_draw_rect_wh(pane_pad, pane_wh.x, pane_wh.y, RGB_OFF_WHITE);
     // bump-map the screen borders because we want to look cool
     // bottom drop shadow
     gl_draw_rect_wh(
@@ -97,6 +99,25 @@ static void __pane_draw_bg()
 }
 
 /*
+** Draws a title for the top of a pane
+**
+** @param title Title string
+** @return Height of the title font
+*/
+static uint16_t __pane_draw_top_title(char* title)
+{
+    Point_2D ul = pane_pad;
+    Point_2D bb;
+    gl_draw_str_bb(ul, title, DEFAULT_FONT_SCALE, pane_w_bound, &bb);
+    // draw a background rectangle around the title
+    gl_draw_rect_wh(pane_pad, pane_wh.x, bb.y, RGB_PANE_TITLE);
+    // draw the title to the screen
+    gl_draw_str_scale(ul, RGB_OFF_WHITE, RGB_OFF_WHITE, title,
+        DEFAULT_FONT_SCALE, pane_w_bound);
+    return bb.y;
+}
+
+/*
 ** Draws a title pane
 **
 ** @param title Title string
@@ -107,7 +128,7 @@ void pane_draw_title(char* title, char* sub)
     __pane_draw_bg();
     // center the title text and automatically pick the largest font size that
     // will fit in that region without word wrapping, if possible
-    uint8_t title_scale = 1;
+    uint8_t title_scale = DEFAULT_FONT_SCALE;
     Point_2D title_ul = pane_pad;
     Point_2D title_bb;
     // first try to find the best-fitting scale, horizontally
@@ -131,10 +152,27 @@ void pane_draw_title(char* title, char* sub)
     // subtitle goes underneath the title, centered
     Point_2D sub_ul = pane_pad;
     Point_2D sub_bb;
-    gl_draw_str_bb(sub_ul, sub, 1, pane_w_bound, &sub_bb);
+    gl_draw_str_bb(sub_ul, sub, DEFAULT_FONT_SCALE, pane_w_bound, &sub_bb);
     // center the subtitle
     sub_ul.x = (sub_ul.x + pane_wh.x - sub_bb.x) / 2;
     // put the subtitle under the title
     sub_ul.y = title_ul.y + title_bb.y + pane_pad.y;
-    gl_draw_str_scale(sub_ul, RGB_HSC, RGB_HSC, sub, 1, pane_w_bound);
+    gl_draw_str_scale(sub_ul, RGB_HSC, RGB_HSC, sub, DEFAULT_FONT_SCALE,
+        pane_w_bound);
+}
+
+/*
+** Draws a pane with a title and text
+**
+** @param title Title string
+** @param text Text string
+*/
+void pane_draw_title_text(char* title, char* text)
+{
+    // set-up pane and title
+    __pane_draw_bg();
+    uint16_t title_h = __pane_draw_top_title(title);
+    // draw text under the title
+    gl_draw_str_scale(PT2(pane_pad.x, title_h + pane_pad.y),
+        RGB_HSC, RGB_HSC, text, DEFAULT_FONT_SCALE, pane_w_bound);
 }
