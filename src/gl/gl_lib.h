@@ -131,18 +131,34 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color);
 /***** String Draw Functions (driver-independent)    *****/
 
 /*
+** Calculates the bounding box of a string to draw from the bit-mapped SeeFont
+**
+** @param ul Upper-left starting point
+** @param str String to draw
+** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param w_bound Right-handed width to bound the text to. This is the maximum 
+**        width value that can be drawn. After this word-wrapping is enforced
+** @param bb Point to store bounding box width and height information into
+*/
+void gl_draw_str_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
+    Point_2D* bb);
+
+/*
 ** Draws a string, based on a custom-made bitmap font.
 ** "Transparent" backgrounds are achieved by setting the background and
-** foreground colors to the same value. Includes font scaling
+** foreground colors to the same value. Includes font scaling and the ability
+** to enforce a width boundary to word-wrap on.
 **
 ** @param ul Upper-left starting point
 ** @param b_color Background color of the text
 ** @param f_color Foreground color of the text
 ** @param str String to draw
 ** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param w_bound Right-handed width to bound the text to. This is the maximum 
+**        width value that can be drawn. After this word-wrapping is enforced
 */
 void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
-    uint8_t scale);
+    uint8_t scale, uint16_t w_bound);
 
 /*
 ** Draws a string, based on a custom-made bitmap font.

@@ -16,7 +16,7 @@
 #include "../gl/pane.h"
 
 /** Macros    **/
-#define SLIDES_SIZE 1
+#define SLIDES_SIZE 3
 
 /*
 ** Initializes program structure
@@ -48,7 +48,21 @@ uint8_t slidedeck_main(uint8_t argc, char* argv[])
     uint8_t slide_id = 0;
     do
     {
-        pane_draw_title("HSC Pane Demo", "Schuyler Martin");
+        // TODO cleanup, make more generic
+        switch(slide_id)
+        {
+            case 0:
+                pane_draw_title("HSC SeeGOL",
+                "Shoyler's Extremely Experimental\n"
+                "Graphical Operating Library");
+                break;
+            case 1:
+                pane_draw_title("HSC", "Schuyler Martin");
+                break;
+            case 2:
+                pane_draw_title("HSC Pane Demofffffffffffffffffffffff", "Schuyler Martin");
+                break;
+        }
         key = kio_getchr();
         switch (key)
         {

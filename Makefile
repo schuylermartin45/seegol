@@ -244,7 +244,7 @@ bin/gl_lib.o: src/gl/img_fids.h src/res/img_cxpm/hsc_logo.cxpm
 bin/gl_lib.o: src/gl/see_font.h
 bin/pane.o: src/kern/gcc16.h src/gl/pane.h src/kern/types.h
 bin/pane.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
-bin/pane.o: src/gl/gl_lib.h
+bin/pane.o: src/gl/gl_lib.h src/gl/see_font.h
 bin/slideshow.o: src/kern/gcc16.h src/usr/slideshow.h
 bin/slideshow.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/slideshow.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h

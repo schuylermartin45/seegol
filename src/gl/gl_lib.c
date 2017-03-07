@@ -188,19 +188,101 @@ void gl_draw_rect_wh(Point_2D ul, uint16_t w, uint16_t h, RGB_8 color)
 /***** String Draw Functions (driver-independent)    *****/
 
 /*
+** Calculates the bounding box of a string to draw from the bit-mapped SeeFont
+**
+** @param ul Upper-left starting point
+** @param str String to draw
+** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param w_bound Right-handed width to bound the text to. This is the maximum 
+**        width value that can be drawn. After this word-wrapping is enforced
+** @param bb Point to store bounding box width and height information into
+*/
+void gl_draw_str_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
+    Point_2D* bb)
+{
+    // enforce some limit on font scaling
+    if ((scale < 1) || (scale > 127))
+        scale = 1;
+    // clear the bounding box so additions can be made later
+    bb->x = 0; bb->y = 0;
+    // current position to draw
+    Point_2D cur = ul;
+    // keeps character row, col counters as we move along
+    Point_2D rc_cntr = {0, 0};
+    // pad vertically
+    cur.y += SEE_FONT_PAD_VERT;
+    bb->y += (scale * SEE_FONT_HEIGHT) + (2 * SEE_FONT_PAD_VERT);
+    // track the longest run of characters to calculate the max bb width
+    uint16_t ch_w_cntr = 0;
+    // loop until null byte
+    while(*str != '\0')
+    {
+        // encounter a newline, jump ahead to the next line
+        if (*str == '\n')
+        {
+            if (rc_cntr.x > ch_w_cntr)
+                ch_w_cntr = rc_cntr.x;
+            // jump a row of chars down
+            rc_cntr.x = 0;
+            ++rc_cntr.y;
+            ++str;
+            // increase height of the bounding box
+            bb->y += (scale * SEE_FONT_HEIGHT) + (2 * SEE_FONT_PAD_VERT);
+        }
+        else
+        {
+            // enforce a newline if we are about to go out of bounds, in x
+            cur.x = ul.x
+                + (rc_cntr.x * ((scale * SEE_FONT_WIDTH) 
+                    + (2 * SEE_FONT_PAD_HORZ)))
+                + SEE_FONT_PAD_HORZ;
+            if ((cur.x + (scale * SEE_FONT_WIDTH) + (3 * SEE_FONT_PAD_HORZ)) 
+                >= w_bound)
+            {
+                if (rc_cntr.x > ch_w_cntr)
+                    ch_w_cntr = rc_cntr.x;
+                // reset before draw
+                rc_cntr.x = 0;
+                ++rc_cntr.y;
+                cur.x = ul.x + SEE_FONT_PAD_HORZ;
+                // increase height of the bounding box
+                bb->y += (scale * SEE_FONT_HEIGHT) + (2 * SEE_FONT_PAD_VERT);
+            }
+            cur.y = ul.y
+                + (rc_cntr.y * ((scale * SEE_FONT_HEIGHT)
+                + (2 * SEE_FONT_PAD_VERT)))
+                + SEE_FONT_PAD_VERT;
+            if (rc_cntr.x > ch_w_cntr)
+                ch_w_cntr = rc_cntr.x;
+            // move right; the character to draw
+            ++rc_cntr.x;
+            ++str;
+        }
+    }
+    // calculate the bounding box width
+    bb->x = ch_w_cntr * ((scale * SEE_FONT_WIDTH) + (2 * SEE_FONT_PAD_HORZ));
+}
+
+/*
 ** Draws a string, based on a custom-made bitmap font.
 ** "Transparent" backgrounds are achieved by setting the background and
-** foreground colors to the same value. Includes font scaling
+** foreground colors to the same value. Includes font scaling and the ability
+** to enforce a width boundary to word-wrap on.
 **
 ** @param ul Upper-left starting point
 ** @param b_color Background color of the text
 ** @param f_color Foreground color of the text
 ** @param str String to draw
 ** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param w_bound Right-handed width to bound the text to. This is the maximum 
+**        width value that can be drawn. After this word-wrapping is enforced
 */
 void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
-    uint8_t scale)
+    uint8_t scale, uint16_t w_bound)
 {
+    // enforce some limit on font scaling
+    if ((scale < 1) || (scale > 127))
+        scale = 1;
     // current position to draw
     Point_2D cur = ul;
     // keeps character row, col counters as we move along
@@ -227,7 +309,7 @@ void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
                     + (2 * SEE_FONT_PAD_HORZ)))
                 + SEE_FONT_PAD_HORZ;
             if ((cur.x + (scale * SEE_FONT_WIDTH) + (3 * SEE_FONT_PAD_HORZ)) 
-                >= vga_driver.screen_w)
+                >= w_bound)
             {
                 // reset before draw
                 rc_cntr.x = 0;
@@ -301,7 +383,7 @@ void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
 */
 void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
 {
-    gl_draw_str_scale(ul, b_color, f_color, str, 1);
+    gl_draw_str_scale(ul, b_color, f_color, str, 1, vga_driver.screen_w);
 }
 
 /*
@@ -325,7 +407,7 @@ void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
     char buff[size];
     // call sprintf, then dump to the screen
     kio_sprintf(str, buff, a0, a1);
-    gl_draw_str_scale(ul, b_color, f_color, buff, scale);
+    gl_draw_str_scale(ul, b_color, f_color, buff, scale, vga_driver.screen_w);
 }
 
 /*
