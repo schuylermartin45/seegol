@@ -52,11 +52,25 @@ void pane_draw_title(char* title, char* subtitle);
 void pane_draw_title_text(char* title, char* text);
 
 /*
-** Draws a pane with a title and an image
+** Draws a pane with text
+**
+** @param text Text string
+*/
+void pane_draw_text(char* text);
+
+/*
+** Draws a pane with a title and an image, centered
 **
 ** @param title Title string
 ** @param fid File id of the image
 */
 void pane_draw_title_img(char* title, uint8_t fid);
+
+/*
+** Draws a pane with an image, centered
+**
+** @param fid File id of the image
+*/
+void pane_draw_img(uint8_t fid);
 
 #endif

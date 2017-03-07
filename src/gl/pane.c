@@ -104,12 +104,14 @@ static void __pane_draw_bg()
 /*
 ** Draws a title for the top of a pane
 **
-** @param title Title string
+** @param title Title string or NULL if no title is required
 **
 ** @return Height of the title font
 */
 static uint16_t __pane_draw_top_title(char* title)
 {
+    if (title == NULL)
+        return 0;
     Point_2D ul = pane_pad;
     Point_2D bb;
     gl_draw_str_bb(ul, title, DEFAULT_FONT_SCALE, pane_w_bound, &bb);
@@ -183,7 +185,17 @@ void pane_draw_title_text(char* title, char* text)
 }
 
 /*
-** Draws a pane with a title and an image
+** Draws a pane with text
+**
+** @param text Text string
+*/
+void pane_draw_text(char* text)
+{
+    pane_draw_title_text(NULL, text);
+}
+
+/*
+** Draws a pane with a title and an image, centered
 **
 ** @param title Title string
 ** @param fid File id of the image
@@ -212,4 +224,14 @@ void pane_draw_title_img(char* title, uint8_t fid)
         }
     }
     gl_draw_img_center_scale(fid, img_scale);
+}
+
+/*
+** Draws a pane with an image, centered
+**
+** @param fid File id of the image
+*/
+void pane_draw_img(uint8_t fid)
+{
+    pane_draw_title_img(NULL, fid);
 }
