@@ -57,7 +57,7 @@ uint8_t slidedeck_main(uint8_t argc, char* argv[])
                 "Graphical Operating Library");
                 break;
             case 1:
-                pane_draw_title("HSC", "Schuyler Martin");
+                pane_draw_title_img("HSC Logo Image", IMG_FID_HSC);
                 break;
             case 2:
                 pane_draw_title_text("This is a test of the header bit at the"

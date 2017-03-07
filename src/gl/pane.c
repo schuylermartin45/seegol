@@ -28,6 +28,9 @@
 #define DEFAULT_FONT_SCALE  1
 // max font scale to test when trying to auto-scale text to fit in a pane
 #define MAX_FONT_SCALE      5
+// same scale criteria but for images 
+#define DEFAULT_IMG_SCALE   1
+#define MAX_IMG_SCALE       5
 
 // screen dimensions
 static uint16_t fr_w;
@@ -53,7 +56,7 @@ void pane_enter(uint8_t mode)
     // size of the view window
     fr_w = gl_getw();
     fr_h = gl_geth();
-    // padding on pane
+    // padding on pane; also determines the upper-left point on the pane
     pane_pad.x = fr_w / PANE_W_FRAC_PAD;
     pane_pad.y = fr_h / PANE_H_FRAC_PAD;
     // pane width and height
@@ -102,6 +105,7 @@ static void __pane_draw_bg()
 ** Draws a title for the top of a pane
 **
 ** @param title Title string
+**
 ** @return Height of the title font
 */
 static uint16_t __pane_draw_top_title(char* title)
@@ -172,7 +176,40 @@ void pane_draw_title_text(char* title, char* text)
     // set-up pane and title
     __pane_draw_bg();
     uint16_t title_h = __pane_draw_top_title(title);
+
     // draw text under the title
     gl_draw_str_scale(PT2(pane_pad.x, title_h + pane_pad.y),
         RGB_HSC, RGB_HSC, text, DEFAULT_FONT_SCALE, pane_w_bound);
+}
+
+/*
+** Draws a pane with a title and an image
+**
+** @param title Title string
+** @param fid File id of the image
+*/
+void pane_draw_title_img(char* title, uint8_t fid)
+{
+    // set-up pane and title
+    __pane_draw_bg();
+    __pane_draw_top_title(title);
+
+    // retrieve image statistics
+    Point_2D img_dims;
+    gl_img_stat(fid, &img_dims);
+    // auto-size and center the image on the screen
+    uint8_t img_scale = DEFAULT_IMG_SCALE;
+    // try to find the best-fitting scale that keeps the image on the pane
+    for (uint8_t s=MAX_IMG_SCALE; s>=img_scale; --s)
+    {
+        if ((img_dims.x * s) <= (pane_wh.x - (3 * pane_pad.x)))
+        {
+            if ((img_dims.y * s) <= (pane_wh.y - (3 * pane_pad.y)))
+            {
+                img_scale = s;
+                break;
+            }
+        }
+    }
+    gl_draw_img_center_scale(fid, img_scale);
 }
