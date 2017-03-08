@@ -416,24 +416,6 @@ void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
     gl_draw_str_scale(ul, b_color, f_color, buff, scale, vga_driver.screen_w);
 }
 
-/*
-** Draws a string using kio_sprintf, based on a custom-made bitmap font.
-** "Transparent" backgrounds are achieved by setting the background and
-** foreground colors to the same value.
-**
-** @param ul Upper-left starting point
-** @param b_color Background color of the text
-** @param f_color Foreground color of the text
-** @param str String to draw
-** @param a0 First arugment to print
-** @param a1 Second arugment to print
-*/
-void gl_draw_strf(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
-    void* a0, void* a1)
-{
-    gl_draw_strf_scale(ul, b_color, f_color, str, 1, a0, a1);
-}
-
 /***** Image Draw Functions (driver-independent)     *****/
 
 /*
@@ -590,18 +572,6 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale)
 }
 
 /*
-** Draws an image "installed" on the OS
-**
-** @param fid File id that identifies the image data to draw from the image
-**        file look-up table (users can just simply use a macro)
-** @param ul Upper-left starting point
-*/
-void gl_draw_img(uint8_t fid, Point_2D ul)
-{
-    gl_draw_img_scale(fid, ul, 1);
-}
-
-/*
 ** Draws a scaled image "installed" on the OS, auto-centered on the screen.
 ** If the image is scaled too much and goes off the screen, zoom in on the
 ** upper left corner of the image.
@@ -626,143 +596,7 @@ void gl_draw_img_center_scale(uint8_t fid, uint8_t scale)
     gl_draw_img_scale(fid, ul, scale);
 }
 
-/*
-** Draws an image "installed" on the OS, auto-centered on the screen
-** If the image is scaled too much and goes off the screen, zoom in on the
-** upper left corner of the image.
-**
-** @param fid File id that identifies the image data to draw from the image
-**        file look-up table (users can just simply use a macro)
-*/
-void gl_draw_img_center(uint8_t fid)
-{
-    // calculate the upper left corner that will center the image on the screen
-    gl_draw_img_center_scale(fid, 1);
-}
-
 /***** Line Draw Functions (driver-independent)      *****/
-
-/*
-** Draw a horizontal line
-**
-** @param p0 First point
-** @param p1 Second point
-** @param color Color to draw
-*/
-static void __gl_draw_horz(Point_2D p0, Point_2D p1, RGB_8 color)
-{
-    for (uint16_t x=p0.x; x<=p1.x; ++x)
-        vga_driver.vga_put_pixel(x, p0.y, color);
-}
-
-/*
-** Draw a vertical line
-**
-** @param p0 First point
-** @param p1 Second point
-** @param color Color to draw
-*/
-static void __gl_draw_vert(Point_2D p0, Point_2D p1, RGB_8 color)
-{
-    // perform the "left-right" swapping of the coordinates but for drawing
-    // vertical lines (ensure that p1-p0 is positive)
-    if (p0.y > p1.y)
-    {
-        Point_2D tp = p0;
-        p0 = p1, p1=tp;
-    }
-    for (uint16_t y=p0.y; y<=p1.y; ++y)
-        vga_driver.vga_put_pixel(p0.x, y, color);
-}
-
-/*
-** Draw a diagonal line (m = +/- 1)
-**
-** @param p0 First point
-** @param p1 Second point
-** @param color Color to draw
-*/
-static void __gl_draw_diag(Point_2D p0, Point_2D p1, RGB_8 color)
-{
-    for (uint16_t i=0; i<=(p1.x - p0.x); ++i)
-    {
-        // negative slopes
-        if (p0.y < p1.y)
-            vga_driver.vga_put_pixel(p0.x + i, p0.y + i, color);
-        // positive slopes
-        else
-            vga_driver.vga_put_pixel(p0.x + i, p0.y - i, color);
-    }
-}
-
-/*
-** Draw a line found in the octants, using the midpoint-line algorithm
-**
-** @param p0 First point
-** @param p1 Second point
-** @param color Color to draw
-*/
-static void __gl_draw_octs(Point_2D p0, Point_2D p1, RGB_8 color)
-{
-    // set x and y to the starting point/pixel; these then change with each
-    // iteration of the drawing
-    int16_t x = p0.x, y = p0.y;
-    // calculate slope component for each direction
-    int16_t dx = p1.x - p0.x, dy = p1.y - p0.y;
-    // choose which direction (+/-) to increment x or y in
-    int16_t incr_x = 1, incr_y = (dy > 0) ? 1 : -1;
-
-    int16_t abs_dy = (dy < 0) ? -dy : dy;
-    // steep lines iterate over y instead of x (this occurs when |dy| > dx)
-    // **Note: dx will always be positive as we always draw left-to-right
-    if (abs_dy > dx)
-    {
-        // establish deltas for next movement
-        int16_t dE = 2 * dx;
-        int16_t dNE = (dy > 0) ? 2 * (dx - dy) : 2 * (dx + dy);
-        // initial delta value
-        int16_t delta = (dy > 0) ? dE - dy : dE + dy;
-        // as dy can be positive or negative, >= or <= checks aren't going to
-        // cut it. So instead we will loop until we barely reach p1...(*)
-        for (; y != p1.y; y += incr_y)
-        {
-            // color and pick the next pixel
-            vga_driver.vga_put_pixel(x, y, color);
-            if (delta <= 0)
-                delta += dE;
-            else
-            {
-                x += incr_x;
-                delta += dNE;
-            }
-        }
-        // (*)... and then draw the last point at p1
-        vga_driver.vga_put_pixel(x, y, color);
-    }
-    // draw gradual-sloped  lines (first and last octant)
-    // this works similar to the code above but is a bit simpler as dx will
-    // always be positive because we gaurantee left-to-right coordinates
-    else
-    {
-        // establish deltas for next movement
-        int16_t dE = (dy > 0) ? 2 * dy : -2 * dy;
-        int16_t dNE = (dy > 0) ? 2 * (dy - dx) : 2 * (-dy - dx);
-        // initial delta value
-        int16_t delta = dE - dx;
-        for (; x <= p1.x; x += incr_x)
-        {
-            // color and pick the next pixel
-            vga_driver.vga_put_pixel(x, y, color);
-            if (delta <= 0)
-                delta += dE;
-            else
-            {
-                y += incr_y;
-                delta += dNE;
-            }
-        }
-    }
-}
 
 /*
 ** Draw a line anywhere on the screen
@@ -780,28 +614,106 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
         p0 = p1; p1 = tp;
     }
     // bound points to within the draw space
-    if (p0.x > gl_getw())
-        p0.x = gl_getw();
-    if (p1.x > gl_getw())
-        p1.x = gl_getw();
-    if (p0.y > gl_geth())
-        p0.y = gl_geth();
-    if (p1.y > gl_geth())
-        p1.y = gl_geth();
+    if (p0.x > vga_driver.screen_w)
+        p0.x = vga_driver.screen_w;
+    if (p1.x > vga_driver.screen_w)
+        p1.x = vga_driver.screen_w;
+    if (p0.y > vga_driver.screen_h)
+        p0.y = vga_driver.screen_h;
+    if (p1.y > vga_driver.screen_h)
+        p1.y = vga_driver.screen_h;
 
     // check for optimized line drawing
     if (p0.y == p1.y)
-        __gl_draw_horz(p0, p1, color);
+        vga_driver.vga_draw_rect_wh(p0.x, p0.y, p1.x-p0.x, 1, color);
     else if (p0.x == p1.x)
-        __gl_draw_vert(p0, p1, color);
+    {
+        // perform the "left-right" swapping of the coordinates but for drawing
+        // vertical lines (ensure that p1-p0 is positive)
+        if (p0.y > p1.y)
+        {
+            Point_2D tp = p0;
+            p0 = p1, p1=tp;
+        }
+        vga_driver.vga_draw_rect_wh(p0.x, p0.y, 1, p1.y-p0.y, color);
+    }
     else
     {
+        // calculate slope component for each direction
         int16_t dx = p1.x - p0.x, dy = p1.y - p0.y;
         // draw diagonal lines if slope is +/-1
         if ((dx == dy) || (dx == -dy))
-            __gl_draw_diag(p0, p1, color);
+        {
+            //__gl_draw_diag(p0, p1, color);
+            for (uint16_t i=0; i<=(p1.x - p0.x); ++i)
+            {
+                // negative slopes
+                if (p0.y < p1.y)
+                    vga_driver.vga_put_pixel(p0.x + i, p0.y + i, color);
+                // positive slopes
+                else
+                    vga_driver.vga_put_pixel(p0.x + i, p0.y - i, color);
+            }
+        }
         // draw...everything else (in the octants)
         else
-            __gl_draw_octs(p0, p1, color);
+        {
+            // set x and y to the starting point/pixel; these then change with
+            // each iteration of the drawing
+            int16_t x = p0.x, y = p0.y;
+            // choose which direction (+/-) to increment x or y in
+            int16_t incr_x = 1, incr_y = (dy > 0) ? 1 : -1;
+
+            int16_t abs_dy = (dy < 0) ? -dy : dy;
+            // steep lines iterate over y instead of x (occurs when |dy| > dx)
+            // **Note: dx will always be + as we always draw left-to-right
+            // establish deltas for next movement
+            int16_t dE = 2 * dx;
+            int16_t dNE = (dy > 0) ? 2 * (dx - dy) : 2 * (dx + dy);
+            // initial delta value
+            int16_t delta = (dy > 0) ? dE - dy : dE + dy;
+            if (abs_dy > dx)
+            {
+                // as dy can be + or -, >= or <= checks aren't going to
+                // cut it. So instead we will loop until we ~ reach p1...(*)
+                for (; y != p1.y; y += incr_y)
+                {
+                    // color and pick the next pixel
+                    vga_driver.vga_put_pixel(x, y, color);
+                    if (delta <= 0)
+                        delta += dE;
+                    else
+                    {
+                        x += incr_x;
+                        delta += dNE;
+                    }
+                }
+                // (*)... and then draw the last point at p1
+                vga_driver.vga_put_pixel(x, y, color);
+            }
+            // draw gradual-sloped  lines (first and last octant)
+            // this works similar to the code above but is a bit simpler as dx
+            // will always be + because we gaurantee left-to-right coordinates
+            else
+            {
+                // establish deltas for next movement
+                dE = (dy > 0) ? 2 * dy : -2 * dy;
+                dNE = (dy > 0) ? 2 * (dy - dx) : 2 * (-dy - dx);
+                // initial delta value
+                delta = dE - dx;
+                for (; x <= p1.x; x += incr_x)
+                {
+                    // color and pick the next pixel
+                    vga_driver.vga_put_pixel(x, y, color);
+                    if (delta <= 0)
+                        delta += dE;
+                    else
+                    {
+                        y += incr_y;
+                        delta += dNE;
+                    }
+                }
+            }
+        }
     }
 }

@@ -437,16 +437,6 @@ void kio_print_color(const char* str, uint8_t color_code)
 }
 
 /*
-** Prints chars to the screen
-**
-** @param str String to print
-*/
-void kio_print(const char* str)
-{
-    kio_print_color(str, KIO_DEFAULT_COLOR);
-}
-
-/*
 ** printf-like print function, limited to 2 arguments
 **
 ** @param str String to print
@@ -463,18 +453,6 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1)
     // call sprintf, then dump to the screen
     kio_sprintf(str, buff, a0, a1);
     kio_print_color(buff, color_code);
-}
-
-/*
-** printf-like print function, limited to 2 arguments
-**
-** @param str String to print
-** @param a0 First arugment to print
-** @param a1 Second arugment to print
-*/
-void kio_printf(const char* str, void* a0, void* a1)
-{
-    kio_printf_color(str, KIO_DEFAULT_COLOR, a0, a1);
 }
 
 /*
@@ -649,17 +627,4 @@ void kio_prompt_color(char* prompt, uint8_t color_code, char* str)
                 kio_printf_color("%c", color_code, &ch, NULL);
         }
     }
-}
-
-/*
-** Fetches a null-terminated string (ended with a newline) from the user
-** with some higher level functionality, drawing to the screen (similar to
-** Python's `input()` function)
-**
-** @param prompt Prompt to show before string input
-** @param str String buffer to put chars into
-*/
-void kio_prompt(char* prompt, char* str)
-{
-    kio_prompt_color(prompt, KIO_DEFAULT_COLOR, str);
 }

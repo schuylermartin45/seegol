@@ -201,8 +201,8 @@ void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
 ** @param a0 First arugment to print
 ** @param a1 Second arugment to print
 */
-void gl_draw_strf(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
-    void* a0, void* a1);
+#define gl_draw_strf(ul, b_color, f_color, str, a0, a1) \
+    gl_draw_strf_scale(ul, b_color, f_color, str, 1, a0, a1)
 
 /***** Image Draw Functions (driver-independent)     *****/
 
@@ -247,7 +247,7 @@ void gl_draw_img_scale(uint8_t fid, Point_2D ul, uint8_t scale);
 **        file look-up table (users can just simply use a macro)
 ** @param ul Upper-left starting point
 */
-void gl_draw_img(uint8_t fid, Point_2D ul);
+#define gl_draw_img(fid, ul) gl_draw_img_scale(fid, Point_2D ul, 1)
 
 /*
 ** Draws a scaled image "installed" on the OS, auto-centered on the screen.
@@ -269,7 +269,7 @@ void gl_draw_img_center_scale(uint8_t fid, uint8_t scale);
 ** @param fid File id that identifies the image data to draw from the image
 **        file look-up table (users can just simply use a macro)
 */
-void gl_draw_img_center(uint8_t fid);
+#define gl_draw_img_center(fid) gl_draw_img_center_scale(fid, 1)
 
 /***** Line Draw Functions (driver-independent)      *****/
 

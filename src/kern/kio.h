@@ -126,7 +126,7 @@ void kio_print_color(const char* str, uint8_t color_code);
 **
 ** @param str String to print
 */
-void kio_print(const char* str);
+#define kio_print(str) kio_print_color(str, KIO_DEFAULT_COLOR)
 
 /*
 ** printf-like print function, limited to 2 arguments
@@ -145,7 +145,8 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1);
 ** @param a0 First arugment to print
 ** @param a1 Second arugment to print
 */
-void kio_printf(const char* str, void* a0, void* a1);
+#define kio_printf(str, a0, a1) \
+    kio_printf_color(str, KIO_DEFAULT_COLOR, a0, a1)
 
 /*
 ** Clears screen
@@ -206,6 +207,7 @@ void kio_prompt_color(char* prompt, uint8_t color_code, char* str);
 ** @param prompt Prompt to show before string input
 ** @param str String buffer to put chars into
 */
-void kio_prompt(char* prompt, char* str);
+#define kio_prompt(prompt, str) \
+    kio_prompt_color(prompt, KIO_DEFAULT_COLOR, str)
 
 #endif

@@ -23,7 +23,5 @@
 */
 bool vga_RGB_8_cmp(RGB_8 c0, RGB_8 c1)
 {
-    if ((c0.r == c1.r) && (c0.g == c1.g) && (c0.b == c1.b))
-        return true;
-    return false;
+    return (c0.r == c1.r) && (c0.g == c1.g) && (c0.b == c1.b);
 }
