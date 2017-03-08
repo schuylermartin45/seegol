@@ -14,6 +14,7 @@
 #include "../kern/gcc16.h"
 #include "../kern/types.h"
 #include "../kern/vga/vga.h"
+#include "../gl/gl_lib.h"
 
 /** Macros     **/
 
@@ -24,16 +25,17 @@
 /** Functions  **/
 
 /*
-** Enter a graphical mode for pane-based programs
+** Initialize a graphical mode for pane-based programs
 **
 ** @param mode Graphics mode to select
 */
 void pane_enter(uint8_t mode);
 
 /*
-** Exit graphical pane mode and go back to text
+** Exits a graphical mode. This alias makes more sense when a program only uses
+** the Pane library.
 */
-void pane_exit(void);
+#define pane_exit() gl_exit()
 
 /*
 ** Draws a title pane
@@ -72,5 +74,22 @@ void pane_draw_title_img(char* title, uint8_t fid);
 ** @param fid File id of the image
 */
 void pane_draw_img(uint8_t fid);
+
+/*
+** Draws a pane with a title, an image to the right, and text to the left
+**
+** @param title Title string
+** @param fid File id of the image
+** @param text Text to go with the image
+*/
+void pane_draw_title_img_text(char* title, uint8_t fid, char* text);
+
+/*
+** Draws a pane with an image to the right and text to the left
+**
+** @param fid File id of the image
+** @param text Text to go with the image
+*/
+void pane_draw_img_text(uint8_t fid, char* text);
 
 #endif

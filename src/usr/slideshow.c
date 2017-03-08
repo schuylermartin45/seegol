@@ -46,7 +46,6 @@ uint8_t slideshow_main(uint8_t argc, char* argv[])
     if (argc > 3)
         return ERR_PROG_USAGE;
 
-    gl_init();
     // default to VGA13
     gl_enter(VGA_MODE_13);
 

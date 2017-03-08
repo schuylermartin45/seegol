@@ -240,11 +240,12 @@ bin/gl_lib.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
 bin/gl_lib.o: src/kern/debug.h src/kern/kio.h src/kern/kio.h
 bin/gl_lib.o: src/kern/vga/vga13.h src/kern/gcc16.h src/kern/types.h
 bin/gl_lib.o: src/kern/asm_lib.h src/kern/vga/vga.h src/gl/img_tbl.h
-bin/gl_lib.o: src/gl/img_fids.h src/res/img_cxpm/hsc_logo.cxpm
+bin/gl_lib.o: src/gl/img_fids.h
+bin/gl_lib.o: src/res/img_cxpm/dark_side_of_the_moon.cxpm
 bin/gl_lib.o: src/gl/see_font.h
 bin/pane.o: src/kern/gcc16.h src/gl/pane.h src/kern/types.h
 bin/pane.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
-bin/pane.o: src/gl/gl_lib.h src/gl/see_font.h
+bin/pane.o: src/gl/gl_lib.h src/gl/gl_lib.h
 bin/slideshow.o: src/kern/gcc16.h src/usr/slideshow.h
 bin/slideshow.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/slideshow.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
@@ -258,7 +259,7 @@ bin/hellow.o: src/usr/program.h src/kern/kio.h
 bin/slidedeck.o: src/kern/gcc16.h src/usr/slidedeck.h
 bin/slidedeck.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/slidedeck.o: src/gl/img_fids.h src/kern/gcc16.h src/gl/pane.h
-bin/slidedeck.o: src/kern/vga/vga.h src/kern/types.h
+bin/slidedeck.o: src/kern/vga/vga.h src/kern/types.h src/gl/gl_lib.h
 bin/seesh.o: src/kern/gcc16.h src/usr/seesh.h src/kern/types.h
 bin/seesh.o: src/kern/debug.h src/kern/gcc16.h src/kern/kio.h
 bin/seesh.o: src/kern/types.h src/kern/kio.h src/usr/program.h

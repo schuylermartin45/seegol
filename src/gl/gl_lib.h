@@ -50,12 +50,6 @@ typedef struct Point_3D
 /** Functions  **/
 
 /*
-** Initialize the graphics library with default values. User should call this
-** once per program
-*/
-void gl_init(void);
-
-/*
 ** Enter a graphical mode
 **
 ** @param mode Graphics mode to select
@@ -68,16 +62,23 @@ void gl_enter(uint8_t mode);
 void gl_exit(void);
 
 /*
+** Get the current graphics mode
+**
+** @return The current graphics mode
+*/
+uint16_t gl_get_mode(void);
+
+/*
 ** Get the current width of the screen
 **
-** @param Width of the screen in the current mode
+** @return Width of the screen in the current mode
 */
 uint16_t gl_getw(void);
 
 /*
 ** Get the current height of the screen
 **
-** @param Height of the screen in the current mode
+** @return Height of the screen in the current mode
 */
 uint16_t gl_geth(void);
 

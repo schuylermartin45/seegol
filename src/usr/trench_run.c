@@ -208,7 +208,6 @@ static void __trench_run_render_frame(uint16_t seed)
 */
 uint8_t trench_run_main(uint8_t argc, char* argv[])
 {
-    gl_init();
     // default to VGA13
     gl_enter(VGA_MODE_13);
 

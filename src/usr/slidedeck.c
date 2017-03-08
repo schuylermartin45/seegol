@@ -16,7 +16,7 @@
 #include "../gl/pane.h"
 
 /** Macros    **/
-#define SLIDES_SIZE 3
+#define SLIDES_SIZE 4
 
 /*
 ** Initializes program structure
@@ -62,6 +62,9 @@ uint8_t slidedeck_main(uint8_t argc, char* argv[])
             case 2:
                 pane_draw_title_text("This is a test of the header bit at the"
                     " top of the slide", "The quick brown fox");
+                break;
+            case 3:
+                pane_draw_title_img_text("Test", IMG_FID_HSC, "Test");
                 break;
         }
         key = kio_getchr();

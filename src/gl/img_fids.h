@@ -15,7 +15,7 @@
 
 /** Macros     **/
 // size of the image table
-#define GL_IMG_TBL_SIZE  2
+#define GL_IMG_TBL_SIZE      2
 
 // file IDs, keys into the table
 // definition is used to conditionally add these images; there's not enough

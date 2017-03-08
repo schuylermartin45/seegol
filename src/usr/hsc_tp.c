@@ -174,7 +174,6 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
     if ((argc < 2) && (argc > 3))
         return ERR_PROG_USAGE;
     // enter graphics mode, based on user input
-    gl_init();
     uint16_t vga_mode = 0;
     if (kio_strcmp(argv[1], "13"))
     {
@@ -205,20 +204,16 @@ uint8_t hsc_tp_main(uint8_t argc, char* argv[])
     // own intialization system.
     else if ((argc == 3) && (kio_strcmp(argv[2], "-p")))
     {
-        gl_exit();
         pane_enter(vga_mode);
         pane_draw_title_text(PANE_TEST_TITLE, PANE_TEST_TEXT);
-        kio_wait_key('q');
-        pane_exit();
-        return EXIT_SUCCESS;
     }
     // putting it all together: transparent HSC Logo w/ color chart and text
     else if (argc < 3)
     {
         __hsc_tp_draw_board();
         // white background to make the logo pop out
-        gl_draw_rect_wh(PT2(35, 55), 250, 90, RGB_WHITE);
-        gl_draw_img_center_scale(IMG_FID_HSC, 4);
+        gl_draw_rect_wh(PT2(70, 65), 180, 70, RGB_WHITE);
+        gl_draw_img_center_scale(IMG_FID_HSC, 2);
         // draw a string; hides crappy compressed text in the image
         gl_draw_str(PT2(20, 145), RGB(255, 100, 0), RGB_HSC, HSC_NAME);
     }

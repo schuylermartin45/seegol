@@ -39,15 +39,14 @@ SECTIONS
         *(.text);
         _TEXT_END = .;
     }
-    .data : ALIGN(0x1000) {
+    .data : {
         _DATA_BEGIN = .;
         *(.data);
         *(.rodata);
         _DATA_END = .;
     }
-    .bss : ALIGN(0x1000) {
+    .bss :  {
         _BSS_BEGIN = .;
-        *(.COMMON);
         *(.bss);
         _BSS_END = .;
     }

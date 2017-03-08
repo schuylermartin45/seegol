@@ -32,33 +32,19 @@
 
 // structure that manages the driver mode currently activated
 // assumed to be text mode if graphics haven't been initialized yet
-static VGA_Driver vga_driver;
+static VGA_Driver vga_driver = {
+    TEXT_WIDTH,
+    TEXT_HEIGHT,
+    (uint16_t*)TEXT_MEM_BEGIN,
+    VGA_MODE_TEXT,
+    // set all the functions here; shouldn't be called in text mode so use
+    // NULL for now
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
 
 /************************** Internal Functions *************************/
 
 /************************** User Functions    **************************/
-
-/*
-** Initialize the graphics library with default values. User should call this
-** once per program
-*/
-void gl_init(void)
-{
-    // configure TEXT mode
-    vga_driver.screen_w = TEXT_WIDTH;
-    vga_driver.screen_h = TEXT_HEIGHT;
-    vga_driver.frame_buff = (uint16_t*)TEXT_MEM_BEGIN;
-    vga_driver.vga_mode = VGA_MODE_TEXT;
-    // set all the functions here; shouldn't be called in text mode so use
-    // NULL for now
-    vga_driver.vga_enter = NULL;
-    vga_driver.vga_clrscr = NULL;
-    vga_driver.vga_vsync = NULL;
-    vga_driver.vga_put_pixel = NULL;
-    vga_driver.vga_get_pixel = NULL;
-    vga_driver.vga_draw_rect = NULL;
-    vga_driver.vga_draw_rect_wh = NULL;
-}
 
 /*
 ** Enter a graphical mode
@@ -82,8 +68,18 @@ void gl_enter(uint8_t mode)
 */
 void gl_exit(void)
 {
-    // reset to the default mode
-    gl_init();
+    // reset to the default TEXT mode
+    vga_driver.screen_w = TEXT_WIDTH;
+    vga_driver.screen_h = TEXT_HEIGHT;
+    vga_driver.frame_buff = (uint16_t*)TEXT_MEM_BEGIN;
+    vga_driver.vga_mode = VGA_MODE_TEXT;
+    vga_driver.vga_enter = NULL;
+    vga_driver.vga_clrscr = NULL;
+    vga_driver.vga_vsync = NULL;
+    vga_driver.vga_put_pixel = NULL;
+    vga_driver.vga_get_pixel = NULL;
+    vga_driver.vga_draw_rect = NULL;
+    vga_driver.vga_draw_rect_wh = NULL;
     // punch it Chewie, make the jump back to text mode
     // (BIOS wipes graphics memory for free)
     __asm__ __volatile__("movb $0x03, %al\n");
@@ -99,9 +95,19 @@ void gl_exit(void)
 }
 
 /*
+** Get the current graphics mode
+**
+** @return The current graphics mode
+*/
+uint16_t gl_get_mode(void)
+{
+    return vga_driver.vga_mode;
+}
+
+/*
 ** Get the current width of the screen
 **
-** @param Width of the screen in the current mode
+** @return Width of the screen in the current mode
 */
 uint16_t gl_getw(void)
 {
@@ -111,7 +117,7 @@ uint16_t gl_getw(void)
 /*
 ** Get the current height of the screen
 **
-** @param Height of the screen in the current mode
+** @return Height of the screen in the current mode
 */
 uint16_t gl_geth(void)
 {

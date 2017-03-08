@@ -13,7 +13,6 @@
 #include "pane.h"
 
 #include "gl_lib.h"
-#include "see_font.h"
 
 // Common colors used in panes
 #define RGB_OFF_WHITE       RGB(230, 230, 230)
@@ -43,15 +42,15 @@ static Point_2D pane_pad;
 static uint16_t pane_w_bound;
 
 /*
-** Enter a graphical mode for pane-based programs
+** Initialize a graphical mode for pane-based programs
 **
 ** @param mode Graphics mode to select
 */
 void pane_enter(uint8_t mode)
 {
-    // start graphics mode
-    gl_init();
-    gl_enter(mode);
+    // start graphics mode, if needed
+    if (gl_get_mode() != mode)
+        gl_enter(mode);
     // calculate common values, now that we have some info on the display mode
     // size of the view window
     fr_w = gl_getw();
@@ -64,14 +63,6 @@ void pane_enter(uint8_t mode)
     pane_wh.y = fr_h - (2 * pane_pad.y);
     // text boundary; forces word wrap
     pane_w_bound = fr_w - pane_pad.y;
-}
-
-/*
-** Exit graphical pane mode and go back to text
-*/
-void pane_exit(void)
-{
-    gl_exit();
 }
 
 /*
@@ -235,3 +226,46 @@ void pane_draw_img(uint8_t fid)
 {
     pane_draw_title_img(NULL, fid);
 }
+
+/*
+** Draws a pane with a title, an image to the right, and text to the left
+**
+** @param title Title string
+** @param fid File id of the image
+** @param text Text to go with the image
+*/
+void pane_draw_title_img_text(char* title, uint8_t fid, char* text)
+{
+    // set-up pane and title
+    __pane_draw_bg();
+    uint16_t title_h = __pane_draw_top_title(title);
+
+    // set an image to the right of the text (fitting within the pane),
+    // centered vertically in the pane
+    Point_2D img_dims;
+    gl_img_stat(fid, &img_dims);
+    Point_2D img_ul;
+    // image is put on the pane to have left padding from the edge of the pane
+    img_ul.x = fr_w - (2 * pane_pad.x) - img_dims.x;
+    // vertically, the image is centered in the pane
+    img_ul.y = pane_pad.y + (pane_wh.y / 2) - (img_dims.y / 2);
+    gl_draw_img_scale(fid, img_ul, DEFAULT_IMG_SCALE);
+
+    // set the text to the left, right-bounded by the left of the image, with
+    // some padding
+    gl_draw_str_scale(PT2(pane_pad.x, title_h + pane_pad.y),
+        RGB_HSC, RGB_HSC, text, DEFAULT_FONT_SCALE, img_ul.x - pane_pad.x);
+}
+
+/*
+** Draws a pane with an image to the right and text to the left
+**
+** @param fid File id of the image
+** @param text Text to go with the image
+*/
+void pane_draw_img_text(uint8_t fid, char* text)
+{
+    pane_draw_title_img_text(NULL, fid, text);
+}
+
+
