@@ -9,6 +9,7 @@
 /** Headers    **/
 #include "gcc16.h"
 #include "kio.h"
+#include "pit.h"
 
 #include "../usr/seesh.h"
 
@@ -22,6 +23,9 @@
 */
 void main(void)
 {
+    // Hardware initialization
+    pit_init();
+
     // kernel print messaging
     kio_print(MSG_KERN_LOAD);
     kio_print(MSG_WELCOME);
@@ -31,6 +35,7 @@ void main(void)
     {
         // call the seesh shell to run commands
         seesh_main();
+        kio_printf("System clock value: %d\n", &pit_clock_value, NULL);
     }
     kio_print(MSG_KERN_EXIT);
 }

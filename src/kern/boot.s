@@ -17,7 +17,11 @@
 
 # reference to the main program code
 .globl main
-.type main, @function
+.type  main, @function
+
+# reference to timer ISR and increment value
+.globl pit_isr
+.type  pit_isr, @function
 
 # extra space in the boot sector, in case I'm strapped for room later
 .globl boot_extra
@@ -76,6 +80,12 @@ __boot_video_init:
     movw    $0x2607, %cx
     int     $0x10
 
+__boot_ivt:
+    # Interrupt Vector Table configuration
+    movw    $pit_isr, 0x20      # load address of ISR into table entry
+    movw    %cs, 0x22           # load code segement into table entry
+
+__boot_kern_main:
     call    main                # jump to the start of the kernel code
 
 boot_extra:

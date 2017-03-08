@@ -61,3 +61,11 @@ Image Quantization/Reduction
 ----------------------------
 http://www.imagemagick.org/Usage/quantize/#extract
 http://www.imagemagick.org/script/quantize.php
+
+Timer driver (Intel 8254)
+-------------------------
+http://wiki.osdev.org/Programmable_Interval_Timer
+http://wiki.osdev.org/8259_PIC
+http://wiki.osdev.org/Interrupt_Service_Routines
+https://en.wikibooks.org/wiki/X86_Assembly/Advanced_Interrupts
+http://forum.osdev.org/viewtopic.php?f=1&t=11834

@@ -45,7 +45,7 @@ IMG_SRC_CXPM = $(subst $(IMG_XPM),$(IMG_CXPM),$(IMG_SRC_XFT0))
 
 # All source files, with paths
 C_SRC = $(C_SRC_KERN) $(C_SRC_GL) $(C_SRC_USR)
-S_SRC = $(KERN)boot.s
+S_SRC = $(KERN)boot.s $(KERN)pit_as.s
 # All source files with no paths
 C_SRC_FILES = $(notdir $(C_SRC))
 S_SRC_FILES = $(notdir $(S_SRC))
@@ -248,41 +248,41 @@ depend:
 # DO NOT DELETE
 
 bin/main.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
-bin/main.o: src/usr/seesh.h src/kern/gcc16.h src/kern/types.h
-bin/vga/vga13.o: src/kern/gcc16.h src/kern/vga/vga13.h
-bin/vga/vga13.o: src/kern/types.h src/kern/gcc16.h
-bin/vga/vga13.o: src/kern/asm_lib.h src/kern/types.h
+bin/main.o: src/kern/pit.h src/usr/seesh.h src/kern/gcc16.h
+bin/main.o: src/kern/types.h
+bin/vga/vga13.o: src/kern/gcc16.h src/kern/asm_lib.h
+bin/vga/vga13.o: src/kern/gcc16.h src/kern/types.h
+bin/vga/vga13.o: src/kern/vga/vga13.h src/kern/types.h
 bin/vga/vga13.o: src/kern/vga/vga.h
 bin/vga/vga.o: src/kern/gcc16.h src/kern/vga/vga.h src/kern/types.h
-bin/vga/vga.o: src/kern/gcc16.h
 bin/asm_lib.o: src/kern/gcc16.h src/kern/asm_lib.h src/kern/types.h
 bin/kio.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
+bin/pit.o: src/kern/gcc16.h src/kern/pit.h src/kern/types.h
+bin/pit.o: src/kern/asm_lib.h
 bin/see_font.o: src/kern/gcc16.h src/gl/see_font.h src/kern/types.h
 bin/gl_lib.o: src/kern/gcc16.h src/gl/gl_lib.h src/kern/types.h
 bin/gl_lib.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
-bin/gl_lib.o: src/kern/gcc16.h src/kern/debug.h src/kern/kio.h
+bin/gl_lib.o: src/kern/debug.h src/kern/gcc16.h src/kern/kio.h
 bin/gl_lib.o: src/kern/types.h src/kern/kio.h src/kern/vga/vga13.h
-bin/gl_lib.o: src/kern/asm_lib.h src/kern/vga/vga.h src/gl/img_tbl.h
-bin/gl_lib.o: src/gl/img_fids.h src/res/img_cxpm/hsc_logo.cxpm
-bin/gl_lib.o: src/gl/see_font.h
+bin/gl_lib.o: src/kern/vga/vga.h src/gl/img_tbl.h src/gl/img_fids.h
+bin/gl_lib.o: src/res/img_cxpm/hsc_logo.cxpm src/gl/see_font.h
 bin/pane.o: src/kern/gcc16.h src/gl/pane.h src/kern/types.h
 bin/pane.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
-bin/pane.o: src/kern/gcc16.h src/gl/gl_lib.h src/gl/gl_lib.h
+bin/pane.o: src/gl/gl_lib.h src/gl/gl_lib.h
 bin/slideshow.o: src/kern/gcc16.h src/usr/slideshow.h
 bin/slideshow.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/slideshow.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
-bin/slideshow.o: src/kern/types.h src/kern/gcc16.h src/gl/img_fids.h
+bin/slideshow.o: src/kern/types.h src/gl/img_fids.h
 bin/trench_run.o: src/kern/gcc16.h src/usr/trench_run.h
 bin/trench_run.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/trench_run.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
-bin/trench_run.o: src/kern/types.h src/kern/gcc16.h
+bin/trench_run.o: src/kern/types.h
 bin/hellow.o: src/kern/gcc16.h src/usr/hellow.h src/kern/types.h
 bin/hellow.o: src/usr/program.h src/kern/kio.h
 bin/slidedeck.o: src/kern/gcc16.h src/usr/slidedeck.h
 bin/slidedeck.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/slidedeck.o: src/gl/img_fids.h src/gl/pane.h src/kern/vga/vga.h
-bin/slidedeck.o: src/kern/gcc16.h src/kern/types.h src/kern/gcc16.h
-bin/slidedeck.o: src/gl/gl_lib.h
+bin/slidedeck.o: src/kern/gcc16.h src/kern/types.h src/gl/gl_lib.h
 bin/seesh.o: src/kern/gcc16.h src/usr/seesh.h src/kern/types.h
 bin/seesh.o: src/kern/debug.h src/kern/gcc16.h src/kern/kio.h
 bin/seesh.o: src/kern/types.h src/kern/kio.h src/usr/program.h
@@ -291,4 +291,4 @@ bin/seesh.o: src/usr/slideshow.h src/usr/trench_run.h
 bin/hsc_tp.o: src/kern/gcc16.h src/usr/hsc_tp.h src/kern/types.h
 bin/hsc_tp.o: src/usr/program.h src/kern/kio.h src/gl/gl_lib.h
 bin/hsc_tp.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
-bin/hsc_tp.o: src/kern/gcc16.h src/gl/img_fids.h src/gl/pane.h
+bin/hsc_tp.o: src/gl/img_fids.h src/gl/pane.h
