@@ -347,7 +347,7 @@ void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
             }
             for(uint8_t row=0; row<SEE_FONT_HEIGHT; ++row)
             {
-                uint8_t row_map = see_font_tbl[ch][row];
+                uint8_t row_map = see_font_tbl[ch - SEE_FONT_START_CH][row];
                 // skip empty rows
                 if (row_map != 0)
                 {

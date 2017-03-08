@@ -14,6 +14,10 @@
 // table of character bit maps
 const uint8_t see_font_tbl[SEE_FONT_NUM_CH][SEE_FONT_HEIGHT] =
 {
+    // Non visible characters are disabled for now to save memory.
+    // For now I'm commenting the code out so if I change my mind, I don't have
+    // to copy, paste, and format everything again.
+    /* 
     // 000: NULL
     {
         0b00000000,
@@ -366,7 +370,8 @@ const uint8_t see_font_tbl[SEE_FONT_NUM_CH][SEE_FONT_HEIGHT] =
         0b00000000,
         0b00000000,
     },
-    // 032: TODO
+    */
+    // 032: Space
     {
         0b00000000,
         0b00000000,
@@ -1411,6 +1416,7 @@ const uint8_t see_font_tbl[SEE_FONT_NUM_CH][SEE_FONT_HEIGHT] =
         0b00000000,
         0b00000000,
     },
+    /*
     // 127: DEL (TM)
     {
         0b11101110,
@@ -1422,4 +1428,5 @@ const uint8_t see_font_tbl[SEE_FONT_NUM_CH][SEE_FONT_HEIGHT] =
         0b00000000,
         0b00000000,
     },
+    */
 };

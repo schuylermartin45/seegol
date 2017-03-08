@@ -23,14 +23,14 @@
 // pane drawing tests
 #define PANE_TEST_TITLE "Wish You Were Here - Pink Floyd"
 #define PANE_TEST_TEXT  \
-    "How I wish, how I wish you were here. "\
-    "We're just two lost souls. "\
-    "Swimming in a fish bowl. "\
-    "Year after year. "\
-    "Running over the same old ground. "\
-    "And how we found, "\
-    "The same old fears. "\
-    "Wish you were here."
+    "How I wish, how I wish you were here "\
+    "We're just two lost souls "\
+    "Swimming in a fish bowl "\
+    "Year after year "\
+    "Running over the same old ground "\
+    "And how we found "\
+    "The same old fears "\
+    "Wish you were here"
 
 /*
 ** Initializes program structure

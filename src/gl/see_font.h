@@ -20,8 +20,11 @@
 // pixel padding, one side
 #define SEE_FONT_PAD_VERT   2
 #define SEE_FONT_PAD_HORZ   0
-// font will hopefully suport 7-bit ASCII
-#define SEE_FONT_NUM_CH     128
+// number of non-visible ASCII characters
+#define ASCII_NON_VISIBLE   33
+#define SEE_FONT_START_CH   ' '
+// suports 7-bit ASCII...kinda
+#define SEE_FONT_NUM_CH     (128 - ASCII_NON_VISIBLE)
 
 /** Globals    **/
 
