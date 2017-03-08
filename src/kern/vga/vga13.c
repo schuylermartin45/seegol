@@ -10,6 +10,7 @@
 
 /** Headers    **/
 #include "../gcc16.h"
+#include "../asm_lib.h"
 #include "vga13.h"
 
 // Palette look-up table in memory. Should be faster to use than Port I/O

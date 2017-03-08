@@ -13,7 +13,6 @@
 /** Headers    **/
 #include "../gcc16.h"
 #include "../types.h"
-#include "../asm_lib.h"
 // standard header for VGA drivers
 #include "vga.h"
 
