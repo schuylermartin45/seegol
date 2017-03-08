@@ -22,12 +22,22 @@ read the older "1mb" IBM floppy format (as opposed to the much more common
 
 
 ## Setup
+SeeGOL was originally built on a Fedora 24 workstation using gcc 6.3.1.
+Although it should be able to be built on almost any reasonable Linux system,
+I have run into issues with the custom image compression Python scripts running
+off of older versions of the Python 3 interpreter on Debian.
+
+The Makefile is configured to warn and error-out on missing software build
+dependencies.
 
 ### Dependencies
 These programs are necessary to build and install 
 - dd
 - make
 - makedepend
+- Python +3.5 (a Python 3 script is used to compress image data before being
+  added to SeeGOL. It should work with any version of Python 3 but I did have
+  the script crash once on a Debian machine running Python 3.4)
 - ImageMagick (the `convert` program is used to down-sample image files)
 TODO [more here]
 An emulator (such as QEMU) may also be helpful in running the OS.

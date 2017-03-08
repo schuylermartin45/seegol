@@ -135,11 +135,33 @@ $(IMG_CXPM)%.cxpm: $(IMG_ORIG)%.* $(SCRIPT_XPM) $(SCRIPT_CXPM)
 # 1) Compile using file pattern rules
 # 2) Link object files using a manual link script to a flat binary
 #
-see_gol: res_img depend linker.ld $(OBJS)
+see_gol: build_depends res_img depend linker.ld $(OBJS)
 	##
 	## MAKE: see_gol
 	##
 	$(LD) $(LDFLAGS) -o $(BIN)os.b $(OBJS)
+
+PYTHON_3   := $(shell command -v python3 2> /dev/null)
+PYTHON_3.5 := $(shell command -v python3.5 2> /dev/null)
+MK_DEPEND  := $(shell command -v makedepend 2> /dev/null)
+IMG_MAGICK := $(shell command -v convert 2> /dev/null)
+QEMU_i386  := $(shell command -v qemu-system-i386 2> /dev/null)
+build_depends:
+ifndef PYTHON_3
+    $(error "Python 3 is missing. It is required to compress image data.")
+endif
+ifndef IMG_MAGICK
+    $(error "ImageMagick is missing. It is required to compress image data.")
+endif
+ifndef MK_DEPEND
+    $(error "makedpend is missing. It is required to build SeeGOL.")
+endif
+ifndef PYTHON_3.5
+    $(warning "Python 3.5 is missing. <3.5 may fail to compress image data.")
+endif
+ifndef QEMU_i386
+    $(warning "QEMU is missing. QEMU provides an easy way to run SeeGOL.")
+endif
 
 #
 # Converting OS resource images directive (images drawn by the OS)
