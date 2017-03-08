@@ -7,7 +7,7 @@
 */
 
 /** Headers    **/
-#include "gcc16.h"
+#include "../gcc16.h"
 #include "vga.h"
 
 /** Globals    **/

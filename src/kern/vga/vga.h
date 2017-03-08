@@ -9,8 +9,8 @@
 #define _VGA_H_
 
 /** Headers    **/
-#include "gcc16.h"
-#include "types.h"
+#include "../gcc16.h"
+#include "../types.h"
 
 /** Macros     **/
 // identifiers for the various graphics modes

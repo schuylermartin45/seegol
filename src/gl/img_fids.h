@@ -11,7 +11,7 @@
 #define _GL_IMG_FIDS_H_
 
 /** Headers    **/
-#include "gcc16.h"
+#include "../kern/gcc16.h"
 
 /** Macros     **/
 // size of the image table

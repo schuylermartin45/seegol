@@ -12,7 +12,7 @@
 #define _GL_IMG_TBL_H_
 
 /** Headers    **/
-#include "gcc16.h"
+#include "../kern/gcc16.h"
 
 // image file ids
 #include "img_fids.h"
