@@ -14,6 +14,7 @@
 #include "../kern/kio.h"
 // definitions for all programs
 #include "program.h"
+
 // user program headers
 #include "hellow.h"
 #include "hsc_tp.h"
@@ -23,8 +24,16 @@
 
 /** Macros    **/
 // number of shell commands. This is kept in the C file out of convenience
-#define BUILT_IN_COUNT  3
-#define PROG_COUNT      (BUILT_IN_COUNT + 5)
+#define BUILTIN_COUNT   3
+#define PROG_COUNT      (BUILTIN_COUNT + 5)
+// macros for installing programs to SeeSH
+#define INSTALL_BUILTIN_PROG(n, d, u, m) \
+    prog_lst->name = n;\
+    prog_lst->desc = d;\
+    prog_lst->usage = u;\
+    prog_lst->main = m;\
+    ++prog_lst;
+#define INSTALL_USR_PROG(init)      init(prog_lst); ++prog_lst;
 
 // structure that holds all program information
 static Program prog_lst[PROG_COUNT];
@@ -47,6 +56,7 @@ static uint8_t _help_main(uint8_t argc, char* argv[])
     // help with an argument will dump more information about a program
     else if (argc == 2)
     {
+        bool prog_found = false;
         for (uint8_t i=0; i<PROG_COUNT; ++i)
         {
             if (kio_strcmp(prog_lst[i].name, argv[1]))
@@ -55,8 +65,14 @@ static uint8_t _help_main(uint8_t argc, char* argv[])
                     prog_lst[i].usage
                 );
                 kio_printf("  %s\n", prog_lst[i].desc, NULL);
+                prog_found = true;
                 break;
             }
+        }
+        if (!prog_found)
+        {
+            kio_printf("Program '%s' not found.\n", argv[1], NULL);
+            return EXIT_FAILURE;
         }
     }
     else
@@ -69,7 +85,7 @@ static uint8_t _help_main(uint8_t argc, char* argv[])
 */
 static uint8_t _clear_main(uint8_t argc, char* argv[])
 {
-    kio_clr();
+    kio_clrscr();
     return EXIT_SUCCESS;
 }
 
@@ -114,32 +130,16 @@ static uint8_t __parse_args(char* buff, char* argv[])
 static void __init(Program* prog_lst)
 {
     // built-in commands
-    prog_lst->name = "exit";
-    prog_lst->desc = "Bail from SeeSH. Game Over.";
-    prog_lst->usage = "";
-    prog_lst->main = NULL;
-    ++prog_lst;
-    prog_lst->name = "clear";
-    prog_lst->desc = "Clears the screen.";
-    prog_lst->usage = "";
-    prog_lst->main = &_clear_main;
-    ++prog_lst;
-    prog_lst->name = "help";
-    prog_lst->desc = "Help menu. Describes other programs.";
-    prog_lst->usage = "[program]";
-    prog_lst->main = &_help_main;
-    ++prog_lst;
+    INSTALL_BUILTIN_PROG("exit", "Bail from SeeSH", "", NULL);
+    INSTALL_BUILTIN_PROG("clear", "Clears the screen.", "", &_clear_main);
+    INSTALL_BUILTIN_PROG("help", "Help menu. Describes other programs.",
+        "[program]", &_help_main);
     // user programs
-    hellow_init(prog_lst);
-    ++prog_lst;
-    hsc_tp_init(prog_lst);
-    ++prog_lst;
-    slidedeck_init(prog_lst);
-    ++prog_lst;
-    slideshow_init(prog_lst);
-    ++prog_lst;
-    trench_run_init(prog_lst);
-    ++prog_lst;
+    INSTALL_USR_PROG(hellow_init);
+    INSTALL_USR_PROG(hsc_tp_init);
+    INSTALL_USR_PROG(slidedeck_init);
+    INSTALL_USR_PROG(slideshow_init);
+    INSTALL_USR_PROG(trench_run_init);
 }
 
 /*
@@ -153,7 +153,6 @@ uint8_t seesh_main(void)
     while(true)
     {
         char prompt_buff[SHELL_BUFF_SIZE];
-        // TODO check this; shouldn't be necessary(?)
         // flush the buffer, otherwise wrong commands might execute
         for(uint8_t i=0; i<SHELL_BUFF_SIZE; ++i)
             prompt_buff[i] = '\0';

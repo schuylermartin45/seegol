@@ -425,7 +425,6 @@ void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
 **        file look-up table (users can just simply use a macro)
 ** @param dims Pointer to a point that will store image size information
 **        (i.e. the dimensions; x stores width, y stores height)
-**
 ** @return Color space size of the image
 */
 uint8_t gl_img_stat(uint8_t fid, Point_2D* dims)
@@ -442,7 +441,6 @@ uint8_t gl_img_stat(uint8_t fid, Point_2D* dims)
 **
 ** @param fid File id that identifies the image data to draw from the image
 **        file look-up table (users can just simply use a macro)
-**
 ** @return 0 if no transparent pixels exist, color code otherwise
 */
 uint8_t gl_img_stat_tcode(uint8_t fid)

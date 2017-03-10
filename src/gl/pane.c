@@ -96,7 +96,6 @@ static void __pane_draw_bg()
 ** Draws a title for the top of a pane
 **
 ** @param title Title string or NULL if no title is required
-**
 ** @return Height of the title font
 */
 static uint16_t __pane_draw_top_title(char* title)

@@ -458,7 +458,7 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1)
 /*
 ** Clears current screen
 */
-void kio_clr()
+void kio_clrscr()
 {
     // reset text to 1st position
     txt_ptr = txt_mem_begin;
@@ -551,9 +551,11 @@ void kio_wait_key(char ch)
 ** Fetches a null-terminated string (ended with a newline) from the user
 **
 ** @param str String buffer to put chars into
+** @return String length
 */
-void kio_getstr(char* str)
+uint16_t kio_getstr(char* str)
 {
+    uint16_t len = 0;
     char ch;
     while(true)
     {
@@ -565,28 +567,39 @@ void kio_getstr(char* str)
             break;
         }
         else
+        {
             *str++ = ch;
+            ++len;
+        }
     }
+    return len;
 }
 
 /*
 ** Fetches a null-terminated string (ended with a newline) from the user
 ** with some higher level functionality, drawing to the screen and able to
 ** handle backspaces. Similar to Python's `input()` function
+** Ignores leading whitespace.
 **
 ** @param prompt Prompt to show before string input
 ** @param color_code Set the color code of text to draw
 ** @param str String buffer to put chars into
+** @return String length
 */
-void kio_prompt_color(char* prompt, uint8_t color_code, char* str)
+uint16_t kio_prompt_color(char* prompt, uint8_t color_code, char* str)
 {
+    uint16_t len = 0;
+    // record the starting point of the str for leading whitespace trimming
+    char* str_start0 = str;
+    char* str_start1 = str;
     // dump prompt to the screen
     kio_print_color(prompt, color_code);
     // record the prompt mem location
     char* prompt_loc = (char*)txt_ptr;
     // fetch chars until newline
     char ch;
-    while(true)
+    bool end_loop = false;
+    while(!end_loop)
     {
         ch = kio_getchr();
         switch (ch)
@@ -605,6 +618,7 @@ void kio_prompt_color(char* prompt, uint8_t color_code, char* str)
                     txt_ptr -= 2;
                     // also wipe the string storage 1 character
                     --str;
+                    --len;
                 }
                 break;
             // terminate string on enter key
@@ -613,7 +627,8 @@ void kio_prompt_color(char* prompt, uint8_t color_code, char* str)
                 // terminate string, add newline after prompt, and bail
                 *str = '\0';
                 kio_print("\n");
-                return;
+                end_loop = true;
+                break;
             // Some keys don't have 8-bit ASCII codes, but rather 16 bit key
             // codes, the lower 8-bits being the null byte. These include the
             // arrow keys. For now, instead of adding history to the prompt, we
@@ -624,7 +639,22 @@ void kio_prompt_color(char* prompt, uint8_t color_code, char* str)
             // otherwise, draw character
             default:
                 *str++ = ch;
+                ++len;
                 kio_printf_color("%c", color_code, &ch, NULL);
         }
     }
+    // trims leading whitespace
+    while((*str_start0 == ' ') || (*str_start0 == '\t'))
+    {
+        ++str_start0;
+        --len;
+    }
+    // shift the buffer contents over the whitespace
+    if (str_start0 != str_start1)
+    {
+        for(uint16_t i=0; i<len; ++i)
+            *str_start1++ = *str_start0++;
+        *str_start1 = '\0';
+    }
+    return len;
 }
