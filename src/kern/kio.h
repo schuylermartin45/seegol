@@ -149,9 +149,16 @@ void kio_printf_color(const char* str, uint8_t color_code, void* a0, void* a1);
     kio_printf_color(str, KIO_DEFAULT_COLOR, a0, a1)
 
 /*
+** Alias to make a "put char" function
+**
+** @param ch Character to print
+*/
+#define kio_putchr(ch)  kio_printf("%c", &(char){ch}, NULL)
+
+/*
 ** Clears screen
 */
-void kio_clr();
+void kio_clrscr();
 
 /*
 ** Changes color of text memory
@@ -185,27 +192,32 @@ void kio_wait_key(char ch);
 ** Fetches a null-terminated string (ended with a newline) from the user
 **
 ** @param str String buffer to put chars into
+** @return String length
 */
-void kio_getstr(char* str);
+uint16_t kio_getstr(char* str);
 
 /*
 ** Fetches a null-terminated string (ended with a newline) from the user
 ** with some higher level functionality, drawing to the screen and able to
-** handle backspaces. Similar to Python's `input()` function
+** handle backspaces. Similar to Python's `input()` function.
+** Ignores leading whitespace.
 **
 ** @param prompt Prompt to show before string input
 ** @param color_code Set the color code of text to draw
 ** @param str String buffer to put chars into
+** @return String length
 */
-void kio_prompt_color(char* prompt, uint8_t color_code, char* str);
+uint16_t kio_prompt_color(char* prompt, uint8_t color_code, char* str);
 
 /*
 ** Fetches a null-terminated string (ended with a newline) from the user
 ** with some higher level functionality, drawing to the screen (similar to
 ** Python's `input()` function)
+** Ignores leading whitespace.
 **
 ** @param prompt Prompt to show before string input
 ** @param str String buffer to put chars into
+** @return String length
 */
 #define kio_prompt(prompt, str) \
     kio_prompt_color(prompt, KIO_DEFAULT_COLOR, str)
