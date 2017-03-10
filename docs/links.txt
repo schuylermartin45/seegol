@@ -44,7 +44,8 @@ Boot off of USB
 https://board.flatassembler.net/topic.php?t=12389
 http://forum.osdev.org/viewtopic.php?f=1&t=20561
 http://f.osdev.org/viewtopic.php?f=1&t=28781
-
+https://en.wikipedia.org/wiki/INT_13H
+http://stackoverflow.com/questions/11174399/pc-boot-dl-register-and-drive-number
 
 Graphics on the PCjr (CGA)
 --------------------------

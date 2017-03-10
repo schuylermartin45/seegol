@@ -182,6 +182,12 @@ floppy.img: see_gol
 	dd if=$(BIN)os.b of=$(IMG)floppy.img
 
 #
+# QEMU emulation shorthand
+#
+floppy_qemu: floppy.img
+	./tools/i386_qemu_floppy.sh
+
+#
 # Targets for copying floppy image onto actual floppy
 #
 floppy: floppy.img
@@ -189,6 +195,8 @@ floppy: floppy.img
 	## MAKE: floppy (targets /dev/fd0)
 	##
 	dd if=$(IMG)floppy.img of=/dev/fd0
+	sync
+
 #
 # Targets for building a USB image
 # 1) dd zeros-out the whole image
@@ -202,14 +210,22 @@ usb.img: see_gol
 	dd if=$(BIN)os.b of=$(IMG)usb.img
 
 #
+# QEMU emulation shorthand
+#
+usb_qemu: usb.img
+	./tools/i386_qemu_usb.sh
+
+#
 # Targets for copying floppy image onto actual floppy
 #
 usb: usb.img
 	##
 	## MAKE: usb (targets /dev/sdj; default for my desktop)
-	## TODO do something safer than assuming a particular mount point
+	## I'd prefer something safer than assuming a particular mount point
+	## but this still requires root to run, so I'm ok with that.
 	##
 	dd if=$(IMG)usb.img of=/dev/sdj
+	sync
 
 #
 # Clean out bin/ directory
