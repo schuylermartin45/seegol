@@ -12,4 +12,4 @@
 # -vga std Default to VGA standard
 # -hda  loads a HDD/USB disk image
 # -boot sets the initial boot device
-qemu-system-i386 -vga std -hda img/usb.img -boot a
+qemu-system-i386 -vga std -clock pit -hda img/usb.img -boot a

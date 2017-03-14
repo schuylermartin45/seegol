@@ -77,3 +77,4 @@ http://wiki.osdev.org/8259_PIC
 http://wiki.osdev.org/Interrupt_Service_Routines
 https://en.wikibooks.org/wiki/X86_Assembly/Advanced_Interrupts
 http://forum.osdev.org/viewtopic.php?f=1&t=11834
+http://www.delorie.com/djgpp/doc/ug/interrupts/inthandlers1.html

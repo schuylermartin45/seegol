@@ -21,7 +21,6 @@
 
 # reference to timer ISR and increment value
 .globl pit_isr
-.type  pit_isr, @function
 
 # extra space in the boot sector, in case I'm strapped for room later
 .globl boot_extra
@@ -102,8 +101,17 @@ __boot_video_init:
 
 __boot_ivt:
     # Interrupt Vector Table configuration
-    movw    $pit_isr, 0x20      # load address of ISR into table entry
-    movw    %cs, 0x22           # load code segement into table entry
+    # INT 8h is a false prophet. INT 1Ch is the one true interrupt.
+    # (INT 8h is the BIOS timer which shouldn't be messed with. INT 1Ch is a
+    # programmable interrupt called after INT 8h is called)
+    # Table entry memory locations assuming the IVT starts at 0x00
+    #   INT  8h -> 0x00 + (0x08 * 4 bytes) = 0x20
+    #   INT 1Ch -> 0x00 + (0x1C * 4 bytes) = 0x70
+    # PIC is set with an offset of 0x20
+    cli
+    movw    $pit_isr, 0x1C      # load address of ISR into table entry
+    movw    %cs, 0x1E           # load code segement into table entry
+    sti
 
 __boot_kern_main:
     call    main                # jump to the start of the kernel code

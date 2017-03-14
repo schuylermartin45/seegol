@@ -13,8 +13,9 @@
 #include "types.h"
 
 /** Macros     **/
-// clock speed (ticks per second)
-#define CLOCK_SPEED 1000
+// clock speed, ticks per second; 1000 = 1ms ticks, 100 = 10ms ticks
+#define CLOCK_SPEED 100
+
 
 /** Globals    **/
 
@@ -27,16 +28,6 @@ extern uint16_t pit_clock_value;
 ** Initializes the clock device
 */
 void pit_init(void);
-
-/*
-** V() function for clock semaphore
-*/
-void pit_signal(void);
-
-/*
-** P() function for clock semaphore
-*/
-void pit_wait(void);
 
 /*
 ** Clock interrupt service routine

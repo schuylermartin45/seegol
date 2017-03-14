@@ -101,7 +101,7 @@ $(BIN)%.o: $(KERN)%.s
 	##
 	## MAKE: assemble kern/
 	##
-	$(AS) $(ASFLAGS) -o $@ $< -a=$@.lst
+	$(AS) $(ASFLAGS) -o $@ $< -aln=dbg_$@.lst
 $(BIN)%.o: $(KERN)%.c
 	##
 	## MAKE: compile kern/
@@ -264,8 +264,8 @@ depend:
 # DO NOT DELETE
 
 bin/main.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
-bin/main.o: src/kern/pit.h src/usr/seesh.h src/kern/gcc16.h
-bin/main.o: src/kern/types.h
+bin/main.o: src/kern/pit.h src/kern/asm_lib.h src/usr/seesh.h
+bin/main.o: src/kern/gcc16.h src/kern/types.h
 bin/vga/vga13.o: src/kern/gcc16.h src/kern/asm_lib.h
 bin/vga/vga13.o: src/kern/gcc16.h src/kern/types.h
 bin/vga/vga13.o: src/kern/vga/vga13.h src/kern/types.h
@@ -274,7 +274,7 @@ bin/vga/vga.o: src/kern/gcc16.h src/kern/vga/vga.h src/kern/types.h
 bin/asm_lib.o: src/kern/gcc16.h src/kern/asm_lib.h src/kern/types.h
 bin/kio.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
 bin/pit.o: src/kern/gcc16.h src/kern/pit.h src/kern/types.h
-bin/pit.o: src/kern/asm_lib.h
+bin/pit.o: src/kern/kio.h src/kern/asm_lib.h
 bin/see_font.o: src/kern/gcc16.h src/gl/see_font.h src/kern/types.h
 bin/gl_lib.o: src/kern/gcc16.h src/gl/gl_lib.h src/kern/types.h
 bin/gl_lib.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
