@@ -100,7 +100,7 @@ SCRIPT_CXPM = $(RES)cxpm.py
 #
 $(BIN)%.o: $(KERN)%.s
 	## MAKE: assemble kern/
-	$(AS) $(ASFLAGS) -o $@ $< -a=$@.lst
+	$(AS) $(ASFLAGS) -o $@ $< -aln=dbg_$@.lst
 $(BIN)%.o: $(KERN)%.c
 	## MAKE: compile kern/
 	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
