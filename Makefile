@@ -10,6 +10,7 @@
 # Source and bin paths
 #
 BIN      = bin/
+DBG_BIN  = dbg_bin/
 IMG      = img/
 SRC	     = src/
 KERN     = $(SRC)kern/
@@ -98,29 +99,19 @@ SCRIPT_CXPM = $(RES)cxpm.py
 #     - Files are compiled as an ELF and copied to flat binaries using objcopy
 #
 $(BIN)%.o: $(KERN)%.s
-	##
 	## MAKE: assemble kern/
-	##
 	$(AS) $(ASFLAGS) -o $@ $< -aln=dbg_$@.lst
 $(BIN)%.o: $(KERN)%.c
-	##
 	## MAKE: compile kern/
-	##
 	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
 $(BIN)%.o: $(VGA)%.c
-	##
 	## MAKE: compile kern/vga/
-	##
 	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
 $(BIN)%.o: $(GL)%.c
-	##
 	## MAKE: compile gl/
-	##
 	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
 $(BIN)%.o: $(USR)%.c
-	##
 	## MAKE: compile usr/
-	##
 	$(CC) $(CFLAGS) -o $@ -c $< -Wa,-aln=dbg_$@.lst
 
 #
@@ -136,9 +127,7 @@ $(IMG_CXPM)%.cxpm: $(IMG_ORIG)%.* $(SCRIPT_XPM) $(SCRIPT_CXPM)
 # 2) Link object files using a manual link script to a flat binary
 #
 see_gol: build_depends res_img depend linker.ld $(OBJS)
-	##
 	## MAKE: see_gol
-	##
 	$(LD) $(LDFLAGS) -o $(BIN)os.b $(OBJS)
 
 PYTHON_3   := $(shell command -v python3 2> /dev/null)
@@ -175,9 +164,7 @@ res_img: $(IMG_SRC_CXPM)
 # 2) dd actually writes the complete flat binary to the floppy image
 #
 floppy.img: see_gol
-	##
 	## MAKE: floppy.img
-	##
 	dd if=/dev/zero of=$(IMG)floppy.img bs=512 count=2880
 	dd if=$(BIN)os.b of=$(IMG)floppy.img
 
@@ -191,9 +178,7 @@ floppy_qemu: floppy.img
 # Targets for copying floppy image onto actual floppy
 #
 floppy: floppy.img
-	##
 	## MAKE: floppy (targets /dev/fd0)
-	##
 	dd if=$(IMG)floppy.img of=/dev/fd0
 	sync
 
@@ -203,9 +188,7 @@ floppy: floppy.img
 # 2) dd actually writes the complete flat binary to the USB image
 #
 usb.img: see_gol
-	##
 	## MAKE: usb.img
-	##
 	dd if=/dev/zero of=$(IMG)usb.img bs=512 count=2880
 	dd if=$(BIN)os.b of=$(IMG)usb.img
 
@@ -219,11 +202,9 @@ usb_qemu: usb.img
 # Targets for copying floppy image onto actual floppy
 #
 usb: usb.img
-	##
 	## MAKE: usb (targets /dev/sdj; default for my desktop)
 	## I'd prefer something safer than assuming a particular mount point
 	## but this still requires root to run, so I'm ok with that.
-	##
 	dd if=$(IMG)usb.img of=/dev/sdj
 	sync
 
@@ -231,10 +212,9 @@ usb: usb.img
 # Clean out bin/ directory
 #
 clean:
-	##
 	## MAKE: clean
-	##
 	rm -f $(BIN)*
+	rm -f $(DBG_BIN)*
 	rm -f $(IMG)*
 	rm -f $(IMG_XPM)*
 	rm -f $(IMG_CXPM)*
@@ -254,9 +234,7 @@ clean:
 # "Brian is not the messiah. He's a very naughty boy!"
 #
 depend:
-	##
 	## MAKE: depend
-	##
 	makedepend -p$(BIN) $(INCLUDES) $(C_SRC)
 	sed -i "s#$(BIN)$(SRC)[a-z]\+/#$(BIN)#g" Makefile
 	rm Makefile.bak
