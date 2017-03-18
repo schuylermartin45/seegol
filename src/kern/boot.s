@@ -19,6 +19,10 @@
 .globl main
 .type  main, @function
 
+# TODO
+.globl pit_isr_c
+.type  pit_isr_c, @function
+
 # reference to timer ISR and increment value
 .globl pit_isr
 
@@ -109,12 +113,33 @@ __boot_ivt:
     #   INT 1Ch -> 0x00 + (0x1C * 4 bytes) = 0x70
     # PIC is set with an offset of 0x20
     cli
-    movw    $pit_isr, 0x1C      # load address of ISR into table entry
-    movw    %cs, 0x1E           # load code segement into table entry
+    leaw    __boot_ivt, %ax
+    #shrw    $4, %ax
+    movw    %ax, 0x20 * 4      # load address of ISR into table entry
+    movw    %cs, (0x20 * 4) + 2           # load code segement into table entry
     sti
 
 __boot_kern_main:
     call    main                # jump to the start of the kernel code
+
+boot_isr_tmp:
+    #cli
+    #pusha
+    push %ax
+
+    #call pit_isr_c
+    #movw $42, pit_clock_value
+    #incl pit_clock_value
+
+    # TODO do this in the C code
+    movb $0x20, %al  # Send EOI to PIC (Details later)
+    outb %al, $0x20     #write to Master PIC port
+    #outb %al, $0xA0     #write to Master PIC port
+
+    pop %ax
+    #popa
+    #sti
+    iret
 
 boot_extra:
     # Note to self:

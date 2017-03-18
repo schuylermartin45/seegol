@@ -47,7 +47,7 @@
 #define PIC_EOI             0x20           // Non-specific EOI command
 
 /** Globals    **/
-//uint16_t pit_clock_value = 0;
+uint16_t pit_clock_value = 0;
 
 /*
 ** Initializes the clock device
@@ -75,7 +75,6 @@ void pit_init(void)
 void pit_isr_c(void)
 {
     // increment the clock counter in software
-    //++pit_clock_value;
-
-    //_outb(PIC_MASTER_CMD_PORT, PIC_EOI);
+    ++pit_clock_value;
+    _outb(PIC_MASTER_CMD_PORT, PIC_EOI);
 }

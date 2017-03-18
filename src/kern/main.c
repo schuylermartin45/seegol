@@ -64,7 +64,6 @@ static void pic_init(void)
     // TODO
     // copy over
     /*
-    */
     uint16_t* ivt_ptr = (uint16_t*)(0x1C);
     uint16_t* new_ivt_ptr = (uint16_t*)(31 * 4);
     // loop over, copying IRQ ISRs
@@ -82,12 +81,16 @@ static void pic_init(void)
         kio_printf("%x ", ivt_ptr, NULL);
         ++ivt_ptr;
     }
+    */
+    /*
+    */
     // ICW1
     _outb(PIC_MASTER_CMD_PORT, PIC_ICW1BASE | PIC_NEEDICW4);
     _outb(PIC_SLAVE_CMD_PORT, PIC_ICW1BASE | PIC_NEEDICW4);
 
     // TODO
     // ICW2: master offset of 20 in the IDT, slave offset of 28
+    // 32, 40
     _outb(PIC_MASTER_IMR_PORT, 32);
     _outb(PIC_SLAVE_IMR_PORT, 40);
 
@@ -101,9 +104,9 @@ static void pic_init(void)
     _outb(PIC_SLAVE_IMR_PORT, PIC_86MODE);
 
     // OCW1: allow interrupts on all lines
-    uint8_t pic0_enable = _inb(PIC_MASTER_IMR_PORT);
-    uint8_t pic1_enable = _inb(PIC_SLAVE_IMR_PORT);
-    kio_printf("PIC PORTs: %B, %B\n", &pic0_enable, &pic1_enable);
+    //uint8_t pic0_enable = _inb(PIC_MASTER_IMR_PORT);
+    //uint8_t pic1_enable = _inb(PIC_SLAVE_IMR_PORT);
+    //kio_printf("PIC PORTs: %B, %B\n", &pic0_enable, &pic1_enable);
     _outb(PIC_MASTER_IMR_PORT, 0x00);
     _outb(PIC_SLAVE_IMR_PORT, 0x00);
     __asm__ __volatile__("sti");
@@ -126,8 +129,12 @@ void main(void)
     // primary OS control loop
     while(true)
     {
+        // TODO rm wait loop
+        uint16_t j = 0;
+        for(uint16_t i=0; i<65000; i++)
+            j += i;
         // call the seesh shell to run commands
-        seesh_main();
+        //seesh_main();
         kio_printf("System clock value: %d\n", &pit_clock_value, NULL);
     }
     kio_print(MSG_KERN_EXIT);

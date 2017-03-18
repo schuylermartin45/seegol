@@ -14,7 +14,7 @@
 ## BEGIN Data Section
 ###############################################################################
 .data
-pit_clock_value:    .word   0x00
+#pit_clock_value:    .word   0x00
 
 ###############################################################################
 ##
@@ -36,24 +36,20 @@ pit_clock_value:    .word   0x00
 ##
 ## ============================================================================
 pit_isr:
-    pushf
     cli
-    push %dx
+    pusha
     push %ax
 
-    call pit_isr_c
+    #call pit_isr_c
     movw $42, pit_clock_value
     #incl pit_clock_value
 
     # TODO do this in the C code
-    # send EOI signal to PIC
     movb $0x20, %al  # Send EOI to PIC (Details later)
-    movw $0x20, %dx  # write to Master PIC port
-    #movw $0xA0, %dx  # write to Slave PIC port
-    outb %al, %dx
+    outb %al, $0x20     #write to Master PIC port
+    #outb %al, $0xA0     #write to Master PIC port
 
     pop %ax
-    pop %dx
+    popa
     sti
-    popf
     iret
