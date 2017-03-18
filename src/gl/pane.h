@@ -58,7 +58,8 @@ void pane_draw_title_text(char* title, char* text);
 **
 ** @param text Text string
 */
-void pane_draw_text(char* text);
+#define pane_draw_text(text) \
+    pane_draw_title_text(NULL, text);
 
 /*
 ** Draws a pane with a title and an image, centered
@@ -73,7 +74,8 @@ void pane_draw_title_img(char* title, uint8_t fid);
 **
 ** @param fid File id of the image
 */
-void pane_draw_img(uint8_t fid);
+#define pane_draw_img(fid) \
+    pane_draw_title_img(NULL, fid)
 
 /*
 ** Draws a pane with a title, an image to the right, and text to the left
@@ -91,5 +93,14 @@ void pane_draw_title_img_text(char* title, uint8_t fid, char* text);
 ** @param text Text to go with the image
 */
 void pane_draw_img_text(uint8_t fid, char* text);
+
+/*
+** Draws a pane with an image to the right and text to the left
+**
+** @param fid File id of the image
+** @param text Text to go with the image
+*/
+#define pane_draw_img_text(fid, text) \
+    pane_draw_title_img_text(NULL, fid, text)
 
 #endif
