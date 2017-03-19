@@ -259,7 +259,7 @@ bin/gl_lib.o: src/kern/vga/vga.h src/gl/img_tbl.h src/gl/img_fids.h
 bin/gl_lib.o: src/res/img_cxpm/hsc_logo.cxpm src/gl/see_font.h
 bin/pane.o: src/kern/gcc16.h src/gl/pane.h src/kern/types.h
 bin/pane.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
-bin/pane.o: src/gl/gl_lib.h src/gl/gl_lib.h
+bin/pane.o: src/gl/gl_lib.h src/kern/kio.h src/gl/gl_lib.h
 bin/slideshow.o: src/kern/gcc16.h src/usr/slideshow.h
 bin/slideshow.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/slideshow.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
@@ -267,7 +267,7 @@ bin/slideshow.o: src/kern/types.h src/gl/img_fids.h
 bin/trench_run.o: src/kern/gcc16.h src/usr/trench_run.h
 bin/trench_run.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/trench_run.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
-bin/trench_run.o: src/kern/types.h
+bin/trench_run.o: src/kern/types.h src/gl/pane.h
 bin/hellow.o: src/kern/gcc16.h src/usr/hellow.h src/kern/types.h
 bin/hellow.o: src/usr/program.h src/kern/kio.h
 bin/slidedeck.o: src/kern/gcc16.h src/usr/slidedeck.h

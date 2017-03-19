@@ -12,6 +12,7 @@
 #include "../kern/gcc16.h"
 #include "pane.h"
 
+#include "../kern/kio.h"
 #include "gl_lib.h"
 
 // Common colors used in panes
@@ -31,6 +32,9 @@
 #define DEFAULT_IMG_SCALE   1
 #define MAX_IMG_SCALE       5
 
+// strf pattern used for options in a prompt menu
+#define OPT_PATTERN         "%D. - %s"
+
 // screen dimensions
 static uint16_t fr_w;
 static uint16_t fr_h;
@@ -40,6 +44,64 @@ static Point_2D pane_wh;
 static Point_2D pane_pad;
 // width boundary of the pane; keeps the text from going out of the window
 static uint16_t pane_w_bound;
+
+// theme color settings, set by user program or defaults to the HSC theme
+RGB_8 thm_b_pane;
+RGB_8 thm_f_pane;
+RGB_8 thm_b_title;
+RGB_8 thm_f_title;
+RGB_8 thm_text;
+RGB_8 thm_b_select;
+RGB_8 thm_f_select;
+RGB_8 thm_drop_shadow;
+
+/*
+** Draws background of a pane; standard across all panes
+*/
+static void __pane_draw_bg()
+{
+    gl_clrscr();
+    // clear screen with background color
+    gl_draw_rect_wh(PT2(0, 0), fr_w, fr_h, thm_b_pane);
+    // draw the pane on top of the background color
+    gl_draw_rect_wh(pane_pad, pane_wh.x, pane_wh.y, thm_f_pane);
+    // bump-map the screen borders because we want to look cool
+    // bottom drop shadow
+    gl_draw_rect_wh(
+        PT2(2 * pane_pad.x, fr_h - pane_pad.y),
+        fr_w - (3 * pane_pad.x),
+        pane_pad.y / 2,
+        thm_drop_shadow
+    );
+    // right-hand drop shadow
+    gl_draw_rect_wh(
+        PT2(fr_w - pane_pad.x, 2 * pane_pad.y),
+        pane_pad.x / 2,
+        fr_h - (3 * pane_pad.y) + (pane_pad.y / 2),
+        thm_drop_shadow
+    );
+}
+
+/*
+** Draws a title for the top of a pane
+**
+** @param title Title string or NULL if no title is required
+** @return Height of the title font
+*/
+static uint16_t __pane_draw_top_title(char* title)
+{
+    if (title == NULL)
+        return 0;
+    Point_2D ul = pane_pad;
+    Point_2D bb;
+    gl_draw_str_bb(ul, title, DEFAULT_FONT_SCALE, pane_w_bound, &bb);
+    // draw a background rectangle around the title
+    gl_draw_rect_wh(pane_pad, pane_wh.x, bb.y, thm_b_title);
+    // draw the title to the screen
+    gl_draw_str_scale(ul, thm_f_title, thm_f_title, title,
+        DEFAULT_FONT_SCALE, pane_w_bound);
+    return bb.y;
+}
 
 /*
 ** Initialize a graphical mode for pane-based programs
@@ -63,54 +125,37 @@ void pane_enter(uint8_t mode)
     pane_wh.y = fr_h - (2 * pane_pad.y);
     // text boundary; forces word wrap
     pane_w_bound = fr_w - pane_pad.y;
+    // use theme defaults
+    pane_set_theme(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 }
 
 /*
-** Draws background of a pane; standard across all panes
-*/
-static void __pane_draw_bg()
-{
-    gl_clrscr();
-    // clear screen with background color
-    gl_draw_rect_wh(PT2(0, 0), fr_w, fr_h, RGB_HSC);
-    // draw the pane on top of the background color
-    gl_draw_rect_wh(pane_pad, pane_wh.x, pane_wh.y, RGB_OFF_WHITE);
-    // bump-map the screen borders because we want to look cool
-    // bottom drop shadow
-    gl_draw_rect_wh(
-        PT2(2 * pane_pad.x, fr_h - pane_pad.y),
-        fr_w - (3 * pane_pad.x),
-        pane_pad.y / 2,
-        RGB_DROP_SHADOW
-    );
-    // right-hand drop shadow
-    gl_draw_rect_wh(
-        PT2(fr_w - pane_pad.x, 2 * pane_pad.y),
-        pane_pad.x / 2,
-        fr_h - (3 * pane_pad.y) + (pane_pad.y / 2),
-        RGB_DROP_SHADOW
-    );
-}
-
-/*
-** Draws a title for the top of a pane
+** Sets the theme for panes. These settings are persistent. If NULL is provided
+** for any argument, that value is set to the default color value
 **
-** @param title Title string or NULL if no title is required
-** @return Height of the title font
+** @param b_pane Pane background color
+** @param f_pane Pane foreground color
+** @param b_title Background color of the title bar
+** @param f_title Foreground (text) color of the title bar
+** @param b_select Background text selection color
+** @param f_select Foreground (text) text selection color
+** @param text Text color
+** @param drop_shadow Boolean controls whether the drop shadow is visible
 */
-static uint16_t __pane_draw_top_title(char* title)
+void pane_set_theme(
+    RGB_8* b_pane,   RGB_8* f_pane,
+    RGB_8* b_title,  RGB_8* f_title,
+    RGB_8* b_select, RGB_8* f_select,
+    RGB_8* text,     RGB_8* drop_shadow)
 {
-    if (title == NULL)
-        return 0;
-    Point_2D ul = pane_pad;
-    Point_2D bb;
-    gl_draw_str_bb(ul, title, DEFAULT_FONT_SCALE, pane_w_bound, &bb);
-    // draw a background rectangle around the title
-    gl_draw_rect_wh(pane_pad, pane_wh.x, bb.y, RGB_PANE_TITLE);
-    // draw the title to the screen
-    gl_draw_str_scale(ul, RGB_OFF_WHITE, RGB_OFF_WHITE, title,
-        DEFAULT_FONT_SCALE, pane_w_bound);
-    return bb.y;
+    thm_b_pane      = (b_pane == NULL)      ? RGB_HSC           : *b_pane;
+    thm_f_pane      = (f_pane == NULL)      ? RGB_OFF_WHITE     : *f_pane;
+    thm_b_title     = (b_title == NULL)     ? RGB_PANE_TITLE    : *b_title;
+    thm_f_title     = (f_title == NULL)     ? RGB_OFF_WHITE     : *f_title;
+    thm_b_select    = (b_select == NULL)    ? RGB_HSC           : *b_select;
+    thm_f_select    = (f_select == NULL)    ? RGB_OFF_WHITE     : *f_select;
+    thm_text        = (text == NULL)        ? RGB_HSC           : *text;
+    thm_drop_shadow = (drop_shadow == NULL) ? RGB_DROP_SHADOW   : *drop_shadow;
 }
 
 /*
@@ -142,7 +187,7 @@ void pane_draw_title(char* title, char* sub)
     title_ul.x = (title_ul.x + pane_wh.x - title_bb.x) / 2;
     title_ul.y = (title_ul.y + pane_wh.y - title_bb.y) / 2;
     // actually draw the title to the screen
-    gl_draw_str_scale(title_ul, RGB_HSC, RGB_HSC, title, title_scale,
+    gl_draw_str_scale(title_ul, thm_text, thm_text, title, title_scale,
         pane_w_bound);
 
     // subtitle goes underneath the title, centered
@@ -153,7 +198,7 @@ void pane_draw_title(char* title, char* sub)
     sub_ul.x = (sub_ul.x + pane_wh.x - sub_bb.x) / 2;
     // put the subtitle under the title
     sub_ul.y = title_ul.y + title_bb.y + pane_pad.y;
-    gl_draw_str_scale(sub_ul, RGB_HSC, RGB_HSC, sub, DEFAULT_FONT_SCALE,
+    gl_draw_str_scale(sub_ul, thm_text, thm_text, sub, DEFAULT_FONT_SCALE,
         pane_w_bound);
 }
 
@@ -171,7 +216,7 @@ void pane_draw_title_text(char* title, char* text)
 
     // draw text under the title
     gl_draw_str_scale(PT2(pane_pad.x, title_h + pane_pad.y),
-        RGB_HSC, RGB_HSC, text, DEFAULT_FONT_SCALE, pane_w_bound);
+        thm_text, thm_text, text, DEFAULT_FONT_SCALE, pane_w_bound);
 }
 
 /*
@@ -233,5 +278,65 @@ void pane_draw_title_img_text(char* title, uint8_t fid, char* text)
     // set the text to the left, right-bounded by the left of the image, with
     // some padding
     gl_draw_str_scale(PT2(pane_pad.x, title_h + pane_pad.y),
-        RGB_HSC, RGB_HSC, text, DEFAULT_FONT_SCALE, img_ul.x - pane_pad.x);
+        thm_text, thm_text, text, DEFAULT_FONT_SCALE, img_ul.x - pane_pad.x);
+}
+
+/*
+** Draws a prompt pane, which allows the user to pick an option from a menu
+**
+** @param prompt Prompt string
+** @param optc Option count, number of options in the menu
+** @param optv Option values, array of strings holding user options
+** @return 0-indexed ID of the option selected by the user
+*/
+uint8_t pane_draw_prompt(char* prompt, uint8_t optc, char* optv[])
+{
+    __pane_draw_bg();
+    uint16_t prompt_h = __pane_draw_top_title(prompt);
+
+    // control for user input, redrawing on each change
+    uint8_t opt = 0;
+    char ch;
+    do
+    {
+        // redraw
+        Point_2D opt_ul = {pane_pad.x, prompt_h + pane_pad.y};
+        for(uint8_t i=0; i<optc; ++i)
+        {
+            Point_2D bb;
+            // calculate the size of the string to be printed
+            gl_draw_strf_bb(opt_ul, OPT_PATTERN, DEFAULT_FONT_SCALE,
+                pane_w_bound, &bb, &i, optv[i]);
+            // selectively draw the selected text
+            if (opt == i)
+            {
+                gl_draw_strf_scale(opt_ul, thm_b_select, thm_f_select,
+                    OPT_PATTERN, DEFAULT_FONT_SCALE, pane_w_bound, &i,
+                    optv[i]);
+            }
+            else
+            {
+                gl_draw_strf_scale(opt_ul, thm_f_pane, thm_text, OPT_PATTERN,
+                    DEFAULT_FONT_SCALE, pane_w_bound, &i, optv[i]);
+            }
+            // advance the cursor
+            opt_ul.y += pane_pad.y + bb.y;
+        }
+        // prompt for input
+        ch = kio_getchr();
+        switch (ch)
+        {
+            // go up
+            case ',': case 'w':
+                // this weird math gets around issues with using unsigned ints
+                opt = ((opt - 1) % optc) - 1;
+            // go down
+            case '.': case 's': case '\t':
+                opt = (opt + 1) % optc;
+        }
+    } while((ch != '\r') && (ch != '\n'));
+
+    // prompts clean-up after themselves
+    gl_clrscr();
+    return opt;
 }

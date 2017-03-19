@@ -12,6 +12,13 @@
 
 #include "../kern/kio.h"
 #include "../gl/gl_lib.h"
+#include "../gl/pane.h"
+
+/** Macros     **/
+// trench run colors
+#define ROGUE_RED       RGB(200,  44,  32)
+#define ROGUE_YLW       RGB(210, 175,  56)
+#define ROGUE_BLK       RGB( 80,  80,  80)
 
 /*
 ** Initializes program structure
@@ -38,10 +45,6 @@ void trench_run_init(Program* prog)
 static void __trench_run_render_stars(uint16_t seed,
     Point_2D tr_ul, Point_2D ctr_ul, Point_2D ctr_ur, Point_2D tr_ur)
 {
-    // manipulate the seed a little bit...because why not?
-    //seed += seed % 16;
-    //seed += seed % 10;
-    //seed += seed % 32;
     // ensure a certain length
     if (seed < 10)
         seed *= 12;
@@ -112,8 +115,6 @@ static void __trench_run_render_stars(uint16_t seed,
 */
 static void __trench_run_render_frame(uint16_t seed)
 {
-    RGB_8 ROGUE_RED = {200,  44,  32};
-    RGB_8 ROGUE_YLW = {210, 175,  56};
     // calculate values relative to the screen size
     uint16_t fr_w = gl_getw();
     uint16_t fr_h = gl_geth();
@@ -209,12 +210,43 @@ static void __trench_run_render_frame(uint16_t seed)
 uint8_t trench_run_main(uint8_t argc, char* argv[])
 {
     // default to VGA13
-    gl_enter(VGA_MODE_13);
+    pane_enter(VGA_MODE_13);
+    // set a theme that matches the look of the trench-run program
+    pane_set_theme(
+        &ROGUE_BLK, &RGB_BLACK,
+        &ROGUE_RED, &ROGUE_YLW,
+        &ROGUE_YLW, &ROGUE_RED,
+        &ROGUE_YLW, &ROGUE_BLK
+    );
+
+    // run length and seed for the trench
+    uint8_t run_len = 10;
+    uint16_t seed = 1342;
+    // option menu for trench run simulations settings
+    char* opts[] =
+    {
+        "Short trench run, seed 0",
+        "Long  trench run, seed 0",
+        "Short trench run, seed 1342",
+        "Long  trench run, seed 1342",
+    };
+    uint8_t opt = pane_draw_prompt("Pick a simulation", 4, opts);
+    switch (opt)
+    {
+        case 0:
+            seed = 0;
+            break;
+        case 1:
+            seed = 0;
+        case 3:
+            run_len = 20;
+            break;
+    }
 
     // draw the plans w/ a seed
-    for(uint16_t t=0; t<10; ++t)
+    for(uint16_t t=0; t<run_len; ++t)
     {
-        __trench_run_render_frame(1342 + t);
+        __trench_run_render_frame(seed + t);
         kio_wait_key(KEY_SPACE);
         gl_clrscr();
         // TODO get a real timer
@@ -228,6 +260,6 @@ uint8_t trench_run_main(uint8_t argc, char* argv[])
     }
 
     // clean-up and exit
-    gl_exit();
+    pane_exit();
     return EXIT_SUCCESS;
 }

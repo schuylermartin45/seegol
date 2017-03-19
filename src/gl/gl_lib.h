@@ -174,6 +174,22 @@ void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
 void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
 
 /*
+** Calculates the bounding box of a string to draw from the bit-mapped SeeFont
+** using kio_sprintf
+**
+** @param ul Upper-left starting point
+** @param str String to draw
+** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param w_bound Right-handed width to bound the text to. This is the maximum 
+**        width value that can be drawn. After this word-wrapping is enforced
+** @param bb Point to store bounding box width and height information into
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
+*/
+void gl_draw_strf_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
+    Point_2D* bb, void* a0, void* a1);
+
+/*
 ** Draws a string using kio_sprintf, based on a custom-made bitmap font.
 ** "Transparent" backgrounds are achieved by setting the background and
 ** foreground colors to the same value. Includes font scaling.
@@ -183,11 +199,13 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
 ** @param f_color Foreground color of the text
 ** @param str String to draw
 ** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param w_bound Right-handed width to bound the text to. This is the maximum 
+**        width value that can be drawn. After this word-wrapping is enforced
 ** @param a0 First arugment to print
 ** @param a1 Second arugment to print
 */
 void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
-    uint8_t scale, void* a0, void* a1);
+    uint8_t scale, uint16_t w_bound, void* a0, void* a1);
 
 /*
 ** Draws a string using kio_sprintf, based on a custom-made bitmap font.
@@ -201,8 +219,8 @@ void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
 ** @param a0 First arugment to print
 ** @param a1 Second arugment to print
 */
-#define gl_draw_strf(ul, b_color, f_color, str, a0, a1) \
-    gl_draw_strf_scale(ul, b_color, f_color, str, 1, a0, a1)
+void gl_draw_strf(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
+    void* a0, void* a1);
 
 /***** Image Draw Functions (driver-independent)     *****/
 
