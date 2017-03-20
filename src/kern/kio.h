@@ -39,6 +39,11 @@
 // common key codes
 #define KEY_ESC     27
 #define KEY_SPACE   32
+// common key codes for keys that use 16 bits
+#define KEY_ARROW_LT    19200
+#define KEY_ARROW_UP    18432
+#define KEY_ARROW_RT    19712
+#define KEY_ARROW_DN    20480
 
 /** Globals    **/
 
@@ -177,16 +182,23 @@ void kio_swap_fb();
 /*
 ** Fetches a single char from the user
 **
+** @return Character from the user or a 16-bit keyboard code
+*/
+uint16_t kio_getchr_16bit();
+
+/*
+** Fetches a single char from the user
+**
 ** @return Character from the user
 */
-char kio_getchr();
+#define kio_getchr()    (char)kio_getchr_16bit()
 
 /*
 ** Blocking wait that waits for a single char from the user
 **
 ** @param Character from the user
 */
-void kio_wait_key(char ch);
+#define kio_wait_key(ch)    while (kio_getchr() != ch) {}
 
 /*
 ** Fetches a null-terminated string (ended with a newline) from the user

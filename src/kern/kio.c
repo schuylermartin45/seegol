@@ -524,27 +524,17 @@ void kio_swap_fb()
 /*
 ** Fetches a single char from the user
 **
-** @return Character from the user
+** @return Character from the user or a 16-bit keyboard code
 */
-char kio_getchr()
+uint16_t kio_getchr_16bit()
 {
     // BIOS interrupt to get a character
     __asm__ __volatile__("movb $0, %ah\n");
     __asm__ __volatile__("int $0x16\n");
     // %al has the character
-    char ch;
-    __asm__ __volatile__("movb %%al, %0\n" : "=rm"(ch));
+    uint16_t ch;
+    __asm__ __volatile__("movw %%ax, %0\n" : "=rm"(ch));
     return ch;
-}
-
-/*
-** Blocking wait that waits for a single char from the user
-**
-** @param Character from the user
-*/
-void kio_wait_key(char ch)
-{
-    while (kio_getchr() != ch) {}
 }
 
 /*

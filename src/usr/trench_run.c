@@ -229,8 +229,9 @@ uint8_t trench_run_main(uint8_t argc, char* argv[])
         "Long  trench run, seed 0",
         "Short trench run, seed 1342",
         "Long  trench run, seed 1342",
+        "Quit",
     };
-    uint8_t opt = pane_draw_prompt("Pick a simulation", 4, opts);
+    uint8_t opt = pane_draw_prompt("Pick a simulation", 5, opts);
     switch (opt)
     {
         case 0:
@@ -240,6 +241,10 @@ uint8_t trench_run_main(uint8_t argc, char* argv[])
             seed = 0;
         case 3:
             run_len = 20;
+            break;
+        case 4:
+            // quit by forcing the loop to not execute
+            run_len = 0;
             break;
     }
 

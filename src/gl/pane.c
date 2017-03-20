@@ -296,45 +296,64 @@ uint8_t pane_draw_prompt(char* prompt, uint8_t optc, char* optv[])
 
     // control for user input, redrawing on each change
     uint8_t opt = 0;
-    char ch;
+    // tracking the previous option will reduce drawing calls on invalid input
+    uint8_t old_opt = 1;
+    uint16_t ch;
     do
     {
         // redraw
-        Point_2D opt_ul = {pane_pad.x, prompt_h + pane_pad.y};
-        for(uint8_t i=0; i<optc; ++i)
+        if (opt != old_opt)
         {
-            Point_2D bb;
-            // calculate the size of the string to be printed
-            gl_draw_strf_bb(opt_ul, OPT_PATTERN, DEFAULT_FONT_SCALE,
-                pane_w_bound, &bb, &i, optv[i]);
-            // selectively draw the selected text
-            if (opt == i)
+            Point_2D opt_ul = {pane_pad.x, prompt_h + pane_pad.y};
+            for(uint8_t i=0; i<optc; ++i)
             {
-                gl_draw_strf_scale(opt_ul, thm_b_select, thm_f_select,
-                    OPT_PATTERN, DEFAULT_FONT_SCALE, pane_w_bound, &i,
-                    optv[i]);
+                Point_2D bb;
+                // calculate the size of the string to be printed
+                gl_draw_strf_bb(opt_ul, OPT_PATTERN, DEFAULT_FONT_SCALE,
+                    pane_w_bound, &bb, &i, optv[i]);
+                // selectively draw the selected text
+                if (opt == i)
+                {
+                    gl_draw_strf_scale(opt_ul, thm_b_select, thm_f_select,
+                        OPT_PATTERN, DEFAULT_FONT_SCALE, pane_w_bound, &i,
+                        optv[i]
+                    );
+                }
+                else
+                {
+                    gl_draw_strf_scale(opt_ul, thm_f_pane, thm_text,
+                        OPT_PATTERN, DEFAULT_FONT_SCALE, pane_w_bound, &i,
+                        optv[i]
+                    );
+                }
+                // advance the cursor
+                opt_ul.y += pane_pad.y + bb.y;
             }
-            else
-            {
-                gl_draw_strf_scale(opt_ul, thm_f_pane, thm_text, OPT_PATTERN,
-                    DEFAULT_FONT_SCALE, pane_w_bound, &i, optv[i]);
-            }
-            // advance the cursor
-            opt_ul.y += pane_pad.y + bb.y;
         }
+        // record the old option for redrawing purposes
+        old_opt = opt;
         // prompt for input
-        ch = kio_getchr();
-        switch (ch)
+        ch = kio_getchr_16bit();
+        // parse the input as a 16bit input code
+        if ((char)ch == '\0')
         {
-            // go up
-            case ',': case 'w':
-                // this weird math gets around issues with using unsigned ints
-                opt = ((opt - 1) % optc) - 1;
-            // go down
-            case '.': case 's': case '\t':
-                opt = (opt + 1) % optc;
+            // arrow key processing
+            switch (ch)
+            {
+                case KEY_ARROW_UP:
+                    --opt;
+                    break;
+                case KEY_ARROW_DN:
+                    ++opt;
+                    break;
+            }
+            // keep the option within the bounds
+            opt %= optc;
         }
-    } while((ch != '\r') && (ch != '\n'));
+        // pick an option using number IDs
+        else if (((char)ch >= '0') && ((char)ch < ('0' + (char)optc)))
+            opt = (char)ch - '0';
+    } while(((char)ch != '\r') && ((char)ch != '\n'));
 
     // prompts clean-up after themselves
     gl_clrscr();
