@@ -341,6 +341,8 @@ uint8_t pane_draw_prompt(char* prompt, uint8_t optc, char* optv[])
             switch (ch)
             {
                 case KEY_ARROW_UP:
+                    if (opt == 0)
+                        opt = optc;
                     --opt;
                     break;
                 case KEY_ARROW_DN:
