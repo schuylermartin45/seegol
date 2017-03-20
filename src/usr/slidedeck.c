@@ -53,7 +53,7 @@ uint8_t slidedeck_main(uint8_t argc, char* argv[])
         {
             case 0:
                 pane_draw_title("HSC SeeGOL",
-                "Shoyler's Extremely Experimental\n"
+                "Shoyler's Extremely Experimental "
                 "Graphical Operating Library");
                 break;
             case 1:

@@ -237,14 +237,31 @@ void gl_draw_str_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
         }
         else
         {
+            // enforce a simple, hacky, word-wrapping
+            // this works by checking how long the next word is after a space
+            // has been seen
+            uint16_t wrap_cntr = 0;
+            if (*str == ' ')
+            {
+                char* wrap_ptr = str;
+                ++wrap_ptr;
+                while ((*wrap_ptr != '\0') && (*wrap_ptr != ' '))
+                {
+                    ++wrap_cntr;
+                    ++wrap_ptr;
+                }
+            }
             // enforce a newline if we are about to go out of bounds, in x
             cur.x = ul.x
                 + (rc_cntr.x * ((scale * SEE_FONT_WIDTH) 
                     + (2 * SEE_FONT_PAD_HORZ)))
                 + SEE_FONT_PAD_HORZ;
-            if ((cur.x + (scale * SEE_FONT_WIDTH) + (3 * SEE_FONT_PAD_HORZ)) 
-                >= w_bound)
+            if ((cur.x + (scale * SEE_FONT_WIDTH)
+                + (3 * SEE_FONT_PAD_HORZ)
+                + (wrap_cntr * scale * SEE_FONT_WIDTH)) >= w_bound)
             {
+                if (*str == ' ')
+                    ++str;
                 if (rc_cntr.x > ch_w_cntr)
                     ch_w_cntr = rc_cntr.x;
                 // reset before draw
@@ -309,14 +326,34 @@ void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
         else
         {
             uint8_t ch = *str;
+            // enforce a simple, hacky, word-wrapping
+            // this works by checking how long the next word is after a space
+            // has been seen
+            uint16_t wrap_cntr = 0;
+            if (ch == ' ')
+            {
+                char* wrap_ptr = str;
+                ++wrap_ptr;
+                while ((*wrap_ptr != '\0') && (*wrap_ptr != ' '))
+                {
+                    ++wrap_cntr;
+                    ++wrap_ptr;
+                }
+            }
             // enforce a newline if we are about to go out of bounds, in x
             cur.x = ul.x
                 + (rc_cntr.x * ((scale * SEE_FONT_WIDTH) 
                     + (2 * SEE_FONT_PAD_HORZ)))
                 + SEE_FONT_PAD_HORZ;
-            if ((cur.x + (scale * SEE_FONT_WIDTH) + (3 * SEE_FONT_PAD_HORZ)) 
-                >= w_bound)
+            if ((cur.x + (scale * SEE_FONT_WIDTH)
+                + (3 * SEE_FONT_PAD_HORZ)
+                + (wrap_cntr * scale * SEE_FONT_WIDTH)) >= w_bound)
             {
+                if (ch == ' ')
+                {
+                    ++str;
+                    ch = *str;
+                }
                 // reset before draw
                 rc_cntr.x = 0;
                 ++rc_cntr.y;
