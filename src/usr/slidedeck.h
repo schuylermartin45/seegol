@@ -31,7 +31,7 @@
 void slidedeck_init(Program* prog);
 
 /*
-** Main method for HSC Test Pattern program
+** Main method for the program
 */
 uint8_t slidedeck_main(uint8_t argc, char* argv[]);
 

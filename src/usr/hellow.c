@@ -26,7 +26,7 @@ void hellow_init(Program* prog)
 }
 
 /*
-** Main method for hello world program
+** Main method for the program
 */
 uint8_t hellow_main(uint8_t argc, char* argv[])
 {

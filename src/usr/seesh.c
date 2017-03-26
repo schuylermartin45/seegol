@@ -21,11 +21,12 @@
 #include "slidedeck.h"
 #include "slideshow.h"
 #include "trench_run.h"
+#include "usr_clock.h"
 
 /** Macros    **/
 // number of shell commands. This is kept in the C file out of convenience
 #define BUILTIN_COUNT   3
-#define PROG_COUNT      (BUILTIN_COUNT + 5)
+#define PROG_COUNT      (BUILTIN_COUNT + 6)
 // macros for installing programs to SeeSH
 #define INSTALL_BUILTIN_PROG(n, d, u, m) \
     prog_lst->name = n;\
@@ -140,6 +141,7 @@ static void __init(Program* prog_lst)
     INSTALL_USR_PROG(slidedeck_init);
     INSTALL_USR_PROG(slideshow_init);
     INSTALL_USR_PROG(trench_run_init);
+    INSTALL_USR_PROG(usr_clock_init);
 }
 
 /*

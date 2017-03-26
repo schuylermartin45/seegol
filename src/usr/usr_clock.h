@@ -1,12 +1,13 @@
 /*
-** File:    hellow.h
+** File:    usr_clock.h
 **
 ** Author:  Schuyler Martin <sam8050@rit.edu>
 **
-** Description: Hello World demo program
+** Description: User program that displays RTC time
 */
-#ifndef _HELLOW_H_
-#define _HELLOW_H_
+
+#ifndef _USR_CLOCK_H_
+#define _USR_CLOCK_H_
 
 /** Headers    **/
 #include "../kern/gcc16.h"
@@ -26,11 +27,11 @@
 **
 ** @param prog Program pointer to set
 */
-void hellow_init(Program* prog);
+void usr_clock_init(Program* prog);
 
 /*
 ** Main method for the program
 */
-uint8_t hellow_main(uint8_t argc, char* argv[]);
+uint8_t usr_clock_main(uint8_t argc, char* argv[]);
 
 #endif
