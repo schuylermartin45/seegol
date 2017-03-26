@@ -55,7 +55,6 @@ uint8_t usr_clock_main(uint8_t argc, char* argv[])
         }
         // non-blocking get chr
         key = kio_getchr_nb();
-        //kio_printf("%d\n", &key, NULL);
     }
     while (key != 'q');
     // capture excess q from non-blocking call; otherwise this gets dumped

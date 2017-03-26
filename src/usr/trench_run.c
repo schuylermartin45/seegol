@@ -10,6 +10,7 @@
 #include "../kern/gcc16.h"
 #include "trench_run.h"
 
+#include "../kern/clock.h"
 #include "../kern/kio.h"
 #include "../gl/gl_lib.h"
 #include "../gl/pane.h"
@@ -248,21 +249,25 @@ uint8_t trench_run_main(uint8_t argc, char* argv[])
             break;
     }
 
+    RTC_Time t_cur, t_prev = {0, 0, 0};
+    // control the frame to draw
+    uint16_t fr = 0;
+    char key = '\0';
     // draw the plans w/ a seed
-    for(uint16_t t=0; t<run_len; ++t)
+    do
     {
-        __trench_run_render_frame(seed + t);
-        kio_wait_key(KEY_SPACE);
-        gl_clrscr();
-        // TODO get a real timer
-        /*
-        uint16_t time_block = 0;
-        for(uint16_t s=0; s<65000; ++s)
-            time_block += s;
-        for(uint16_t s=0; s<65000; ++s)
-            time_block += s;
-        */
-    }
+        // animation control w/ timer
+        clk_rtc_time(&t_cur);
+        if (clk_rtc_diff(t_cur, t_prev))
+        {
+            gl_clrscr();
+            __trench_run_render_frame(seed + fr);
+            t_prev = t_cur;
+            ++fr;
+        }
+        // non-blocking get chr
+        key = kio_getchr_nb();
+    } while ((key != 'q') && (fr < run_len));
 
     // clean-up and exit
     pane_exit();

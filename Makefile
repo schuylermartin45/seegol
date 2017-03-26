@@ -267,7 +267,8 @@ bin/slideshow.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/slideshow.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
 bin/slideshow.o: src/kern/types.h src/gl/img_fids.h
 bin/trench_run.o: src/kern/gcc16.h src/usr/trench_run.h
-bin/trench_run.o: src/kern/types.h src/usr/program.h src/kern/kio.h
+bin/trench_run.o: src/kern/types.h src/usr/program.h src/kern/clock.h
+bin/trench_run.o: src/kern/gcc16.h src/kern/types.h src/kern/kio.h
 bin/trench_run.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
 bin/trench_run.o: src/kern/types.h src/gl/pane.h
 bin/usr_clock.o: src/kern/gcc16.h src/usr/usr_clock.h
