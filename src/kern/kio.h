@@ -180,18 +180,34 @@ void kio_swap_fb();
 /************************** Input Functions **************************/
 
 /*
+** Fetches a single char from the user using the BIOS interrupt. This should
+** not be called directly. Instead, use the aliases defined in the header file
+**
+** @param func BIOS function code, specifies the operation of getchr
+** @return Character from the user or a 16-bit keyboard code
+*/
+uint16_t _kio_getchr_type(uint8_t func);
+
+/*
 ** Fetches a single char from the user
 **
 ** @return Character from the user or a 16-bit keyboard code
 */
-uint16_t kio_getchr_16bit();
+#define kio_getchr_16bit()  _kio_getchr_type(0x00)
 
 /*
 ** Fetches a single char from the user
 **
 ** @return Character from the user
 */
-#define kio_getchr()    (char)kio_getchr_16bit()
+#define kio_getchr()    (char)_kio_getchr_type(0x00)
+
+/*
+** Fetches a single char from the user, non-blocking
+**
+** @return Character from the user
+*/
+uint16_t kio_getchr_nb();
 
 /*
 ** Blocking wait that waits for a single char from the user

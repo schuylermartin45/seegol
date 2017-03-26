@@ -46,14 +46,21 @@ uint8_t usr_clock_main(uint8_t argc, char* argv[])
         {
             kio_clrscr();
             clk_rtc_str(t_buff, t_cur, false);
-            kio_printf("Ticking away, the moments that makes up the dull day:"
-                "\n    %s\n", t_buff, NULL);
+            kio_printf(
+                "         "
+                "Ticking away, the moments that makes up the dull day..."
+                "\n                     %s\n", t_buff, NULL
+            );
             t_prev = t_cur;
         }
-        // TODO non-blocking get chr
-        //key = kio_getchr();
+        // non-blocking get chr
+        key = kio_getchr_nb();
+        //kio_printf("%d\n", &key, NULL);
     }
     while (key != 'q');
+    // capture excess q from non-blocking call; otherwise this gets dumped
+    // to seesh. Also clear the screen
+    kio_clrscr();
 
     return EXIT_SUCCESS;
 }
