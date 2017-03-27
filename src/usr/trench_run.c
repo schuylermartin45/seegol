@@ -12,6 +12,7 @@
 
 #include "../kern/clock.h"
 #include "../kern/kio.h"
+#include "../kern/rng.h"
 #include "../gl/gl_lib.h"
 #include "../gl/pane.h"
 
@@ -20,6 +21,13 @@
 #define ROGUE_RED       RGB(200,  44,  32)
 #define ROGUE_YLW       RGB(210, 175,  56)
 #define ROGUE_BLK       RGB( 80,  80,  80)
+// Trench run length
+#define DEFAULT_RUN_LEN 30
+#define LONG_RUN_LEN    60
+// chances of drawing a star
+#define STAR_PROB_LO    0
+#define STAR_PROB_HI    100
+#define STAR_PROB       87
 
 /*
 ** Initializes program structure
@@ -82,10 +90,16 @@ static void __trench_run_render_stars(uint16_t seed,
             int16_t cur_ur_eq = (cursor.x * ur_dy) - (cursor.y * ur_dx);
             // see if we should draw this
             if ((cur_ul_eq > ul_eq) && (cur_ur_eq < ur_eq))
-                gl_put_pixel(cursor, RGB_WHITE);
+            {
+                if (rng_fetch_range(STAR_PROB_LO, STAR_PROB_HI) > STAR_PROB)
+                    gl_put_pixel(cursor, RGB_WHITE);
+            }
         }
         else
+        {
+            if (rng_fetch_range(STAR_PROB_LO, STAR_PROB_HI) > STAR_PROB)
                 gl_put_pixel(cursor, RGB_WHITE);
+        }
         switch (cntr % 4)
         {
             case 0: cursor.x = cursor.x + dx;
@@ -221,7 +235,7 @@ uint8_t trench_run_main(uint8_t argc, char* argv[])
     );
 
     // run length and seed for the trench
-    uint8_t run_len = 10;
+    uint8_t run_len = DEFAULT_RUN_LEN;
     uint16_t seed = 1342;
     // option menu for trench run simulations settings
     char* opts[] =
@@ -241,7 +255,7 @@ uint8_t trench_run_main(uint8_t argc, char* argv[])
         case 1:
             seed = 0;
         case 3:
-            run_len = 20;
+            run_len = LONG_RUN_LEN;
             break;
         case 4:
             // quit by forcing the loop to not execute
@@ -253,7 +267,8 @@ uint8_t trench_run_main(uint8_t argc, char* argv[])
     // control the frame to draw
     uint16_t fr = 0;
     char key = '\0';
-    // draw the plans w/ a seed
+    // draw the plans w/ a seed; star placement is determined by an RNG
+    rng_init(seed);
     do
     {
         // animation control w/ timer

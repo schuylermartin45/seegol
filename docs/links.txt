@@ -77,3 +77,8 @@ http://webpages.charter.net/danrollins/techhelp/0247.HTM
 http://webpages.charter.net/danrollins/techhelp/0230.HTM
 http://wiki.osdev.org/CMOS
 http://stackoverflow.com/questions/13143774/how-to-read-key-without-waiting-for-it-assembly-8086
+
+Random Number Generator
+-----------------------
+http://stackoverflow.com/questions/7602919/how-do-i-generate-random-numbers-without-rand-function
+https://en.wikipedia.org/wiki/Linear-feedback_shift_register

@@ -245,6 +245,8 @@ bin/main.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
 bin/main.o: src/usr/seesh.h src/kern/gcc16.h src/kern/types.h
 bin/clock.o: src/kern/gcc16.h src/kern/clock.h src/kern/types.h
 bin/clock.o: src/kern/asm_lib.h src/kern/kio.h
+bin/rng.o: src/kern/gcc16.h src/kern/rng.h src/kern/types.h
+bin/rng.o: src/kern/clock.h
 bin/vga/vga13.o: src/kern/gcc16.h src/kern/asm_lib.h
 bin/vga/vga13.o: src/kern/gcc16.h src/kern/types.h
 bin/vga/vga13.o: src/kern/vga/vga13.h src/kern/types.h
@@ -269,11 +271,13 @@ bin/slideshow.o: src/kern/types.h src/gl/img_fids.h
 bin/trench_run.o: src/kern/gcc16.h src/usr/trench_run.h
 bin/trench_run.o: src/kern/types.h src/usr/program.h src/kern/clock.h
 bin/trench_run.o: src/kern/gcc16.h src/kern/types.h src/kern/kio.h
-bin/trench_run.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
-bin/trench_run.o: src/kern/types.h src/gl/pane.h
+bin/trench_run.o: src/kern/rng.h src/gl/gl_lib.h src/kern/vga/vga.h
+bin/trench_run.o: src/kern/gcc16.h src/kern/types.h src/gl/pane.h
 bin/usr_clock.o: src/kern/gcc16.h src/usr/usr_clock.h
 bin/usr_clock.o: src/kern/types.h src/usr/program.h src/kern/clock.h
 bin/usr_clock.o: src/kern/gcc16.h src/kern/types.h src/kern/kio.h
+bin/usr_clock.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
+bin/usr_clock.o: src/kern/types.h src/gl/img_fids.h
 bin/hellow.o: src/kern/gcc16.h src/usr/hellow.h src/kern/types.h
 bin/hellow.o: src/usr/program.h src/kern/kio.h
 bin/slidedeck.o: src/kern/gcc16.h src/usr/slidedeck.h
