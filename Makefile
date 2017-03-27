@@ -70,8 +70,24 @@ INCLUDES = -I. -I./$(SRC) -I./$(KERN) -I.$(VGA) -I./$(GL) -I./$(USR)
 # Compiler setup
 # Note: we prepend all C files with a directive to target Real Mode
 #
+# C Compiler optimizations from:
+# http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
+#
+# Flags that seem to make no difference:
+# --------------------------------------
+# gcc:
+#   -Wl,-z,norelro
+#   -Wl,--hash-style=gnu
+# ld:
+#   -z norelro
+#
 CC = gcc
-CFLAGS = -g -Os -march=i686 -m32 -std=c99 -ffreestanding -Wall -Werror \
+CFLAGS = -Os -s -march=i686 -m32 -std=c99 -ffreestanding -Wall -Werror \
+		 -fno-stack-protector -fomit-frame-pointer -ffunction-sections \
+		 -falign-functions=1 -falign-jumps=1 -falign-loops=1 \
+		 -fdata-sections -Wl,--gc-sections -mpreferred-stack-boundary=2 \
+		 -fno-unwind-tables -fno-asynchronous-unwind-tables \
+		 -fmerge-all-constants -fno-ident \
 		 -Wno-trigraphs -Wl,--oformat=binary $(INCLUDES)
 
 #

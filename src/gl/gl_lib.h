@@ -46,6 +46,10 @@ typedef struct Point_3D
 #define RGB_BLACK       RGB(  0,   0,   0)
 #define RGB_WHITE       RGB(255, 255, 255)
 #define RGB_HSC         RGB( 40,  49, 137)
+// subtractive colors
+#define RGB_CYAN         RGB(  0, 255, 255)
+#define RGB_MAGENTA      RGB(255,   0, 255)
+#define RGB_YELLOW       RGB(255, 255,   0)
 
 /** Functions  **/
 
