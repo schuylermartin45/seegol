@@ -35,14 +35,15 @@ void usr_clock_init(Program* prog)
 ** consistent in size) is not possible nor practical.
 **
 ** @param clk_center Center point of the clock
+** @param width Clock arm width
 ** @param color Color of the clock arm
 ** @param divisions Number of divisions in this time unit (i.e. seconds have
 **        60 divisions in a clock)
 ** @param rad Arm radius. The bounding box of the clock is 2 radii wide
 ** @param t_unit Time unit value of the arm
 */
-static void usr_clock_draw_arm(Point_2D clk_center, RGB_8 color,
-    uint16_t divisions, uint16_t rad, uint8_t t_unit)
+static void __usr_clock_draw_arm(Point_2D clk_center, uint8_t width,
+    RGB_8 color, uint16_t divisions, uint16_t rad, uint8_t t_unit)
 {
     // assume the end point of the arm starts at 12 o'clock position
     Point_2D end_pt = clk_center;
@@ -111,7 +112,7 @@ static void usr_clock_draw_arm(Point_2D clk_center, RGB_8 color,
         end_pt.y -= rad;
     }
     // draw a line from the center of the circle to the end of the arm    
-    gl_draw_line(clk_center, end_pt, color);
+    gl_draw_line_width(clk_center, end_pt, width, color);
 }
 
 /*
@@ -140,12 +141,12 @@ static void __usr_clock_render_gui(RTC_Time t, char* t_str)
     // draw fastest moving to slowest moving (longest arm to shortest) in case
     // of any overlap
     // sec
-    usr_clock_draw_arm(clk_center, RGB_YELLOW,  60, gl_getw() / 6, t.sec);
+    __usr_clock_draw_arm(clk_center, 1, RGB_YELLOW, 60, gl_getw() / 6, t.sec);
     // min
-    usr_clock_draw_arm(clk_center, RGB_CYAN,    60, gl_getw() / 10, t.min);
+    __usr_clock_draw_arm(clk_center, 2, RGB_CYAN, 60, gl_getw() / 9, t.min);
     // hr
     uint8_t hr = (t.hr > 12) ? t.hr - 12 : t.hr;
-    usr_clock_draw_arm(clk_center, RGB_MAGENTA, 12, gl_getw() / 16, hr);
+    __usr_clock_draw_arm(clk_center, 3, RGB_MAGENTA, 12, gl_getw() / 18, hr);
 }
 
 /*

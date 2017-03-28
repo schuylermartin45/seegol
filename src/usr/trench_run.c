@@ -22,8 +22,9 @@
 #define ROGUE_YLW       RGB(210, 175,  56)
 #define ROGUE_BLK       RGB( 80,  80,  80)
 // Trench run length
-#define DEFAULT_RUN_LEN 30
-#define LONG_RUN_LEN    60
+#define DEFAULT_RUN_LEN 10
+// infinite drawing mode
+#define INFINITE_MODE   255
 // chances of drawing a star
 #define STAR_PROB_LO    0
 #define STAR_PROB_HI    100
@@ -64,7 +65,7 @@ static void __trench_run_render_stars(uint16_t seed,
         
     // use the seed to determine certain parameters
     Point_2D cursor = {seed % gl_getw(), seed % 10};
-    uint16_t dx = (seed % 50) + 1;
+    uint16_t dx = (seed % 35) + 1;
     uint16_t dy = ((seed % 4) + 1) * 3;
 
     // counts the cycles
@@ -236,28 +237,25 @@ uint8_t trench_run_main(uint8_t argc, char* argv[])
 
     // run length and seed for the trench
     uint8_t run_len = DEFAULT_RUN_LEN;
-    uint16_t seed = 1342;
+    uint16_t seed = 0;
     // option menu for trench run simulations settings
     char* opts[] =
     {
-        "Short trench run, seed 0",
-        "Long  trench run, seed 0",
-        "Short trench run, seed 1342",
-        "Long  trench run, seed 1342",
+        "Infinite trench run, seed 0",
+        "Trench run, seed 0",
+        "Trench run, seed 1342",
         "Quit",
     };
-    uint8_t opt = pane_draw_prompt("Pick a simulation", 5, opts);
+    uint8_t opt = pane_draw_prompt("Pick a simulation", 4, opts);
     switch (opt)
     {
         case 0:
-            seed = 0;
+            run_len = INFINITE_MODE;
             break;
-        case 1:
-            seed = 0;
+        case 2:
+            seed = 1342;
+            break;
         case 3:
-            run_len = LONG_RUN_LEN;
-            break;
-        case 4:
             // quit by forcing the loop to not execute
             run_len = 0;
             break;
@@ -265,11 +263,11 @@ uint8_t trench_run_main(uint8_t argc, char* argv[])
 
     RTC_Time t_cur, t_prev = {0, 0, 0};
     // control the frame to draw
-    uint16_t fr = 0;
+    uint16_t fr = 0, cmp_fr= 0;
     char key = '\0';
     // draw the plans w/ a seed; star placement is determined by an RNG
     rng_init(seed);
-    do
+    while((key != 'q') && (cmp_fr < run_len))
     {
         // animation control w/ timer
         clk_rtc_time(&t_cur);
@@ -279,10 +277,13 @@ uint8_t trench_run_main(uint8_t argc, char* argv[])
             __trench_run_render_frame(seed + fr);
             t_prev = t_cur;
             ++fr;
+            // allows us to have an infinite draw scheme
+            if (run_len != INFINITE_MODE)
+                ++cmp_fr;
         }
         // non-blocking get chr
         key = kio_getchr_nb();
-    } while ((key != 'q') && (fr < run_len));
+    }
 
     // clean-up and exit
     pane_exit();

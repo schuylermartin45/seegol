@@ -298,8 +298,18 @@ void gl_draw_img_center_scale(uint8_t fid, uint8_t scale);
 **
 ** @param p0 First point
 ** @param p1 Second point
+** @param width Line width/thickness
 ** @param color Color to draw
 */
-void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color);
+void gl_draw_line_width(Point_2D p0, Point_2D p1, uint8_t width, RGB_8 color);
+
+/*
+** Draw a line anywhere on the screen
+**
+** @param p0 First point
+** @param p1 Second point
+** @param color Color to draw
+*/
+#define gl_draw_line(p0, p1, color) gl_draw_line_width(p0, p1, 1, color)
 
 #endif

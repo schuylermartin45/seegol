@@ -684,9 +684,10 @@ void gl_draw_img_center_scale(uint8_t fid, uint8_t scale)
 **
 ** @param p0 First point
 ** @param p1 Second point
+** @param width Line width/thickness
 ** @param color Color to draw
 */
-void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
+void gl_draw_line_width(Point_2D p0, Point_2D p1, uint8_t width, RGB_8 color)
 {
     // start by performing the left-right coordinate check-and-swap
     if (p0.x > p1.x)
@@ -706,7 +707,7 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
 
     // check for optimized line drawing
     if (p0.y == p1.y)
-        vga_driver.vga_draw_rect_wh(p0.x, p0.y, p1.x-p0.x, 1, color);
+        vga_driver.vga_draw_rect_wh(p0.x, p0.y, p1.x-p0.x, width, color);
     else if (p0.x == p1.x)
     {
         // perform the "left-right" swapping of the coordinates but for drawing
@@ -716,7 +717,7 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
             Point_2D tp = p0;
             p0 = p1, p1=tp;
         }
-        vga_driver.vga_draw_rect_wh(p0.x, p0.y, 1, p1.y-p0.y, color);
+        vga_driver.vga_draw_rect_wh(p0.x, p0.y, width, p1.y-p0.y, color);
     }
     else
     {
@@ -725,15 +726,20 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
         // draw diagonal lines if slope is +/-1
         if ((dx == dy) || (dx == -dy))
         {
-            //__gl_draw_diag(p0, p1, color);
             for (uint16_t i=0; i<=(p1.x - p0.x); ++i)
             {
                 // negative slopes
                 if (p0.y < p1.y)
-                    vga_driver.vga_put_pixel(p0.x + i, p0.y + i, color);
+                    // TODO
+                    //vga_driver.vga_put_pixel(p0.x + i, p0.y + i, color);
+                    vga_driver.vga_draw_rect_wh(p0.x + i, p0.y + i, width, 1,
+                        color);
                 // positive slopes
                 else
-                    vga_driver.vga_put_pixel(p0.x + i, p0.y - i, color);
+                    // TODO
+                    //vga_driver.vga_put_pixel(p0.x + i, p0.y - i, color);
+                    vga_driver.vga_draw_rect_wh(p0.x + i, p0.y - i, width, 1,
+                        color);
             }
         }
         // draw...everything else (in the octants)
@@ -760,7 +766,9 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
                 for (; y != p1.y; y += incr_y)
                 {
                     // color and pick the next pixel
-                    vga_driver.vga_put_pixel(x, y, color);
+                    // TODO
+                    //vga_driver.vga_put_pixel(x, y, color);
+                    vga_driver.vga_draw_rect_wh(x, y, width, 1, color);
                     if (delta <= 0)
                         delta += dE;
                     else
@@ -785,7 +793,9 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
                 for (; x <= p1.x; x += incr_x)
                 {
                     // color and pick the next pixel
-                    vga_driver.vga_put_pixel(x, y, color);
+                    // TODO
+                    //vga_driver.vga_put_pixel(x, y, color);
+                    vga_driver.vga_draw_rect_wh(x, y, 1, width, color);
                     if (delta <= 0)
                         delta += dE;
                     else
