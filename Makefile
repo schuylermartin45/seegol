@@ -81,12 +81,17 @@ INCLUDES = -I. -I./$(SRC) -I./$(KERN) -I.$(VGA) -I./$(GL) -I./$(USR)
 # ld:
 #   -z norelro
 #
+# Enabling this flag reduces binary size but does not allow the OS to boot on
+# SOME systems. It will boot in the Distributed Systems Lab but not on my
+# personal test machine.
+#   -fomit-frame-pointer
+#
 CC = gcc
 CFLAGS = -Os -s -march=i686 -m32 -std=c99 -ffreestanding -Wall -Werror \
-		 -fno-stack-protector -fomit-frame-pointer -ffunction-sections \
+		 -fno-stack-protector -ffunction-sections \
+		 -fno-unwind-tables -fno-asynchronous-unwind-tables \
 		 -falign-functions=1 -falign-jumps=1 -falign-loops=1 \
 		 -fdata-sections -Wl,--gc-sections -mpreferred-stack-boundary=2 \
-		 -fno-unwind-tables -fno-asynchronous-unwind-tables \
 		 -fmerge-all-constants -fno-ident \
 		 -Wno-trigraphs -Wl,--oformat=binary $(INCLUDES)
 

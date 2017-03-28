@@ -28,7 +28,9 @@
 // chances of drawing a star
 #define STAR_PROB_LO    0
 #define STAR_PROB_HI    100
-#define STAR_PROB       87
+#define STAR_PROB       77  // year the movie came out
+// padding on targeting computer border
+#define TCB_PAD         1
 
 /*
 ** Initializes program structure
@@ -147,13 +149,24 @@ static void __trench_run_render_frame(uint16_t seed)
         PT2(ctr_lr.x, ctr_ul.y), PT2(tr_ul.x, tr_ul.y));
 
     // "targetting computer" indicator, lower and center just like the movie
-    Point_2D t_comp_ul = {0, 0};
-    Point_2D t_comp_bb;
-    gl_draw_strf_bb(t_comp_ul, "|%06d|", 2, fr_w, &t_comp_bb, &seed, NULL);
-    t_comp_ul.x = (fr_w - t_comp_bb.x) / 2;
-    t_comp_ul.y = fr_h - (t_comp_bb.y + (t_comp_bb.y / 2));
-    gl_draw_strf_scale(t_comp_ul, ROGUE_RED, ROGUE_YLW, "|%06d|", 2, fr_w,
-        &seed, NULL);
+    Point_2D tc_ul = {0, 0};
+    Point_2D tc_bb;
+    gl_draw_strf_bb(tc_ul, "%06d", 2, fr_w, &tc_bb, &seed, NULL);
+    tc_ul.x = (fr_w - tc_bb.x) / 2;
+    tc_ul.y = fr_h - (tc_bb.y + (tc_bb.y / 2));
+    gl_draw_strf_scale(tc_ul, ROGUE_RED, ROGUE_RED, "%06d", 2, fr_w, &seed,
+        NULL);
+
+    // draw frame around the letters
+    Point_2D tcb_ul = {tc_ul.x - TCB_PAD, tc_ul.y - TCB_PAD};
+    Point_2D tcb_lr = {
+        tc_ul.x + tc_bb.x + TCB_PAD,
+        tc_ul.y + tc_bb.y + TCB_PAD
+    };
+    gl_draw_line(tcb_ul, PT2(tcb_lr.x, tcb_ul.y), ROGUE_YLW);
+    gl_draw_line(tcb_ul, PT2(tcb_ul.x, tcb_lr.y), ROGUE_YLW);
+    gl_draw_line(PT2(tcb_ul.x, tcb_lr.y), tcb_lr, ROGUE_YLW);
+    gl_draw_line(PT2(tcb_lr.x, tcb_ul.y), tcb_lr, ROGUE_YLW);
 
     // draw the corners of the trenches, based on the screen dimensions
     // top corners of trench
@@ -162,6 +175,47 @@ static void __trench_run_render_frame(uint16_t seed)
     // bottom corners of trench
     gl_draw_line(PT2(tr_ul.x, tr_lr.y), PT2(ctr_ul.x, ctr_lr.y), ROGUE_YLW);
     gl_draw_line(tr_lr, ctr_lr, ROGUE_YLW);
+    // y values of upper middle stripe
+    uint16_t tr_md_u_y  = tr_ul.y  + ((tr_lr.y - tr_ul.y)   / 4);
+    uint16_t ctr_md_u_y = ctr_ul.y + ((ctr_lr.y - ctr_ul.y) / 4);
+    // y values of middle middle stripe
+    uint16_t tr_md_m_y  = tr_ul.y  + ((tr_lr.y - tr_ul.y)   / 2);
+    uint16_t ctr_md_m_y = ctr_ul.y + ((ctr_lr.y - ctr_ul.y) / 2);
+    // y values of lower middle stripe
+    uint16_t tr_md_l_y  = tr_ul.y  + ((tr_lr.y - tr_ul.y)   * 3 / 4);
+    uint16_t ctr_md_l_y = ctr_ul.y + ((ctr_lr.y - ctr_ul.y) * 3 / 4);
+    // middle lines, left side, upper to bottom
+    gl_draw_line(
+        PT2(tr_ul.x,  tr_md_u_y),
+        PT2(ctr_ul.x, ctr_md_u_y),
+        ROGUE_YLW
+    );
+    gl_draw_line(
+        PT2(tr_ul.x,  tr_md_m_y),
+        PT2(ctr_ul.x, ctr_md_m_y),
+        ROGUE_YLW
+    );
+    gl_draw_line(
+        PT2(tr_ul.x,  tr_md_l_y),
+        PT2(ctr_ul.x, ctr_md_l_y),
+        ROGUE_YLW
+    );
+    // middle lines, right side, upper to bottom
+    gl_draw_line(
+        PT2(tr_lr.x,  tr_md_u_y),
+        PT2(ctr_lr.x, ctr_md_u_y),
+        ROGUE_YLW
+    );
+    gl_draw_line(
+        PT2(tr_lr.x,  tr_md_m_y),
+        PT2(ctr_lr.x, ctr_md_m_y),
+        ROGUE_YLW
+    );
+    gl_draw_line(
+        PT2(tr_lr.x,  tr_md_l_y),
+        PT2(ctr_lr.x, ctr_md_l_y),
+        ROGUE_YLW
+    );
 
     // bound the end of the trench
     gl_draw_line(ctr_ul, PT2(ctr_ul.x, ctr_lr.y), ROGUE_YLW);
@@ -190,12 +244,18 @@ static void __trench_run_render_frame(uint16_t seed)
                 break;
             }
         }
+        // ignore the middle lines
+        uint8_t ylw_cntr = 0;
         for(; y<fr_h; ++y)
         {
             tr_p1.y = y;
             gl_get_pixel(tr_p1, &cmp_color);
             if (vga_RGB_8_cmp(cmp_color, ROGUE_YLW))
-                break;
+            {
+                ++ylw_cntr;
+                if (ylw_cntr > 3)
+                    break;
+            }
         }
         gl_draw_line(tr_p0, tr_p1, ROGUE_YLW);
         // finding the subsequent bars is easier since we know one dimension
@@ -211,15 +271,20 @@ static void __trench_run_render_frame(uint16_t seed)
                 break;
         }
         gl_draw_line(tr_p1, tr_p0, ROGUE_YLW);
-        // last vertical bar
+        // last vertical bar, built just like the first one
         tr_p1 = tr_p0;
-        y = fr_h / 2;
+        y = tr_p1.y;
+        ylw_cntr = 0;
         for(; y<fr_h; --y)
         {
             tr_p1.y = y;
             gl_get_pixel(tr_p1, &cmp_color);
             if (vga_RGB_8_cmp(cmp_color, ROGUE_YLW))
-                break;
+            {
+                ++ylw_cntr;
+                if (ylw_cntr > 4)
+                    break;
+            }
         }
         gl_draw_line(tr_p0, tr_p1, ROGUE_YLW);
     }

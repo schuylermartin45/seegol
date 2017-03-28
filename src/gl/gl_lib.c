@@ -227,7 +227,7 @@ void gl_draw_str_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
         if (*str == '\n')
         {
             if (rc_cntr.x > ch_w_cntr)
-                ch_w_cntr = rc_cntr.x;
+                ch_w_cntr = rc_cntr.x + 1;
             // jump a row of chars down
             rc_cntr.x = 0;
             ++rc_cntr.y;
@@ -263,7 +263,7 @@ void gl_draw_str_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
                 if (*str == ' ')
                     ++str;
                 if (rc_cntr.x > ch_w_cntr)
-                    ch_w_cntr = rc_cntr.x;
+                    ch_w_cntr = rc_cntr.x + 1;
                 // reset before draw
                 rc_cntr.x = 0;
                 ++rc_cntr.y;
@@ -276,14 +276,14 @@ void gl_draw_str_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
                 + (2 * SEE_FONT_PAD_VERT)))
                 + SEE_FONT_PAD_VERT;
             if (rc_cntr.x > ch_w_cntr)
-                ch_w_cntr = rc_cntr.x;
+                ch_w_cntr = rc_cntr.x + 1;
             // move right; the character to draw
             ++rc_cntr.x;
             ++str;
         }
     }
     // calculate the bounding box width
-    bb->x = ch_w_cntr * ((scale * SEE_FONT_WIDTH) + (2 * SEE_FONT_PAD_HORZ));
+    bb->x = ch_w_cntr * (scale * (SEE_FONT_WIDTH + (2 * SEE_FONT_PAD_HORZ)));
 }
 
 /*
@@ -707,7 +707,7 @@ void gl_draw_line_width(Point_2D p0, Point_2D p1, uint8_t width, RGB_8 color)
 
     // check for optimized line drawing
     if (p0.y == p1.y)
-        vga_driver.vga_draw_rect_wh(p0.x, p0.y, p1.x-p0.x, width, color);
+        vga_driver.vga_draw_rect_wh(p0.x, p0.y, p1.x-p0.x + 1, width, color);
     else if (p0.x == p1.x)
     {
         // perform the "left-right" swapping of the coordinates but for drawing
@@ -717,7 +717,7 @@ void gl_draw_line_width(Point_2D p0, Point_2D p1, uint8_t width, RGB_8 color)
             Point_2D tp = p0;
             p0 = p1, p1=tp;
         }
-        vga_driver.vga_draw_rect_wh(p0.x, p0.y, width, p1.y-p0.y, color);
+        vga_driver.vga_draw_rect_wh(p0.x, p0.y, width, p1.y-p0.y + 1, color);
     }
     else
     {
@@ -730,14 +730,10 @@ void gl_draw_line_width(Point_2D p0, Point_2D p1, uint8_t width, RGB_8 color)
             {
                 // negative slopes
                 if (p0.y < p1.y)
-                    // TODO
-                    //vga_driver.vga_put_pixel(p0.x + i, p0.y + i, color);
                     vga_driver.vga_draw_rect_wh(p0.x + i, p0.y + i, width, 1,
                         color);
                 // positive slopes
                 else
-                    // TODO
-                    //vga_driver.vga_put_pixel(p0.x + i, p0.y - i, color);
                     vga_driver.vga_draw_rect_wh(p0.x + i, p0.y - i, width, 1,
                         color);
             }
@@ -766,8 +762,6 @@ void gl_draw_line_width(Point_2D p0, Point_2D p1, uint8_t width, RGB_8 color)
                 for (; y != p1.y; y += incr_y)
                 {
                     // color and pick the next pixel
-                    // TODO
-                    //vga_driver.vga_put_pixel(x, y, color);
                     vga_driver.vga_draw_rect_wh(x, y, width, 1, color);
                     if (delta <= 0)
                         delta += dE;
@@ -793,8 +787,6 @@ void gl_draw_line_width(Point_2D p0, Point_2D p1, uint8_t width, RGB_8 color)
                 for (; x <= p1.x; x += incr_x)
                 {
                     // color and pick the next pixel
-                    // TODO
-                    //vga_driver.vga_put_pixel(x, y, color);
                     vga_driver.vga_draw_rect_wh(x, y, 1, width, color);
                     if (delta <= 0)
                         delta += dE;
