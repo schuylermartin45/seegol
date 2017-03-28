@@ -31,7 +31,7 @@ void rng_init(uint16_t seed)
         RTC_Time t_cur;
         clk_rtc_time(&t_cur);
         // just some arbitrary math I came up with
-        lfsr = (t_cur.sec * (t_cur.min % t_cur.hr)) + t_cur.day;
+        lfsr = (t_cur.sec * (t_cur.min % (t_cur.hr + 1))) + t_cur.day;
     }
     else
         lfsr = seed;
