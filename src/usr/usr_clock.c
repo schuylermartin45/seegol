@@ -46,11 +46,29 @@ static void usr_clock_draw_arm(Point_2D clk_center, RGB_8 color,
 {
     // assume the end point of the arm starts at 12 o'clock position
     Point_2D end_pt = clk_center;
-    // 1 unit of change in the sampling of an octant
-    uint16_t rad_frac = rad / 8;
-    // how far along a square's edge we travel, based on time
-    uint16_t travel = (t_unit % 8) * rad_frac;
+    // divisions of time in an octant
     uint16_t oct_div = (divisions / 8) + 1;
+    // 1 unit of change in the sampling of an octant
+    uint16_t rad_frac = rad / oct_div;
+    // how far along a square's edge we travel, based on time
+    uint16_t travel = (t_unit % oct_div) * rad_frac;
+    // the error is much higher for the hour hand b/c there are far fewer
+    // divisions. This hack seems to correct the error and produce hour hands
+    // that are "good enough"
+    if (divisions == 12)
+    {
+        travel = ((t_unit % oct_div) + 1) * rad_frac;
+        if (t_unit == 6)
+        {
+            travel = rad;
+            t_unit = 7;
+        }
+        else if (t_unit > 6)
+            t_unit += 2;
+    }
+    // a smaller error correction is made for the other two hands
+    else if (t_unit >= 30)
+        travel += (2 * rad_frac);
     // determine the octant we're in
     if      (t_unit < (1 * oct_div))   // 1st
     {
@@ -119,13 +137,15 @@ static void __usr_clock_render_gui(RTC_Time t, char* t_str)
 
     // draw three clock arms based on the current time
     Point_2D clk_center = {gl_getw() / 2, gl_geth() / 2};
+    // draw fastest moving to slowest moving (longest arm to shortest) in case
+    // of any overlap
+    // sec
+    usr_clock_draw_arm(clk_center, RGB_YELLOW,  60, gl_getw() / 6, t.sec);
+    // min
+    usr_clock_draw_arm(clk_center, RGB_CYAN,    60, gl_getw() / 10, t.min);
     // hr
     uint8_t hr = (t.hr > 12) ? t.hr - 12 : t.hr;
     usr_clock_draw_arm(clk_center, RGB_MAGENTA, 12, gl_getw() / 16, hr);
-    // min
-    usr_clock_draw_arm(clk_center, RGB_CYAN,    60, gl_getw() / 10, t.min);
-    // sec
-    usr_clock_draw_arm(clk_center, RGB_YELLOW,  60, gl_getw() / 6, t.sec);
 }
 
 /*
