@@ -95,7 +95,11 @@ void clk_rtc_str(char* buff, RTC_Time time, bool is_24)
             hr -= 12;
         }
         else
+        {
+            if (hr == 0)
+                hr = 12;
             am_pm = "AM";
+        }
     }
     // date
     kio_sprintf("%02D/%02D/", buff, &(time.mon), &(time.day));
