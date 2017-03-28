@@ -50,44 +50,44 @@ static void usr_clock_draw_arm(Point_2D clk_center, RGB_8 color,
     uint16_t rad_frac = rad / 8;
     // how far along a square's edge we travel, based on time
     uint16_t travel = (t_unit % 8) * rad_frac;
-    uint16_t oct_div = divisions / 8;
+    uint16_t oct_div = (divisions / 8) + 1;
     // determine the octant we're in
-    if      (t_unit <= (1 * oct_div))   // 1st
+    if      (t_unit < (1 * oct_div))   // 1st
     {
         end_pt.x += travel;
         end_pt.y -= rad;
     }
-    else if (t_unit < (2 * oct_div))    // 2nd
+    else if (t_unit < (2 * oct_div))   // 2nd
     {
         end_pt.x += rad;
         end_pt.y = (end_pt.y - rad) + travel;
     }
-    else if (t_unit <= (3 * oct_div))   // 3rd
+    else if (t_unit < (3 * oct_div))   // 3rd
     {
         end_pt.x += rad;
         end_pt.y += travel;
     }
-    else if (t_unit <= (4 * oct_div))   // 4th
+    else if (t_unit < (4 * oct_div))   // 4th
     {
         end_pt.x += rad - travel;
         end_pt.y += rad;
     }
-    else if (t_unit <= (5 * oct_div))   // 5th
+    else if (t_unit < (5 * oct_div))   // 5th
     {
         end_pt.x -= travel;
         end_pt.y += rad;
     }
-    else if (t_unit <= (6 * oct_div))   // 6th
+    else if (t_unit < (6 * oct_div))   // 6th
     {
         end_pt.x -= rad;
         end_pt.y += rad - travel;
     }
-    else if (t_unit <= (7 * oct_div))   // 7th
+    else if (t_unit < (7 * oct_div))   // 7th
     {
         end_pt.x -= rad;
         end_pt.y -= travel;
     }
-    else if (t_unit < (8 * oct_div))    // 8th
+    else //if (t_unit <= (8 * oct_div))    // 8th
     {
         end_pt.x -= rad - travel;
         end_pt.y -= rad;
@@ -121,11 +121,11 @@ static void __usr_clock_render_gui(RTC_Time t, char* t_str)
     Point_2D clk_center = {gl_getw() / 2, gl_geth() / 2};
     // hr
     uint8_t hr = (t.hr > 12) ? t.hr - 12 : t.hr;
-    usr_clock_draw_arm(clk_center, RGB_MAGENTA, 12, gl_getw() / 9, hr);
+    usr_clock_draw_arm(clk_center, RGB_MAGENTA, 12, gl_getw() / 16, hr);
     // min
-    usr_clock_draw_arm(clk_center, RGB_CYAN, 60, gl_getw() / 7, t.min);
+    usr_clock_draw_arm(clk_center, RGB_CYAN, 60, gl_getw() / 10, t.min);
     // sec
-    usr_clock_draw_arm(clk_center, RGB_YELLOW, 60, gl_getw() / 5, t.sec);
+    usr_clock_draw_arm(clk_center, RGB_YELLOW, 60, gl_getw() / 6, t.sec);
 }
 
 /*
