@@ -120,7 +120,8 @@ static void __usr_clock_render_gui(RTC_Time t, char* t_str)
     // draw three clock arms based on the current time
     Point_2D clk_center = {gl_getw() / 2, gl_geth() / 2};
     // hr
-    usr_clock_draw_arm(clk_center, RGB_MAGENTA, 12, gl_getw() / 9, t.min);
+    uint8_t hr = (t.hr > 12) ? t.hr - 12 : t.hr;
+    usr_clock_draw_arm(clk_center, RGB_MAGENTA, 12, gl_getw() / 9, hr);
     // min
     usr_clock_draw_arm(clk_center, RGB_CYAN, 60, gl_getw() / 7, t.min);
     // sec

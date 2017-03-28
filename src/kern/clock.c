@@ -59,15 +59,21 @@ void clk_rtc_time(RTC_Time *time)
 
     // adjust time information when CMOS register B is set to "BCD" mode
     // this gets us the correct human-readable display time
-    if (!(__clk_rtc_get_reg(0x0B) & 0x04))
+    uint8_t reg_b = __clk_rtc_get_reg(0x0B);
+    if (!(reg_b & 0x04))
     {
-        time->hr  = (time->hr  & 0x0F) + ((time->hr  / 16) * 10);
+        // hr BCD calculation is different from the others...for some reason
+        time->hr  = ((time->hr & 0x0F) +
+            (((time->hr & 0x70) / 16) * 10) ) | (time->hr & 0x80);
         time->min = (time->min & 0x0F) + ((time->min / 16) * 10);
         time->sec = (time->sec & 0x0F) + ((time->sec / 16) * 10);
         time->day = (time->day & 0x0F) + ((time->day / 16) * 10);
         time->mon = (time->mon & 0x0F) + ((time->mon / 16) * 10);
         time->yr  = (time->yr  & 0x0F) + ((time->yr  / 16) * 10);
     }
+    // 12 -> 24 hour clock check
+    if (!(reg_b & 0x02) && (time->hr & 0x80))
+        time->hr = ((time->hr & 0x7F) + 12) % 24;
 }
 
 /*
