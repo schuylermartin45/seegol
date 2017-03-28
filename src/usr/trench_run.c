@@ -22,7 +22,7 @@
 #define ROGUE_YLW       RGB(210, 175,  56)
 #define ROGUE_BLK       RGB( 80,  80,  80)
 // Trench run length
-#define DEFAULT_RUN_LEN 10
+#define DEFAULT_RUN_LEN 30
 // infinite drawing mode
 #define INFINITE_MODE   255
 // chances of drawing a star
@@ -146,10 +146,15 @@ static void __trench_run_render_frame(uint16_t seed)
     __trench_run_render_stars(seed, tr_ul, ctr_ul,
         PT2(ctr_lr.x, ctr_ul.y), PT2(tr_ul.x, tr_ul.y));
 
-    // "targetting computer" indicator
-    gl_draw_strf(PT2(fr_w - (fr_w / 4), fr_h / 20), ROGUE_RED, ROGUE_YLW,
-        "|%06d|", &seed, NULL);
-    
+    // "targetting computer" indicator, lower and center just like the movie
+    Point_2D t_comp_ul = {0, 0};
+    Point_2D t_comp_bb;
+    gl_draw_strf_bb(t_comp_ul, "|%06d|", 2, fr_w, &t_comp_bb, &seed, NULL);
+    t_comp_ul.x = (fr_w - t_comp_bb.x) / 2;
+    t_comp_ul.y = fr_h - (t_comp_bb.y + (t_comp_bb.y / 2));
+    gl_draw_strf_scale(t_comp_ul, ROGUE_RED, ROGUE_YLW, "|%06d|", 2, fr_w,
+        &seed, NULL);
+
     // draw the corners of the trenches, based on the screen dimensions
     // top corners of trench
     gl_draw_line(tr_ul, ctr_ul, ROGUE_YLW);
