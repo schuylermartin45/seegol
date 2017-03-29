@@ -186,35 +186,23 @@ static void __trench_run_render_frame(uint16_t seed)
     uint16_t ctr_md_l_y = ctr_ul.y + ((ctr_lr.y - ctr_ul.y) * 3 / 4);
     // middle lines, left side, upper to bottom
     gl_draw_line(
-        PT2(tr_ul.x,  tr_md_u_y),
-        PT2(ctr_ul.x, ctr_md_u_y),
-        ROGUE_YLW
+        PT2(tr_ul.x,  tr_md_u_y), PT2(ctr_ul.x, ctr_md_u_y), ROGUE_YLW
     );
     gl_draw_line(
-        PT2(tr_ul.x,  tr_md_m_y),
-        PT2(ctr_ul.x, ctr_md_m_y),
-        ROGUE_YLW
+        PT2(tr_ul.x,  tr_md_m_y), PT2(ctr_ul.x, ctr_md_m_y), ROGUE_YLW
     );
     gl_draw_line(
-        PT2(tr_ul.x,  tr_md_l_y),
-        PT2(ctr_ul.x, ctr_md_l_y),
-        ROGUE_YLW
+        PT2(tr_ul.x,  tr_md_l_y), PT2(ctr_ul.x, ctr_md_l_y), ROGUE_YLW
     );
     // middle lines, right side, upper to bottom
     gl_draw_line(
-        PT2(tr_lr.x,  tr_md_u_y),
-        PT2(ctr_lr.x, ctr_md_u_y),
-        ROGUE_YLW
+        PT2(tr_lr.x,  tr_md_u_y), PT2(ctr_lr.x, ctr_md_u_y), ROGUE_YLW
     );
     gl_draw_line(
-        PT2(tr_lr.x,  tr_md_m_y),
-        PT2(ctr_lr.x, ctr_md_m_y),
-        ROGUE_YLW
+        PT2(tr_lr.x,  tr_md_m_y), PT2(ctr_lr.x, ctr_md_m_y), ROGUE_YLW
     );
     gl_draw_line(
-        PT2(tr_lr.x,  tr_md_l_y),
-        PT2(ctr_lr.x, ctr_md_l_y),
-        ROGUE_YLW
+        PT2(tr_lr.x,  tr_md_l_y), PT2(ctr_lr.x, ctr_md_l_y), ROGUE_YLW
     );
 
     // bound the end of the trench
@@ -223,10 +211,32 @@ static void __trench_run_render_frame(uint16_t seed)
     gl_draw_line(ctr_lr, PT2(ctr_lr.x, ctr_ul.y), ROGUE_YLW);
 
     // trench lines determined by seed
-    for (uint8_t tr_lines=1; tr_lines<3; ++tr_lines)
+    uint16_t line_arr[3];
+    switch (seed % 3)
     {
-        uint16_t frac_w = ((seed % 2) + 1) * (fr_w / 6);
-        Point_2D tr_p0 = {frac_w * tr_lines, 0};
+        case 0:
+            line_arr[0] = (fr_w / 32) * 7;
+            line_arr[1] = (fr_w / 32) * 10;
+            line_arr[2] = (fr_w / 32) * 13;
+            break;
+        case 1:
+            line_arr[0] = 0;
+            line_arr[1] = (fr_w / 32) * 8;
+            line_arr[2] = (fr_w / 32) * 12;
+            break;
+        case 2:
+            line_arr[0] = (fr_w / 32) * 6;
+            line_arr[1] = 0;
+            line_arr[2] = (fr_w / 32) * 11;
+            break;
+    }
+    for(uint8_t tr_lines=0; tr_lines<3; ++tr_lines)
+    {
+        uint16_t frac_w = line_arr[tr_lines];
+        // skip line
+        if (frac_w == 0)
+            continue;
+        Point_2D tr_p0 = {frac_w, 0};
         Point_2D tr_p1 = tr_p0;
 
         // cheaty way; solving equations without decimals is hard
@@ -262,14 +272,21 @@ static void __trench_run_render_frame(uint16_t seed)
         // horizontal bar
         tr_p0 = tr_p1;
         // start looking for x past the center of the screen; this prevents
-        // issues with running into aliased values
+        // issues with running into aliased flat lines; "the jaggies"
+        bool edge_found = false;
         for(uint16_t x=(fr_w / 2)+1; x<fr_w; ++x)
         {
             tr_p0.x = x;
             gl_get_pixel(tr_p0, &cmp_color);
             if (vga_RGB_8_cmp(cmp_color, ROGUE_YLW))
+                edge_found = true;
+            if (edge_found && !vga_RGB_8_cmp(cmp_color, ROGUE_YLW))
+            {
+                tr_p0.x = x - 1;
                 break;
+            }
         }
+        // handle the aliasing on the other side
         gl_draw_line(tr_p1, tr_p0, ROGUE_YLW);
         // last vertical bar, built just like the first one
         tr_p1 = tr_p0;
