@@ -125,7 +125,7 @@ static void __usr_clock_render_gui(RTC_Time t, char* t_str)
 {
     gl_clrscr();
     // draw an appropriate background
-    gl_draw_img_center_scale(IMG_FID_DSTM, 5);
+    gl_draw_img_center_scale(IMG_FID_DSTM, 3);
 
     // draw digital clock, which looks cool, top & centered
     Point_2D digi_bb;
