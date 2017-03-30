@@ -112,14 +112,6 @@ void pane_draw_title_img_text(char* title, uint8_t fid, char* text);
 ** @param fid File id of the image
 ** @param text Text to go with the image
 */
-void pane_draw_img_text(uint8_t fid, char* text);
-
-/*
-** Draws a pane with an image to the right and text to the left
-**
-** @param fid File id of the image
-** @param text Text to go with the image
-*/
 #define pane_draw_img_text(fid, text) \
     pane_draw_title_img_text(NULL, fid, text)
 

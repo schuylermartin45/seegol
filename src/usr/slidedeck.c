@@ -16,7 +16,7 @@
 #include "../gl/pane.h"
 
 /** Macros    **/
-#define SLIDES_SIZE 4
+#define SLIDES_SIZE 3
 
 /*
 ** Initializes program structure
@@ -27,9 +27,7 @@ void slidedeck_init(Program* prog)
 {
     prog->name = "slidedeck";
     prog->desc =
-        "Slidedeck Program. Displays a presentation. 'q' to quit. 'space|n|.' "
-        "to\n"
-        "  advance to the next slide, 'p|,' to go back a slide.";
+        "A presentation about SeeGOL. 'q' to quit. Arrow keys to navigate.";
     prog->usage = "";
     prog->main = &slidedeck_main;
 }
@@ -44,40 +42,40 @@ uint8_t slidedeck_main(uint8_t argc, char* argv[])
 
     // slidedeck of all images
     // block for user input and commands
-    char key = '\0';
+    uint16_t key = '\0';
     uint8_t slide_id = 0;
     do
     {
-        // TODO cleanup, make more generic
         switch(slide_id)
         {
             case 0:
                 pane_draw_title("HSC SeeGOL",
-                "Shoyler's Extremely Experimental "
-                "Graphical Operating Library");
+                    "Shoyler's Extremely Experimental "
+                    "Graphical Operating Library"
+                );
                 break;
             case 1:
-                pane_draw_img(IMG_FID_HSC);
+                pane_draw_title_img_text("About", IMG_FID_HSC,
+                    "SeeGOL was developed by Schuyler Martin as his capstone "
+                    "project. He has been studying CS at RIT as a BS/MS "
+                    "student. During that time, he focued his work in systems "
+                    "programming, CG, and CV. SeeGOL is evidence of the "
+                    "skills he has learned in that time.\n"
+                    "        - Shoyler, 2017"
+                );
                 break;
             case 2:
-                pane_draw_title_text("This is a test of the header bit at the"
-                    " top of the slide", "The quick brown fox");
-                break;
-            case 3:
-                pane_draw_title_img_text("Test", IMG_FID_HSC, "Test");
+                pane_draw_img(IMG_FID_HSC);
                 break;
         }
-        key = kio_getchr();
+        key = kio_getchr_16bit();
         switch (key)
         {
             // slides can go forward and backwards
-            case 'n':
-            case '.':
-            case KEY_SPACE:
+            case KEY_ARROW_RT:
                 ++slide_id;
                 break;
-            case 'p':
-            case ',':
+            case KEY_ARROW_LT:
                 if (slide_id > 0)
                 {
                     --slide_id;
@@ -88,7 +86,7 @@ uint8_t slidedeck_main(uint8_t argc, char* argv[])
         if (slide_id >= SLIDES_SIZE)
             break;
     }
-    while (key != 'q');
+    while ((char)key != 'q');
 
     // exit graphics mode
     pane_exit();

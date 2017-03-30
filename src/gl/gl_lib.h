@@ -175,7 +175,7 @@ void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
 ** @param f_color Foreground color of the text
 ** @param str String to draw
 */
-void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
+void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str);
 
 /*
 ** Calculates the bounding box of a string to draw from the bit-mapped SeeFont
