@@ -127,13 +127,10 @@ static void __usr_clock_render_gui(RTC_Time t, char* t_str)
     // draw an appropriate background
     gl_draw_img_center_scale(IMG_FID_DSTM, 5);
 
-    // draw digital clock, which looks cool, bottom & centered
+    // draw digital clock, which looks cool, top & centered
     Point_2D digi_bb;
     gl_draw_str_bb(PT2(0, 0), t_str, 1, gl_getw(), &digi_bb);
-    Point_2D digi_ul = {
-        (gl_getw() - digi_bb.x) / 2, 
-        gl_geth() - (2 * digi_bb.y)
-    };
+    Point_2D digi_ul = {(gl_getw() - digi_bb.x) / 2, digi_bb.y};
     gl_draw_str(digi_ul, RGB_WHITE, RGB_WHITE, t_str);
 
     // draw three clock arms based on the current time
