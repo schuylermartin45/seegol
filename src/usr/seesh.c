@@ -24,7 +24,7 @@
 
 /** Macros    **/
 // number of shell commands. This is kept in the C file out of convenience
-#define BUILTIN_COUNT   3
+#define BUILTIN_COUNT   4
 #define PROG_COUNT      (BUILTIN_COUNT + 5)
 // macros for installing programs to SeeSH
 #define INSTALL_BUILTIN_PROG(n, d, u, m) \
@@ -131,6 +131,7 @@ static void __init(Program* prog_lst)
 {
     // built-in commands
     INSTALL_BUILTIN_PROG("exit", "Bail from SeeSH", "", NULL);
+    INSTALL_BUILTIN_PROG("reboot", "Reboot the system.", "", NULL);
     INSTALL_BUILTIN_PROG("clear", "Clears the screen.", "", &_clear_main);
     INSTALL_BUILTIN_PROG("help", "Help menu. Describes other programs.",
         "[program]", &_help_main);
@@ -149,6 +150,8 @@ uint8_t seesh_main(void)
 {
     kio_print(MSG_SHELL_START);
     __init(prog_lst);
+    // exit code for the shell
+    uint8_t seesh_code = EXIT_SUCCESS;
     // shell control loop
     while(true)
     {
@@ -157,9 +160,15 @@ uint8_t seesh_main(void)
         for(uint8_t i=0; i<SHELL_BUFF_SIZE; ++i)
             prompt_buff[i] = '\0';
         kio_prompt(SHELL_PROMPT, prompt_buff);
-        // special bail command
+        // special bail commands: exit, reboot, shutdown
+        // reboot and shutdown are handled by the kernel's main
         if (kio_strcmp(prog_lst[0].name, prompt_buff))
             break;
+        else if (kio_strcmp(prog_lst[1].name, prompt_buff))
+        {
+            seesh_code = SYSTEM_REBOOT;
+            break;
+        }
         // programs have error codes; default to not found exception
         uint8_t err_code = ERR_PROG_NOT_FOUND;
         // parse the command line arguments
@@ -198,6 +207,6 @@ uint8_t seesh_main(void)
                 );
         }
     }
-    kio_print("Good-bye!\n");
-    return EXIT_SUCCESS;
+    kio_print("SeeSH: Good-bye!\n");
+    return seesh_code;
 }

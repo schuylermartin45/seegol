@@ -111,3 +111,25 @@ void clk_rtc_str(char* buff, RTC_Time time, bool is_24)
     buff += 6;
     kio_sprintf("%02D %2s", buff, &(time.sec), am_pm);
 }
+
+/*
+** Simple clock busy wait for relatively short amounts of time
+**
+** @param delay Delay in seconds
+*/
+void clk_busy_wait(uint8_t delay)
+{
+    uint8_t cntr = 0;
+    RTC_Time t_cur = {0, 0, 0};
+    clk_rtc_time(&t_cur);
+    RTC_Time t_prev = t_cur;
+    while(cntr < delay)
+    {
+        clk_rtc_time(&t_cur);
+        if (clk_rtc_diff(t_cur, t_prev))
+        {
+            t_prev = t_cur;
+            ++cntr;
+        }
+    }
+}

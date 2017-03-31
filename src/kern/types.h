@@ -39,5 +39,8 @@ typedef unsigned short  uint16_t;
 #define STR_HELP(x) #x
 #define STR(x) STR_HELP(x)
 
+// SeeGOL System Codes
+#define SYSTEM_REBOOT   13
+#define SYSTEM_SHUTDOWN 42
 
 #endif

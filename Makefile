@@ -262,8 +262,9 @@ depend:
 
 # DO NOT DELETE
 
-bin/main.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
-bin/main.o: src/usr/seesh.h src/kern/gcc16.h src/kern/types.h
+bin/main.o: src/kern/gcc16.h src/kern/asm_lib.h src/kern/types.h
+bin/main.o: src/kern/clock.h src/kern/kio.h src/usr/seesh.h
+bin/main.o: src/kern/gcc16.h src/kern/types.h
 bin/clock.o: src/kern/gcc16.h src/kern/clock.h src/kern/types.h
 bin/clock.o: src/kern/asm_lib.h src/kern/kio.h
 bin/rng.o: src/kern/gcc16.h src/kern/rng.h src/kern/types.h

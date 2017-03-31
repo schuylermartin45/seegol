@@ -65,4 +65,11 @@ void clk_rtc_str(char* buff, RTC_Time time, bool is_24);
 #define clk_rtc_diff(t0, t1) \
     (t0.sec != t1.sec) || (t0.min != t1.min) || (t0.hr != t1.hr)
 
+/*
+** Simple clock busy wait for relatively short amounts of time
+**
+** @param delay Delay in seconds
+*/
+void clk_busy_wait(uint8_t delay);
+
 #endif
