@@ -10,6 +10,9 @@
 
 # -i386 is the closest we can get to a pure 8080 or 8088 emulation
 # -vga std Default to VGA standard
+# -clock sets PIT device
+# -rtc sets the real time clock
 # -hda  loads a HDD/USB disk image
 # -boot sets the initial boot device
-qemu-system-i386 -vga std -clock pit -hda img/usb.img -boot a
+qemu-system-i386 -vga std -clock pit -rtc base=localtime,clock=host \
+    -hda img/usb.img -boot a

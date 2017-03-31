@@ -27,12 +27,10 @@ void slideshow_init(Program* prog)
 {
     prog->name = "slideshow";
     prog->desc =
-        "Slideshow Program. Displays images installed on the machine. 'q' "
-        "to quit.\n"
-        "  'space' to advance to the next image. Any digit '1-9' will scale "
-        "the image.\n"
-        "  Images are auto-centered. Image ID and scale can be specified as "
-        "input args.";
+        "Displays images on the machine. 'q' to quit. Arrow keys to navigate. "
+        "Any\n"
+        "  digit '1-9' will scale the image. Image and scale can be given as "
+        "arguments.";
     prog->usage = "[f_id] [scale]";
     prog->main = &slideshow_main;
 }
@@ -84,12 +82,12 @@ uint8_t slideshow_main(uint8_t argc, char* argv[])
     else
     {
         // block for user input and commands
-        char key = '\0';
+        uint16_t key = '\0';
         do
         {
             gl_draw_img_center_scale(fid, scale);
-            key = kio_getchr();
-            switch (key)
+            key = kio_getchr_16bit();
+            switch ((char)key)
             {
                 // increase scale
                 case '1': case '2': case '3': 
@@ -97,16 +95,25 @@ uint8_t slideshow_main(uint8_t argc, char* argv[])
                 case '7': case '8': case '9':
                     scale = key - '0';
                     break;
-                case KEY_SPACE:
+            }
+            switch (key)
+            {
+                case KEY_ARROW_RT:
                     ++fid;
                     break;
+                case KEY_ARROW_LT:
+                    if (fid > 0)
+                    {
+                        --fid;
+                        break;
+                    }
             }
             // break if we've seen everything
             if (fid >= GL_IMG_TBL_SIZE)
                 break;
             gl_clrscr();
         }
-        while (key != 'q');
+        while ((char)key != 'q');
     }
 
     // exit graphics mode

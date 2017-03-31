@@ -227,7 +227,7 @@ void gl_draw_str_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
         if (*str == '\n')
         {
             if (rc_cntr.x > ch_w_cntr)
-                ch_w_cntr = rc_cntr.x;
+                ch_w_cntr = rc_cntr.x + 1;
             // jump a row of chars down
             rc_cntr.x = 0;
             ++rc_cntr.y;
@@ -237,16 +237,33 @@ void gl_draw_str_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
         }
         else
         {
+            // enforce a simple, hacky, word-wrapping
+            // this works by checking how long the next word is after a space
+            // has been seen
+            uint16_t wrap_cntr = 0;
+            if (*str == ' ')
+            {
+                char* wrap_ptr = str;
+                ++wrap_ptr;
+                while ((*wrap_ptr != '\0') && (*wrap_ptr != ' '))
+                {
+                    ++wrap_cntr;
+                    ++wrap_ptr;
+                }
+            }
             // enforce a newline if we are about to go out of bounds, in x
             cur.x = ul.x
                 + (rc_cntr.x * ((scale * SEE_FONT_WIDTH) 
                     + (2 * SEE_FONT_PAD_HORZ)))
                 + SEE_FONT_PAD_HORZ;
-            if ((cur.x + (scale * SEE_FONT_WIDTH) + (3 * SEE_FONT_PAD_HORZ)) 
-                >= w_bound)
+            if ((cur.x + (scale * SEE_FONT_WIDTH)
+                + (3 * SEE_FONT_PAD_HORZ)
+                + (wrap_cntr * scale * SEE_FONT_WIDTH)) >= w_bound)
             {
+                if (*str == ' ')
+                    ++str;
                 if (rc_cntr.x > ch_w_cntr)
-                    ch_w_cntr = rc_cntr.x;
+                    ch_w_cntr = rc_cntr.x + 1;
                 // reset before draw
                 rc_cntr.x = 0;
                 ++rc_cntr.y;
@@ -259,14 +276,14 @@ void gl_draw_str_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
                 + (2 * SEE_FONT_PAD_VERT)))
                 + SEE_FONT_PAD_VERT;
             if (rc_cntr.x > ch_w_cntr)
-                ch_w_cntr = rc_cntr.x;
+                ch_w_cntr = rc_cntr.x + 1;
             // move right; the character to draw
             ++rc_cntr.x;
             ++str;
         }
     }
     // calculate the bounding box width
-    bb->x = ch_w_cntr * ((scale * SEE_FONT_WIDTH) + (2 * SEE_FONT_PAD_HORZ));
+    bb->x = ch_w_cntr * (scale * (SEE_FONT_WIDTH + (2 * SEE_FONT_PAD_HORZ)));
 }
 
 /*
@@ -309,14 +326,34 @@ void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
         else
         {
             uint8_t ch = *str;
+            // enforce a simple, hacky, word-wrapping
+            // this works by checking how long the next word is after a space
+            // has been seen
+            uint16_t wrap_cntr = 0;
+            if (ch == ' ')
+            {
+                char* wrap_ptr = str;
+                ++wrap_ptr;
+                while ((*wrap_ptr != '\0') && (*wrap_ptr != ' '))
+                {
+                    ++wrap_cntr;
+                    ++wrap_ptr;
+                }
+            }
             // enforce a newline if we are about to go out of bounds, in x
             cur.x = ul.x
                 + (rc_cntr.x * ((scale * SEE_FONT_WIDTH) 
                     + (2 * SEE_FONT_PAD_HORZ)))
                 + SEE_FONT_PAD_HORZ;
-            if ((cur.x + (scale * SEE_FONT_WIDTH) + (3 * SEE_FONT_PAD_HORZ)) 
-                >= w_bound)
+            if ((cur.x + (scale * SEE_FONT_WIDTH)
+                + (3 * SEE_FONT_PAD_HORZ)
+                + (wrap_cntr * scale * SEE_FONT_WIDTH)) >= w_bound)
             {
+                if (ch == ' ')
+                {
+                    ++str;
+                    ch = *str;
+                }
                 // reset before draw
                 rc_cntr.x = 0;
                 ++rc_cntr.y;
@@ -393,6 +430,31 @@ void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
 }
 
 /*
+** Calculates the bounding box of a string to draw from the bit-mapped SeeFont
+** using kio_sprintf
+**
+** @param ul Upper-left starting point
+** @param str String to draw
+** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param w_bound Right-handed width to bound the text to. This is the maximum 
+**        width value that can be drawn. After this word-wrapping is enforced
+** @param bb Point to store bounding box width and height information into
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
+*/
+void gl_draw_strf_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
+    Point_2D* bb, void* a0, void* a1)
+{
+    // autosize buffer
+    uint16_t size = kio_sprintf_len(str, a0, a1);
+    char buff[size];
+    // call sprintf, then dump to the screen
+    kio_sprintf(str, buff, a0, a1);
+    // now calculate the bounding box
+    gl_draw_str_bb(ul, buff, scale, w_bound, bb);
+}
+
+/*
 ** Draws a string using kio_sprintf, based on a custom-made bitmap font.
 ** "Transparent" backgrounds are achieved by setting the background and
 ** foreground colors to the same value. Includes font scaling.
@@ -402,18 +464,39 @@ void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str)
 ** @param f_color Foreground color of the text
 ** @param str String to draw
 ** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param w_bound Right-handed width to bound the text to. This is the maximum 
+**        width value that can be drawn. After this word-wrapping is enforced
 ** @param a0 First arugment to print
 ** @param a1 Second arugment to print
 */
 void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
-    uint8_t scale, void* a0, void* a1)
+    uint8_t scale, uint16_t w_bound, void* a0, void* a1)
 {
     // autosize buffer
     uint16_t size = kio_sprintf_len(str, a0, a1);
     char buff[size];
     // call sprintf, then dump to the screen
     kio_sprintf(str, buff, a0, a1);
-    gl_draw_str_scale(ul, b_color, f_color, buff, scale, vga_driver.screen_w);
+    gl_draw_str_scale(ul, b_color, f_color, buff, scale, w_bound);
+}
+
+/*
+** Draws a string using kio_sprintf, based on a custom-made bitmap font.
+** "Transparent" backgrounds are achieved by setting the background and
+** foreground colors to the same value.
+**
+** @param ul Upper-left starting point
+** @param b_color Background color of the text
+** @param f_color Foreground color of the text
+** @param str String to draw
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
+*/
+void gl_draw_strf(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
+    void* a0, void* a1)
+{
+    gl_draw_strf_scale(ul, b_color, f_color, str, 1, vga_driver.screen_w,
+        a0, a1);
 }
 
 /***** Image Draw Functions (driver-independent)     *****/
@@ -601,9 +684,10 @@ void gl_draw_img_center_scale(uint8_t fid, uint8_t scale)
 **
 ** @param p0 First point
 ** @param p1 Second point
+** @param width Line width/thickness
 ** @param color Color to draw
 */
-void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
+void gl_draw_line_width(Point_2D p0, Point_2D p1, uint8_t width, RGB_8 color)
 {
     // start by performing the left-right coordinate check-and-swap
     if (p0.x > p1.x)
@@ -623,7 +707,7 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
 
     // check for optimized line drawing
     if (p0.y == p1.y)
-        vga_driver.vga_draw_rect_wh(p0.x, p0.y, p1.x-p0.x, 1, color);
+        vga_driver.vga_draw_rect_wh(p0.x, p0.y, p1.x-p0.x + 1, width, color);
     else if (p0.x == p1.x)
     {
         // perform the "left-right" swapping of the coordinates but for drawing
@@ -633,7 +717,7 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
             Point_2D tp = p0;
             p0 = p1, p1=tp;
         }
-        vga_driver.vga_draw_rect_wh(p0.x, p0.y, 1, p1.y-p0.y, color);
+        vga_driver.vga_draw_rect_wh(p0.x, p0.y, width, p1.y-p0.y + 1, color);
     }
     else
     {
@@ -642,15 +726,16 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
         // draw diagonal lines if slope is +/-1
         if ((dx == dy) || (dx == -dy))
         {
-            //__gl_draw_diag(p0, p1, color);
             for (uint16_t i=0; i<=(p1.x - p0.x); ++i)
             {
                 // negative slopes
                 if (p0.y < p1.y)
-                    vga_driver.vga_put_pixel(p0.x + i, p0.y + i, color);
+                    vga_driver.vga_draw_rect_wh(p0.x + i, p0.y + i, width, 1,
+                        color);
                 // positive slopes
                 else
-                    vga_driver.vga_put_pixel(p0.x + i, p0.y - i, color);
+                    vga_driver.vga_draw_rect_wh(p0.x + i, p0.y - i, width, 1,
+                        color);
             }
         }
         // draw...everything else (in the octants)
@@ -677,7 +762,7 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
                 for (; y != p1.y; y += incr_y)
                 {
                     // color and pick the next pixel
-                    vga_driver.vga_put_pixel(x, y, color);
+                    vga_driver.vga_draw_rect_wh(x, y, width, 1, color);
                     if (delta <= 0)
                         delta += dE;
                     else
@@ -702,7 +787,7 @@ void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color)
                 for (; x <= p1.x; x += incr_x)
                 {
                     // color and pick the next pixel
-                    vga_driver.vga_put_pixel(x, y, color);
+                    vga_driver.vga_draw_rect_wh(x, y, 1, width, color);
                     if (delta <= 0)
                         delta += dE;
                     else

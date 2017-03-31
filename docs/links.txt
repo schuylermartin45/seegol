@@ -70,6 +70,19 @@ Image Quantization/Reduction
 http://www.imagemagick.org/Usage/quantize/#extract
 http://www.imagemagick.org/script/quantize.php
 
+Random Number Generator
+-----------------------
+http://stackoverflow.com/questions/7602919/how-do-i-generate-random-numbers-without-rand-function
+https://en.wikipedia.org/wiki/Linear-feedback_shift_register
+
+Real Time Clock (RTC) & Non-blocking Keyboard Control
+-----------------------------------------------------
+http://stackoverflow.com/questions/41105383/get-system-time-with-bios-interrupt-in-assembly
+http://webpages.charter.net/danrollins/techhelp/0247.HTM
+http://webpages.charter.net/danrollins/techhelp/0230.HTM
+http://wiki.osdev.org/CMOS
+http://stackoverflow.com/questions/13143774/how-to-read-key-without-waiting-for-it-assembly-8086
+
 Timer driver (Intel 8254)
 -------------------------
 http://wiki.osdev.org/Programmable_Interval_Timer

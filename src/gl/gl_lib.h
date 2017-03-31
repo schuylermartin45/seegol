@@ -46,6 +46,10 @@ typedef struct Point_3D
 #define RGB_BLACK       RGB(  0,   0,   0)
 #define RGB_WHITE       RGB(255, 255, 255)
 #define RGB_HSC         RGB( 40,  49, 137)
+// subtractive colors
+#define RGB_CYAN         RGB(  0, 255, 255)
+#define RGB_MAGENTA      RGB(255,   0, 255)
+#define RGB_YELLOW       RGB(255, 255,   0)
 
 /** Functions  **/
 
@@ -171,7 +175,23 @@ void gl_draw_str_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
 ** @param f_color Foreground color of the text
 ** @param str String to draw
 */
-void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
+void gl_draw_str(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str);
+
+/*
+** Calculates the bounding box of a string to draw from the bit-mapped SeeFont
+** using kio_sprintf
+**
+** @param ul Upper-left starting point
+** @param str String to draw
+** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param w_bound Right-handed width to bound the text to. This is the maximum 
+**        width value that can be drawn. After this word-wrapping is enforced
+** @param bb Point to store bounding box width and height information into
+** @param a0 First arugment to print
+** @param a1 Second arugment to print
+*/
+void gl_draw_strf_bb(Point_2D ul, char* str, uint8_t scale, uint16_t w_bound,
+    Point_2D* bb, void* a0, void* a1);
 
 /*
 ** Draws a string using kio_sprintf, based on a custom-made bitmap font.
@@ -183,11 +203,13 @@ void gl_draw_str(Point_2D start, RGB_8 b_color, RGB_8 f_color, char* str);
 ** @param f_color Foreground color of the text
 ** @param str String to draw
 ** @param scale Font scale factor (Ex: scale=2: 1 font pixel -> 4 real pixels)
+** @param w_bound Right-handed width to bound the text to. This is the maximum 
+**        width value that can be drawn. After this word-wrapping is enforced
 ** @param a0 First arugment to print
 ** @param a1 Second arugment to print
 */
 void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
-    uint8_t scale, void* a0, void* a1);
+    uint8_t scale, uint16_t w_bound, void* a0, void* a1);
 
 /*
 ** Draws a string using kio_sprintf, based on a custom-made bitmap font.
@@ -201,8 +223,8 @@ void gl_draw_strf_scale(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
 ** @param a0 First arugment to print
 ** @param a1 Second arugment to print
 */
-#define gl_draw_strf(ul, b_color, f_color, str, a0, a1) \
-    gl_draw_strf_scale(ul, b_color, f_color, str, 1, a0, a1)
+void gl_draw_strf(Point_2D ul, RGB_8 b_color, RGB_8 f_color, char* str,
+    void* a0, void* a1);
 
 /***** Image Draw Functions (driver-independent)     *****/
 
@@ -276,8 +298,18 @@ void gl_draw_img_center_scale(uint8_t fid, uint8_t scale);
 **
 ** @param p0 First point
 ** @param p1 Second point
+** @param width Line width/thickness
 ** @param color Color to draw
 */
-void gl_draw_line(Point_2D p0, Point_2D p1, RGB_8 color);
+void gl_draw_line_width(Point_2D p0, Point_2D p1, uint8_t width, RGB_8 color);
+
+/*
+** Draw a line anywhere on the screen
+**
+** @param p0 First point
+** @param p1 Second point
+** @param color Color to draw
+*/
+#define gl_draw_line(p0, p1, color) gl_draw_line_width(p0, p1, 1, color)
 
 #endif

@@ -16,11 +16,11 @@
 #include "program.h"
 
 // user program headers
-#include "hellow.h"
 #include "hsc_tp.h"
 #include "slidedeck.h"
 #include "slideshow.h"
 #include "trench_run.h"
+#include "usr_clock.h"
 
 /** Macros    **/
 // number of shell commands. This is kept in the C file out of convenience
@@ -135,11 +135,11 @@ static void __init(Program* prog_lst)
     INSTALL_BUILTIN_PROG("help", "Help menu. Describes other programs.",
         "[program]", &_help_main);
     // user programs
-    INSTALL_USR_PROG(hellow_init);
     INSTALL_USR_PROG(hsc_tp_init);
     INSTALL_USR_PROG(slidedeck_init);
     INSTALL_USR_PROG(slideshow_init);
     INSTALL_USR_PROG(trench_run_init);
+    INSTALL_USR_PROG(usr_clock_init);
 }
 
 /*
@@ -184,7 +184,9 @@ uint8_t seesh_main(void)
             case EXIT_SUCCESS:
                 break;
             case ERR_PROG_NOT_FOUND:
-                kio_printf("ERROR: program '%s' not found\n", argv[0], NULL);
+                kio_printf("ERROR: program '%s' not found. Type 'help' for a "
+                    "complete list.\n",
+                    argv[0], NULL);
                 break;
             case ERR_PROG_USAGE:
             case ERR_PROG_BAD_ARGS:

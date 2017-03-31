@@ -70,8 +70,29 @@ INCLUDES = -I. -I./$(SRC) -I./$(KERN) -I.$(VGA) -I./$(GL) -I./$(USR)
 # Compiler setup
 # Note: we prepend all C files with a directive to target Real Mode
 #
+# C Compiler optimizations from:
+# http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
+#
+# Flags that seem to make no difference:
+# --------------------------------------
+# gcc:
+#   -Wl,-z,norelro
+#   -Wl,--hash-style=gnu
+# ld:
+#   -z norelro
+#
+# Enabling this flag reduces binary size but does not allow the OS to boot on
+# SOME systems. It will boot in the Distributed Systems Lab but not on my
+# personal test machine.
+#   -fomit-frame-pointer
+#
 CC = gcc
-CFLAGS = -g -Os -march=i686 -m32 -std=c99 -ffreestanding -Wall -Werror \
+CFLAGS = -Os -s -march=i686 -m32 -std=c99 -ffreestanding -Wall -Werror \
+		 -fno-stack-protector -ffunction-sections \
+		 -fno-unwind-tables -fno-asynchronous-unwind-tables \
+		 -falign-functions=1 -falign-jumps=1 -falign-loops=1 \
+		 -fdata-sections -Wl,--gc-sections -mpreferred-stack-boundary=2 \
+		 -fmerge-all-constants -fno-ident \
 		 -Wno-trigraphs -Wl,--oformat=binary $(INCLUDES)
 
 #
@@ -244,6 +265,10 @@ depend:
 bin/main.o: src/kern/gcc16.h src/kern/kio.h src/kern/types.h
 bin/main.o: src/kern/pit.h src/kern/asm_lib.h src/usr/seesh.h
 bin/main.o: src/kern/gcc16.h src/kern/types.h
+bin/clock.o: src/kern/gcc16.h src/kern/clock.h src/kern/types.h
+bin/clock.o: src/kern/asm_lib.h src/kern/kio.h
+bin/rng.o: src/kern/gcc16.h src/kern/rng.h src/kern/types.h
+bin/rng.o: src/kern/clock.h
 bin/vga/vga13.o: src/kern/gcc16.h src/kern/asm_lib.h
 bin/vga/vga13.o: src/kern/gcc16.h src/kern/types.h
 bin/vga/vga13.o: src/kern/vga/vga13.h src/kern/types.h
@@ -262,17 +287,21 @@ bin/gl_lib.o: src/kern/vga/vga.h src/gl/img_tbl.h src/gl/img_fids.h
 bin/gl_lib.o: src/res/img_cxpm/hsc_logo.cxpm src/gl/see_font.h
 bin/pane.o: src/kern/gcc16.h src/gl/pane.h src/kern/types.h
 bin/pane.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
-bin/pane.o: src/gl/gl_lib.h src/gl/gl_lib.h
+bin/pane.o: src/gl/gl_lib.h src/kern/kio.h src/gl/gl_lib.h
 bin/slideshow.o: src/kern/gcc16.h src/usr/slideshow.h
 bin/slideshow.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/slideshow.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
 bin/slideshow.o: src/kern/types.h src/gl/img_fids.h
 bin/trench_run.o: src/kern/gcc16.h src/usr/trench_run.h
-bin/trench_run.o: src/kern/types.h src/usr/program.h src/kern/kio.h
-bin/trench_run.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
-bin/trench_run.o: src/kern/types.h
-bin/hellow.o: src/kern/gcc16.h src/usr/hellow.h src/kern/types.h
-bin/hellow.o: src/usr/program.h src/kern/kio.h
+bin/trench_run.o: src/kern/types.h src/usr/program.h src/kern/clock.h
+bin/trench_run.o: src/kern/gcc16.h src/kern/types.h src/kern/kio.h
+bin/trench_run.o: src/kern/rng.h src/gl/gl_lib.h src/kern/vga/vga.h
+bin/trench_run.o: src/kern/gcc16.h src/kern/types.h src/gl/pane.h
+bin/usr_clock.o: src/kern/gcc16.h src/usr/usr_clock.h
+bin/usr_clock.o: src/kern/types.h src/usr/program.h src/kern/clock.h
+bin/usr_clock.o: src/kern/gcc16.h src/kern/types.h src/kern/kio.h
+bin/usr_clock.o: src/gl/gl_lib.h src/kern/vga/vga.h src/kern/gcc16.h
+bin/usr_clock.o: src/kern/types.h src/gl/img_fids.h
 bin/slidedeck.o: src/kern/gcc16.h src/usr/slidedeck.h
 bin/slidedeck.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/slidedeck.o: src/gl/img_fids.h src/gl/pane.h src/kern/vga/vga.h
@@ -280,8 +309,8 @@ bin/slidedeck.o: src/kern/gcc16.h src/kern/types.h src/gl/gl_lib.h
 bin/seesh.o: src/kern/gcc16.h src/usr/seesh.h src/kern/types.h
 bin/seesh.o: src/kern/debug.h src/kern/gcc16.h src/kern/kio.h
 bin/seesh.o: src/kern/types.h src/kern/kio.h src/usr/program.h
-bin/seesh.o: src/usr/hellow.h src/usr/hsc_tp.h src/usr/slidedeck.h
-bin/seesh.o: src/usr/slideshow.h src/usr/trench_run.h
+bin/seesh.o: src/usr/hsc_tp.h src/usr/slidedeck.h src/usr/slideshow.h
+bin/seesh.o: src/usr/trench_run.h src/usr/usr_clock.h
 bin/hsc_tp.o: src/kern/gcc16.h src/usr/hsc_tp.h src/kern/types.h
 bin/hsc_tp.o: src/usr/program.h src/kern/kio.h src/gl/gl_lib.h
 bin/hsc_tp.o: src/kern/vga/vga.h src/kern/gcc16.h src/kern/types.h
