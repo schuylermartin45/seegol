@@ -30,6 +30,10 @@
 // byte used to indicate run-length endcoded section in the CXPM decoder
 #define CXPM_MARKER    0
 
+// this allows us to skip some intializations and tear-downs if the same
+// graphics mode has been entered multiple times
+static int16_t gl_enter_lvl = 0;
+
 // structure that manages the driver mode currently activated
 // assumed to be text mode if graphics haven't been initialized yet
 static VGA_Driver vga_driver = {
@@ -53,6 +57,15 @@ static VGA_Driver vga_driver = {
 */
 void gl_enter(uint8_t mode)
 {
+    // skip initialization if we're already in the correct graphics mode
+    // this speeds up the switch-over
+    if (vga_driver.vga_mode == mode)
+    {
+        ++gl_enter_lvl;
+        return;
+    }
+    else
+        gl_enter_lvl = 0;
     // start handling text debugging in the back up buffer
     kio_swap_fb();
     switch (mode)
@@ -68,6 +81,13 @@ void gl_enter(uint8_t mode)
 */
 void gl_exit(void)
 {
+    // skip the tear-down process if we came from an "outer layer", this saves
+    // time on hardware initialization; undoes the skip in the enter function
+    if (gl_enter_lvl > 0)
+    {
+        --gl_enter_lvl;
+        return;
+    }
     // reset to the default TEXT mode
     vga_driver.screen_w = TEXT_WIDTH;
     vga_driver.screen_h = TEXT_HEIGHT;

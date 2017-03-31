@@ -44,12 +44,15 @@ void main(void)
     kio_print(MSG_KERN_LOAD);
     kio_print(MSG_WELCOME);
 
+    // every cool 1984 computer boots with a sexy splash screen
+    seesh_splash();
+
     uint8_t sys_code = 0;
     // primary OS control loop
-    while((sys_code != SYSTEM_SHUTDOWN) && (sys_code != SYSTEM_REBOOT))
+    while(sys_code != SYSTEM_REBOOT)
     {
         // call the seesh shell to run commands
-        sys_code = seesh_main();
+        sys_code = seesh_gui_main();
     }
     // Goodbye!
     kio_print(MSG_KERN_EXIT);

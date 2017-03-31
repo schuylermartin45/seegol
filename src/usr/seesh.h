@@ -30,7 +30,22 @@
 
 /*
 ** Main execution point of the shell
+**
+** @return exit code
 */
 uint8_t seesh_main(void);
+
+/*
+** System boot splash screen, like the good ol' days
+*/
+void seesh_splash(void);
+
+/*
+** Main execution point of the "visual shell". This has limited access to
+** programs on SeeGOL. SeeSH can be launched from this GUI.
+**
+** @return exit code
+*/
+uint8_t seesh_gui_main(void);
 
 #endif

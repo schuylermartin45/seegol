@@ -305,9 +305,11 @@ bin/slidedeck.o: src/kern/types.h src/usr/program.h src/kern/kio.h
 bin/slidedeck.o: src/gl/img_fids.h src/gl/pane.h src/kern/vga/vga.h
 bin/slidedeck.o: src/kern/gcc16.h src/kern/types.h src/gl/gl_lib.h
 bin/seesh.o: src/kern/gcc16.h src/usr/seesh.h src/kern/types.h
-bin/seesh.o: src/kern/debug.h src/kern/gcc16.h src/kern/kio.h
-bin/seesh.o: src/kern/types.h src/kern/kio.h src/usr/program.h
-bin/seesh.o: src/usr/hsc_tp.h src/usr/slidedeck.h src/usr/slideshow.h
+bin/seesh.o: src/kern/clock.h src/kern/gcc16.h src/kern/types.h
+bin/seesh.o: src/kern/kio.h src/gl/gl_lib.h src/kern/vga/vga.h
+bin/seesh.o: src/kern/gcc16.h src/kern/types.h src/gl/img_fids.h
+bin/seesh.o: src/gl/pane.h src/usr/program.h src/usr/hsc_tp.h
+bin/seesh.o: src/usr/slidedeck.h src/usr/slideshow.h
 bin/seesh.o: src/usr/trench_run.h src/usr/usr_clock.h
 bin/hsc_tp.o: src/kern/gcc16.h src/usr/hsc_tp.h src/kern/types.h
 bin/hsc_tp.o: src/usr/program.h src/kern/kio.h src/gl/gl_lib.h
