@@ -22,7 +22,7 @@
 */
 void usr_clock_init(Program* prog)
 {
-    prog->name = "clock";
+    prog->name = "Clock";
     prog->desc =
         "Displays the current system time. 'q' to quit. '-t' for text clock.";
     prog->usage = "-t";

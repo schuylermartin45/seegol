@@ -25,7 +25,7 @@
 */
 void slidedeck_init(Program* prog)
 {
-    prog->name = "slidedeck";
+    prog->name = "Slidedeck";
     prog->desc =
         "A presentation about SeeGOL. 'q' to quit. Arrow keys to navigate.";
     prog->usage = "";

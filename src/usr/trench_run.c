@@ -39,7 +39,7 @@
 */
 void trench_run_init(Program* prog)
 {
-    prog->name = "trench_run";
+    prog->name = "Trench_Run";
     prog->desc = "These plans are NOT in the main computer.";
     prog->usage = "";
     prog->main = &trench_run_main;

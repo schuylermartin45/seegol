@@ -65,13 +65,23 @@
 uint16_t kio_str_int(char* buff, uint16_t base);
 
 /*
+** Compares two strings for equivalency, with flags for case sensitivity
+**
+** @param str0 First string
+** @param str1 Second string
+** @param is_case If true, the check is case sensitive
+** @return True if strings are the same, false otherwise
+*/
+bool kio_strcmp_case(const char* str0, const char* str1, bool is_case);
+
+/*
 ** Compares two strings for equivalency
 **
 ** @param str0 First string
 ** @param str1 Second string
 ** @return True if strings are the same, false otherwise
 */
-bool kio_strcmp(const char* str0, const char* str1);
+#define kio_strcmp(str0, str1)  kio_strcmp_case(str0, str1, true)
 
 /*
 ** Returns the length of a string

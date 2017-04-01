@@ -31,7 +31,7 @@
 #define BUILTIN_COUNT   5
 #define PROG_COUNT      (BUILTIN_COUNT + 5)
 // number of programs that can be launched from the GUI
-#define GUI_PROG_COUNT  6
+#define GUI_PROG_COUNT  7
 // macros for installing programs to SeeSH
 #define INSTALL_BUILTIN_PROG(n, d, u, m) \
     prog_lst->name = n;\
@@ -51,15 +51,25 @@ char* gui_prog_disp[GUI_PROG_COUNT];
 /************************** Built-in Main Functions **************************/
 
 /*
-** Main method for help menu program
+** Main method for help menu program. Handles both GUI and Text forms
 */
 static uint8_t _help_main(uint8_t argc, char* argv[])
 {
-    // help with no arguments well dump a list of commands 
-    if (argc == 1)
+    // GUI help menu
+    if ((argc == 1) && (argv == NULL))
     {
-        kio_print("SeeSH- Program List ('help [program]' for more info)\n");
-        kio_print("====================================================\n");
+        pane_enter(VGA_MODE_13);
+        uint8_t pid = pane_draw_prompt("Help Menu", GUI_PROG_COUNT,
+            gui_prog_disp);
+        pane_draw_title_text(gui_prog_lst[pid].name, gui_prog_lst[pid].desc);
+        kio_wait_key('q');
+        pane_exit();
+    }
+    // The rest of this controls the text version of the help menu
+    // help with no arguments well dump a list of commands 
+    else if (argc == 1)
+    {
+        kio_print("Help Menu - 'help [program]' for more info\n\n");
         for (uint8_t i=0; i<PROG_COUNT; ++i)
             kio_printf("%D - %s\n", &i, prog_lst[i].name);
     }
@@ -69,7 +79,7 @@ static uint8_t _help_main(uint8_t argc, char* argv[])
         bool prog_found = false;
         for (uint8_t i=0; i<PROG_COUNT; ++i)
         {
-            if (kio_strcmp(prog_lst[i].name, argv[1]))
+            if (kio_strcmp_case(prog_lst[i].name, argv[1], false))
             {
                 kio_printf("Usage: %s %s\n", prog_lst[i].name,
                     prog_lst[i].usage
@@ -150,24 +160,25 @@ static uint8_t __parse_args(char* buff, char* argv[])
 static void __seesh_init(Program* prog_lst)
 {
     // cheap way to prevent re-initialization of the list
-    if (!kio_strcmp(prog_lst[0].name, "exit"))
+    if (!kio_strcmp_case(prog_lst[0].name, "exit", false))
     {
         // standard built-in commands
         INSTALL_BUILTIN_PROG("exit", "Bail from SeeSH", "", NULL);
         INSTALL_BUILTIN_PROG("clear", "Clears the screen.", "", &_clear_main);
-        INSTALL_BUILTIN_PROG("help", "Help menu. Describes other programs.",
-            "[program]", &_help_main);
         // user programs
         INSTALL_USR_PROG(hsc_tp_init);
         /** programs below this line will be used in the GUI display menu **/
         gui_prog_lst = prog_lst;
+        INSTALL_USR_PROG(usr_clock_init);
         INSTALL_USR_PROG(slidedeck_init);
         INSTALL_USR_PROG(slideshow_init);
         INSTALL_USR_PROG(trench_run_init);
-        INSTALL_USR_PROG(usr_clock_init);
         // built-ins that can also be called from the GUI
-        INSTALL_BUILTIN_PROG("seesh", "SeeGOL's Shell", "", &_seesh_main);
-        INSTALL_BUILTIN_PROG("reboot", "Reboot the system.", "", NULL);
+        INSTALL_BUILTIN_PROG("Help", "Help menu. Describes other programs.",
+            "[program]", &_help_main);
+        INSTALL_BUILTIN_PROG("SeeSH", "SeeGOL's Shell. All programs can be run"
+            "from here. Case insensitive.", "", &_seesh_main);
+        INSTALL_BUILTIN_PROG("Reboot", "Reboot the system.", "", NULL);
         // namesoptions are a partial list of programs; running the shell will
         // actually deal with this
         for(uint8_t i=0; i<GUI_PROG_COUNT; ++i)
@@ -197,9 +208,10 @@ uint8_t seesh_main(void)
         kio_prompt(SHELL_PROMPT, prompt_buff);
         // special bail commands: exit, reboot, shutdown
         // reboot and shutdown are handled by the kernel's main
-        if (kio_strcmp(prog_lst[0].name, prompt_buff))
+        if (kio_strcmp_case(prog_lst[0].name, prompt_buff, false))
             break;
-        else if (kio_strcmp(prog_lst[PROG_COUNT - 1].name, prompt_buff))
+        else if (kio_strcmp_case(prog_lst[PROG_COUNT - 1].name, prompt_buff,
+            false))
         {
             seesh_code = SYSTEM_REBOOT;
             break;
@@ -215,7 +227,7 @@ uint8_t seesh_main(void)
         for (id=1; id<PROG_COUNT; ++id)
         {
             // execute program, if it is found and pass the arguments over
-            if (kio_strcmp(prog_lst[id].name, argv[0]))
+            if (kio_strcmp_case(prog_lst[id].name, argv[0], false))
             {
                 err_code = prog_lst[id].main(argc, argv);
                 // pass the buck from previous SeeSH calls

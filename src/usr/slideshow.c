@@ -25,12 +25,11 @@
 */
 void slideshow_init(Program* prog)
 {
-    prog->name = "slideshow";
+    prog->name = "Slideshow";
     prog->desc =
         "Displays images on the machine. 'q' to quit. Arrow keys to navigate. "
-        "Any\n"
-        "  digit '1-9' will scale the image. Image and scale can be given as "
-        "arguments.";
+        "Any digit '1-9' will scale the image. Image and scale can be given "
+        "as arguments.";
     prog->usage = "[f_id] [scale]";
     prog->main = &slideshow_main;
 }

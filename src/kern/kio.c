@@ -122,16 +122,18 @@ uint16_t kio_str_int(char* buff, uint16_t base)
 }
 
 /*
-** Compares two strings for equivalency
+** Compares two strings for equivalency, with flags for case sensitivity
 **
 ** @param str0 First string
 ** @param str1 Second string
+** @param is_case If true, the check is case sensitive
 ** @return True if strings are the same, false otherwise
 */
-bool kio_strcmp(const char* str0, const char* str1)
+bool kio_strcmp_case(const char* str0, const char* str1, bool is_case)
 {
     // check character by character, bailing if there's a mismatch
-    while(*str0 == *str1)
+    while((*str0 == *str1) || (!is_case &&
+        ((*str0 - 'A' == *str1 - 'a') || (*str0 - 'a' == *str1 - 'A'))))
     {
         if ((*str0 == '\0') || (*str1 == '\0'))
             break;
