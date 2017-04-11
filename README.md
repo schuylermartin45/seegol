@@ -39,7 +39,6 @@ These programs are necessary to build and install
   added to SeeGOL. It should work with any version of Python 3 but I did have
   the script crash once on a Debian machine running Python 3.4)
 - ImageMagick (the `convert` program is used to down-sample image files)
-TODO [more here]
 An emulator (such as QEMU) may also be helpful in running the OS.
 
 ### Compiling from Source
@@ -129,11 +128,12 @@ Includes scripts and other helpful tools used to run and debug the OS.
 
 
 ## User Manual
-TODO
+SeeGOL comes with a built-in user manual. A help menu is accesible from both
+the main GUI menus and from SeeSH (the SeeGOL SHell).
 
 
 ## Design
-TODO
+For a complete design overview, please see the docs/ directory.
 
 
 ## Rolling Status Log
