@@ -24,6 +24,7 @@ http://www.delorie.com/gnu/docs/binutils/as_270.html
 https://www.codeproject.com/articles/664165/writing-a-boot-loader-in-assembly-and-c-part
 http://zoo.cs.yale.edu/classes/cs422/2010/lec/l3-hw
 https://github.com/davidgiven/ack
+http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
 
 Bootloader
 ----------
