@@ -69,8 +69,17 @@ make floppy
 ```
 Otherwise dd the image file to the floppy:
 ```shell
-dd if=/path/to/floppy.img of=/path/to/floppy 
+dd if=/path/to/floppy.img of=/path/to/floppy
 ```
+
+To just build the floppy image:
+```shell
+make floppy.img
+```
+
+Similarly, `usb.img` and `usb` make directives also exist. `usb` assumes the
+drive is at `/dev/sdj` (because that's the location my college desktop used).
+
 After making any necessary changes to the boot order via a machine's BIOS
 settings, SeeGOL should be bootable from this floppy on almost any Intel x86
 computer. Modern machines that do not have a floppy drive can usually boot
